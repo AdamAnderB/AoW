@@ -1,4 +1,4 @@
-## ----Behavioral Data: Removal with %in%----
+## ----Behavioral Data: Removing with in Operator----
 #removal of remaining incorrect individual items
 behavioral_data<-behavioral_data%>%
   filter(Participant.Private.ID %in% participant_agg$Participant.Private.ID &

@@ -154,7 +154,7 @@ item_agg<-behavioral_data%>%
 individual_removal <-behavioral_data%>%
   filter(image_incorrect == 0 & text_incorrect == 0)
 ```
-```{r Behavioral Data: Removal with %in%}
+```{r Behavioral Data: Removing with in Operator}
 #removal of remaining incorrect individual items
 behavioral_data<-behavioral_data%>%
   filter(Participant.Private.ID %in% participant_agg$Participant.Private.ID &
@@ -165,7 +165,7 @@ behavioral_data <-behavioral_data%>%
   select(-c(text_incorrect,image_incorrect,response_button_text,
             pic_verification,target_obj,type))
 ```
-```{r ET Data: Clean-Tidy-Filtering with inner_join()}
+```{r ET Data: Tidying and Filtering with an Inner Join}
 et_data<-eyetracking_data%>%
   select(time_elapsed,participant_id,spreadsheet_row,
          type,x_pred_normalised,y_pred_normalised)%>%
@@ -200,7 +200,7 @@ all_data<-all_data %>%
          comp_2 = if_else(image_viewing == img_3_file, 1, 0), 
          dist = if_else(image_viewing == img_4_file, 1, 0))
 ```
-```{r ET Data: Time-Empirical Logits/looks}
+```{r ET Data: Time and Empirical Logits}
 all_data<-all_data%>%
   mutate(time_elapsed=time_elapsed-object_start.y-200)%>%
   mutate(time_elapsed_rounded=50*round((time_elapsed)/50))
