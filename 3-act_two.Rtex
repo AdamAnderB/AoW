@@ -64,7 +64,7 @@ Additionally, before beginning removal, we select criterion for removal. These n
 
 One important note about this removal is that the results would be different if you sequentially piped in the participant\_agg data frame as the base frame for item removal. This is because it would remove some incorrect items scores simply based on the participants that were removed. We decided to pull in from the original behavioral\_data to avoid creating a bias in removal standard.
 
-%\lstinputlisting[language=R, firstnumber=last]{scripts/chunk-Behavioral Data: Removal with \%in\%.R}
+\lstinputlisting[language=R, firstnumber=last]{scripts/chunk-Behavioral Data: Removing with IN Operator.R}
 
 \subsubsection{Combining behavioral and ET data and variable frame rates}
 
@@ -72,13 +72,13 @@ In this last section of data removal, we start with a less strict standard as th
 
 Like, before, we must start with...
 
-\lstinputlisting[language=R, firstnumber=last]{scripts/chunk-ET Data: Clean-Tidy-Filtering with inner_join().R}
+\lstinputlisting[language=R, firstnumber=last]{scripts/chunk-ET Data: Tidying and Filtering with an Inner Join.R}
 
 \lstinputlisting[language=R, firstnumber=last]{scripts/chunk-ET Data: Localizing Visual Stimuli.R}
 
 We start wrangling with the eye-fixation data frame. We exclude all non-experimental data by selecting time and eye-fixation related data that is within the prediction window. We then explore each participant's frame rates by grouping participant and trial and doing simple counts. 
 
-%\lstinputlisting[language=R, firstnumber=last]{scripts/chunk-ET Data: Time-Empirical Logits/looks.R}
+\lstinputlisting[language=R, firstnumber=last]{scripts/chunk-ET Data: Time and Empirical Logits.R}
 
 Aggregate data then shows that two participants had excessively low frame rates that drop off throughout the experiment likely due to unstable connection. To better understand the binning of data and frame rate variability, a shiny app was produced in order to allow the readerto manipulate the data themselves.
 
