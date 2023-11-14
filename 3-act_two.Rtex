@@ -28,15 +28,15 @@ firstnumber=28]{scripts/chunk-Questionnaire: Clean.R}
 
 Now that we have a data frame with three columns (Participant.ID, question, response) we can restructure the data into tidy data (one observation per row). While this can be done with simple filter/select and joining, pivot\_wider and pivot\_longer offer a simple solution to this common data structure problem. Starting at line 36, we pivot wider to create a single row for each participant with each question having its own column.   
 
-
 \lstinputlisting[language=R,
 firstnumber=last]{scripts/chunk-Questionnaire: Tidy.R}
 
 Starting at line 57, we find that two participants should be removed for language expertise outside English and one for exceeding the age cut off (both predetermined values). We can filter this data to remove the participants that do not qualify. See supplementary materials for example of visualizations created through specific data type (e.g., visualizing all numeric columns).
+
 \lstinputlisting[language=R,
 firstnumber=last]{scripts/chunk-Questionnaire: Filtered.R}
 
-We can now answer our question, which participants should be excluded based on the background questionnaire. To finish this wrangling cycle, we can now use this data frame to filter out unqualified participants \%in\% the participants column of the next removal stage.
+We can now answer our question, which participants should be excluded based on the background questionnaire. To finish this wrangling cycle, we can now use this data frame to filter out unqualified participants in the participants column of the next removal stage.
 \subsubsection{Behavioral-task wrangling}
 The next cycle of data wrangling begins with the question: which participants and items should be removed based on the behavioral results of the experiment. Cleaning is similar to the questionnaire cycle, but we start from scratch with a clone of the behavioral data frame (named: task\_behavior), because the new question has new goals, which requires different variables. However, we start this cycles implementation by filtering the participants in the behavioral-task clone with the questionnaire data from above in order to only keep those participants that qualified in the questionnaire wrangling cycle (line 66). We keep columns relating to all behavioral responses, visual stimuli, conditions, and experimental screens (see supplementary materials for specific columns). Lastly, to achieve tidy data, we split the visual image selection and comprehension question into two columns so that a single observation is now based on each trial for each participant (i.e., pivot into a wider structure (line 75)).
 
@@ -64,10 +64,10 @@ Additionally, before beginning removal, we select criterion for removal. These n
 
 One important note about this removal is that the results would be different if you sequentially piped in the participant\_agg data frame as the base frame for item removal. This is because it would remove some incorrect items scores simply based on the participants that were removed. We decided to pull in from the original behavioral\_data to avoid creating a bias in removal standard.
 
-\lstinputlisting[language=R, firstnumber=last]{scripts/chunk-Behavioral Data: Removal with \%in\%.R}
-
+%\lstinputlisting[language=R, firstnumber=last]{scripts/chunk-Behavioral Data: Removal with \%in\%.R}
 
 \subsubsection{Combining behavioral and ET data and variable frame rates}
+
 In this last section of data removal, we start with a less strict standard as there is no current reference for expected results for frame rate. However, recent work has begun to fill this gap \parencite[see: ][, for examples]{Vos_2017,Prystauka_Altmann_Rothman_2023}. Here, we start with two questions: What type of variability in frame rate does online eye-tracking have? And, how can we use these eye-fixations and variable times to capture predictive processing? 
 
 Like, before, we must start with...
@@ -76,33 +76,9 @@ Like, before, we must start with...
 
 \lstinputlisting[language=R, firstnumber=last]{scripts/chunk-ET Data: Localizing Visual Stimuli.R}
 
-\lstinputlisting[language=R, firstnumber=last]{scripts/chunk-ET Data: Time-Empirical Logits/looks.R}
-
 We start wrangling with the eye-fixation data frame. We exclude all non-experimental data by selecting time and eye-fixation related data that is within the prediction window. We then explore each participant's frame rates by grouping participant and trial and doing simple counts. 
 
-
-\begin{lstlisting}[language=R]
-## ---- fix time scaling and create empirical logit
-all_data<-all_data%>%
-  mutate(time_elapsed=time_elapsed-object_start.y-200)%>%
-  mutate(time_elapsed_rounded=50*round((time_elapsed)/50))
-
-agg_data <- all_data %>% 
-  group_by(time_elapsed_rounded,verb_type, talker)%>%
-  summarise(target_looks = mean(target), 
-            comp_1_looks = mean(comp_1),
-            comp_2_looks = mean(comp_2),
-            dist_looks = mean(dist),
-            target_n=n()) 
-
-agg_data<-agg_data%>%
-  filter(time_elapsed_rounded>-400 & time_elapsed_rounded<800)
-
-target_data<-agg_data%>%
-  mutate(emp_logit =log((target_looks+(0.5/target_n))/(1-(target_looks+(0.5/target_n)))))
-
-\end{lstlisting}
-
+%\lstinputlisting[language=R, firstnumber=last]{scripts/chunk-ET Data: Time-Empirical Logits/looks.R}
 
 Aggregate data then shows that two participants had excessively low frame rates that drop off throughout the experiment likely due to unstable connection. To better understand the binning of data and frame rate variability, a shiny app was produced in order to allow the readerto manipulate the data themselves.
 
