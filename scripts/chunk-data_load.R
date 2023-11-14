@@ -1,5 +1,6 @@
 ## ----data_load----
-#set the path to be the folder where the et_data.csv,OSF_data.csv, and task_data.csv are located
+#set the path to be the folder where the et_data.csv,OSF_data.csv, 
+#and task_data.csv are located
 path<-"/Users/adambramlett/scripts/the_art_of_wrangling/"
 input_path<-file.path(path,"data")
 output_path<-file.path(path,"cleaned_data")

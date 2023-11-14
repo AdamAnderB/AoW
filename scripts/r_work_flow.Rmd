@@ -14,7 +14,8 @@ library(readxl)
 ```
 
 ```{r data_load,echo=FALSE}
-#set the path to be the folder where the et_data.csv,OSF_data.csv, and task_data.csv are located
+#set the path to be the folder where the et_data.csv,OSF_data.csv, 
+#and task_data.csv are located
 path<-"/Users/adambramlett/scripts/the_art_of_wrangling/"
 input_path<-file.path(path,"data")
 output_path<-file.path(path,"cleaned_data")
@@ -36,17 +37,19 @@ cleaned_quest_data<-task_data%>%
 
 ```{r Questionnaire: Tidy}
 tidy_quest_data<-cleaned_quest_data%>%
-  pivot_wider(names_from = Screen.Name, values_from = Response,values_fn = list)%>%
+  pivot_wider(names_from=Screen.Name,values_from=Response,values_fn=list)%>%
   rowwise()%>%
   mutate(across(c(accent_heard,other_languages_spoken), toString),
          across(where(is.character), tolower),
-         across(c(chinese_study_duration,age,experience_chinese_accent), as.numeric),
+         across(c(chinese_study_duration,age,experience_chinese_accent),
+                as.numeric),
          across(c(Participant.Private.ID), as.factor),
          speaks_L2 = if_else(other_languages_spoken == "english"|
-                                         other_languages_spoken == "none"|
-                                         other_languages_spoken == ""|
-                                         other_languages_spoken == " ",0,1))
+                               other_languages_spoken == "none"|
+                               other_languages_spoken == ""|
+                               other_languages_spoken == " ",0,1))
 ```
+
 ```{r Questionnaire: visualization numeric variables}
 #visualize numeric variables
 tidy_quest_data%>%
@@ -59,11 +62,12 @@ tidy_quest_data%>%
 ```{r Questionnaire: Filtered}
 #filtered data
 filtered_quest_data<-tidy_quest_data%>%
-  filter(age<=40 & age>=18 &   #1 removed due to being outside of age range (part:7492145)
+  filter(age<=40 & age>=18 #1 removed due to being outside of age range
          chinese_study_duration==0 & #none removed 
          speaks_L2==0,#2 participants removed that speak other languages
          language_disorder == "No") #none removed
-
+```
+```{r Sanity}
 #sanity check
 #length(unique(task_data$Participant.Private.ID))
 #length(unique(filtered_quest_data$Participant.Private.ID))
@@ -72,7 +76,8 @@ filtered_quest_data<-tidy_quest_data%>%
 ```{r Experimental Data: Clean and Tidy}
 #response for quadrant data
 experimental_cleaned <- task_data%>%
-  filter(Participant.Private.ID %in% filtered_quest_data$Participant.Private.ID)%>%
+  filter(Participant.Private.ID %in% 
+           filtered_quest_data$Participant.Private.ID)%>%
   select(talker,verb_type,center_image,
          image_1,image_2,image_3,image_4,
          Participant.Private.ID,Spreadsheet.Row,Trial.Number,
@@ -95,36 +100,32 @@ OSF_filt <- OSF_data%>%
          img_1_file, img_2_file, img_3_file, img_4_file, 
          target_obj,pic_verification,object_start)%>% 
   filter(type == "Exp")
-
-
-#sanity check
-#length(unique(response_filt$Participant.Private.ID))
-#length(unique(response_filt$center_image))
 ```
-```{r Behaviorial Data: Clean and Tidy}
+```{r Behavioral Data: Join OSF and Experimental Data}
 #participant and item removal (grouped) and individual trial removal
 #combine data and filter out non experimental trials
-behaviorial_data <- OSF_filt %>% 
+behavioral_data <- OSF_filt %>% 
   inner_join(experimental_tidy, by=c( "talker","verb_type","subject_img_file"))
-
+```
+```{r Behavioral Data: Clean and Tidy}
 #clean combined OSF and Response data
-behaviorial_data$Participant.Private.ID<-as.factor(behaviorial_data$Participant.Private.ID)
-behaviorial_data <-behaviorial_data %>%
+behavioral_data$Participant.Private.ID<-
+  as.factor(behavioral_data$Participant.Private.ID)
+behavioral_data <-behavioral_data %>%
   mutate(image_incorrect= if_else(img_1_file == response_button_image,0,1),
          text_incorrect = if_else(response_button_text == "Yes",0,1))
 ```
-```{r Behaviorial Data: Removal Standards}
+```{r Behavioral Data: Removal Standards}
 #These are in standard deviations to retain maximum amount of quality data
-#We set all of these to be 3 SDs, but we put the code this way so you can change it for your needs
+#We set all of these to be 3 SDs, code here is only for your future use
 image_participant_threshold = 3
 image_item_threshold = 3
 text_participant_threshold = 3
 text_item_threshold = 3
-
 ```
-```{r Behaviorial Data: Participant and Item Removal}
+```{r Behavioral Data: Participant and Item Removal}
 #participant removal
-participant_agg<-behaviorial_data%>%
+participant_agg<-behavioral_data%>%
   group_by(Participant.Private.ID)%>%
   summarize(num_incorrect_image=sum(image_incorrect),
             num_incorrect_text=sum(text_incorrect))%>%
@@ -132,10 +133,12 @@ participant_agg<-behaviorial_data%>%
          sd_image_score = sd(num_incorrect_image),
          mean_text_score = mean(num_incorrect_text),
          sd_text_score = sd(num_incorrect_text))%>%
-  filter(num_incorrect_image <= mean_image_score+(sd_image_score*image_participant_threshold) &
-         num_incorrect_text <= mean_text_score+(sd_text_score*text_participant_threshold))
+  filter(num_incorrect_image <= mean_image_score+
+           (sd_image_score*image_participant_threshold) &
+         num_incorrect_text <= mean_text_score+
+           (sd_text_score*text_participant_threshold))
 #item removal
-item_agg<-behaviorial_data%>%
+item_agg<-behavioral_data%>%
   group_by(center_image)%>%
   summarize(num_incorrect_image=sum(image_incorrect),
             num_incorrect_text=sum(text_incorrect))%>%
@@ -143,42 +146,48 @@ item_agg<-behaviorial_data%>%
          sd_image_score = sd(num_incorrect_image),
          mean_text_score = mean(num_incorrect_text),
          sd_text_score = sd(num_incorrect_text))%>%
-  filter(num_incorrect_image <= mean_image_score+(sd_image_score*image_item_threshold) &
-         num_incorrect_text <= mean_text_score+(sd_text_score*text_item_threshold))
+  filter(num_incorrect_image <= mean_image_score+
+           (sd_image_score*image_item_threshold) &
+         num_incorrect_text <= mean_text_score+
+           (sd_text_score*text_item_threshold))
 
-individual_removal <-behaviorial_data%>%
+individual_removal <-behavioral_data%>%
   filter(image_incorrect == 0 & text_incorrect == 0)
 ```
-```{r Behaviorial Data: Removal with %in%}
+```{r Behavioral Data: Removal with %in%}
 #removal of remaining incorrect individual items
-behaviorial_data<-behaviorial_data%>%
+behavioral_data<-behavioral_data%>%
   filter(Participant.Private.ID %in% participant_agg$Participant.Private.ID &
            center_image %in% item_agg$center_image) 
            #image_incorrect == 0 & text_incorrect == 0)
 
-behaviorial_data <-behaviorial_data%>%
-  select(-c(text_incorrect,image_incorrect,response_button_text,pic_verification,target_obj,type))
+behavioral_data <-behavioral_data%>%
+  select(-c(text_incorrect,image_incorrect,response_button_text,
+            pic_verification,target_obj,type))
 ```
 ```{r ET Data: Clean-Tidy-Filtering with inner_join()}
-#combine eye tracking with response and OSF data frames-- with data clean-up and manipulation
 et_data<-eyetracking_data%>%
-  select(time_elapsed,participant_id,spreadsheet_row,type,x_pred_normalised,y_pred_normalised)%>%
+  select(time_elapsed,participant_id,spreadsheet_row,
+         type,x_pred_normalised,y_pred_normalised)%>%
   filter(type =="prediction" )
 et_data<-et_data%>%rename("Participant.Private.ID"="participant_id",
                           "Spreadsheet.Row"="spreadsheet_row")
 et_data$Participant.Private.ID<-as.factor(et_data$Participant.Private.ID)
 ```
 ```{r ET Data: Localizing Visual Stimuli}
-all_data <-behaviorial_data %>% inner_join(et_data, by=c("Participant.Private.ID", "Spreadsheet.Row"))
+all_data <-behavioral_data %>% 
+  inner_join(et_data, by=c("Participant.Private.ID", "Spreadsheet.Row"))
 
 lower=.4
 upper=.6
 
 all_data<-all_data%>%
-  mutate(image_viewing =  case_when(x_pred_normalised <= lower & y_pred_normalised >= upper ~ image_1,
-                                  x_pred_normalised >= upper & y_pred_normalised >= upper ~ image_2,
-                                  x_pred_normalised <= lower & y_pred_normalised <= lower ~ image_3,
-                                  x_pred_normalised >= upper & y_pred_normalised <= lower ~ image_4))
+  mutate(image_viewing=
+  case_when(x_pred_normalised <= lower & y_pred_normalised >= upper ~ image_1,
+            x_pred_normalised >= upper & y_pred_normalised >= upper ~ image_2,
+            x_pred_normalised <= lower & y_pred_normalised <= lower ~ image_3,
+            x_pred_normalised >= upper & y_pred_normalised <= lower ~ image_4))
+
 all_data<-all_data%>%
   filter(image_viewing == image_1|
            image_viewing == image_2|
@@ -208,7 +217,8 @@ agg_data<-agg_data%>%
   filter(time_elapsed_rounded>-400 & time_elapsed_rounded<800)
 
 target_data<-agg_data%>%
-  mutate(emp_logit =log((target_looks+(0.5/target_n))/(1-(target_looks+(0.5/target_n)))))
+  mutate(emp_logit =log((target_looks+(0.5/target_n))/
+                          (1-(target_looks+(0.5/target_n)))))
 
 
 ```

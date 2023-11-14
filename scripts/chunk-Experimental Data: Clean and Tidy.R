@@ -1,7 +1,8 @@
 ## ----Experimental Data: Clean and Tidy----
 #response for quadrant data
 experimental_cleaned <- task_data%>%
-  filter(Participant.Private.ID %in% filtered_quest_data$Participant.Private.ID)%>%
+  filter(Participant.Private.ID %in% 
+           filtered_quest_data$Participant.Private.ID)%>%
   select(talker,verb_type,center_image,
          image_1,image_2,image_3,image_4,
          Participant.Private.ID,Spreadsheet.Row,Trial.Number,

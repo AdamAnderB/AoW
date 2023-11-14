@@ -6,8 +6,3 @@ OSF_filt <- OSF_data%>%
          img_1_file, img_2_file, img_3_file, img_4_file, 
          target_obj,pic_verification,object_start)%>% 
   filter(type == "Exp")
-
-
-#sanity check
-#length(unique(response_filt$Participant.Private.ID))
-#length(unique(response_filt$center_image))
