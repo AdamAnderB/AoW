@@ -93,8 +93,8 @@ experimental_tidy<-experimental_cleaned%>%
 ```
 ```{r OSF Data: Clean and Tidy}
 
-#combine OSF Data and experimental data data
-#OSF for target,competitor, distractors
+#combine OSF Data and experimental data
+#OSF for target, competitor, distractors
 OSF_filt <- OSF_data%>%
   select(talker,verb_type,subject_img_file,type,
          img_1_file, img_2_file, img_3_file, img_4_file, 
@@ -102,7 +102,6 @@ OSF_filt <- OSF_data%>%
   filter(type == "Exp")
 ```
 ```{r Behavioral Data: Join OSF and Experimental Data}
-#participant and item removal (grouped) and individual trial removal
 #combine data and filter out non experimental trials
 behavioral_data <- OSF_filt %>% 
   inner_join(experimental_tidy, by=c( "talker","verb_type","subject_img_file"))
