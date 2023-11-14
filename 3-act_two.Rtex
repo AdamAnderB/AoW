@@ -1,0 +1,245 @@
+\section{Act 2: Replication of \textcite{Porretta_et_al_2020}}
+\subsection{The replication}
+
+We carried out a single change replication study \parencite{Marsden_2018} involving internet-based data collection of  \textcite{Porretta_et_al_2020}'s in-person VWP experiment, which found that a foreign accent impedes predictive processing but does not preclude it. \textcite{Porretta_et_al_2020} used a standard 2x2 VWP design discussed above \parencite[e.g.,][]{Allopenna} to explore predictive sentence processing for accented and unaccented speech. On each trial (24 target, 24 filler), participants were presented with a 500-ms fixation cross followed by a 2x2 visual stimuli with an additional center image that represented the subject of the sentence. Each visual set of 2x2 visual stimuli were previewed for 200ms. Next, participants heard a transitive sentence that was either restrictive (e.g., “the fireman will climb the ladder”, \textit{climb} allows for object prediction) or nonrestrictive (e.g., “the fireman will need the ladder”, \textit{need} does not allow for object prediction) and spoken by either a native or Chinese accented English speaker (see figure \ref{fig:porretta_visual_stimuli} for an example of the visual stimuli). Participants then must select if this recording matched one of the visual stimuli (i.e., This is a simple comprehension question to ensure attention). All recordings were taken from \parencite{Porretta_et_al_2020} and speaker was counterbalanced across four lists. The experiment contains 250 images, 50 of which are center images and 200 that make up the 2x2 design. (10 practice, 120 filler, 120 experimental). 99 of the images were identical to the original experiment (all 50 center images for subjects in the sentences and 49 of the visual stimuli for objects across practice, filler, and experimental items). The remaining 151 images were obtained following the same specifications of the initial study (open source line-drawn images). 
+
+Whereas our study changed only the method of collecting data from in person to online, the reader will see below, this single change leads to a variety of differences that required explicit choices to be made throughout data analysis (e.g., inclusion and exclusion, frame rate, unstable connections, participant calibration, time bin sizes, among other issues). Below, we propose a number of best practices in this report to help improve transparency in these data wrangling choices, which we hope will become standard reporting procedures in both online and in-person eye-tracking studies.
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=.075]{figures/porretta_e_al_vi.png}
+    \caption{Caption}
+    \label{fig:porretta_visual_stimuli}
+\end{figure}
+
+\subsection{"Enter: Wrangling"}
+The cycle of data wrangling always starts with a motivated question, see figure \ref{fig:data_wrangling}. For example, our replication's overarching question comes in the form of the research questions: To what extent can online eye-tracking capture the predictive effects found in accent processing. In our case, we have 3,000 eye-tracking spreadsheets and four behavioral spreadsheets. We then begin our implementation by importing the data and combining it into two data frames (e.g., behavioral and eye-fixations), see supplementary materials for details on creating data frames from complex and relational data structures. However, the current data structure cannot be directly statistically analysed nor visualized- "enter: wrangling". 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{figures/data_wrangling.png}
+    \caption{The data wrangling cycle: the iterative process of data wrangling, includes all steps, which reduce, reorder, extend, tidy, transform, and/or combine your data}
+    \label{fig:data_wrangling}
+\end{figure}
+
+\subsubsection{Questionnaire wrangling}
+In a VWP experiment, removal occurs at four levels (questionnaire based, item based, behavior based, fixation quality based). While the exact point you start is unimportant, here, we start with simple first (questionnaire based removal). This then begins a new cycle of data wrangling. Our second wrangling cycle question is: Which participants should be excluded based on not being qualified from information provided in the background questionnaire (e.g., not an English speaker and not between the ages of 18 and 40)? In line, 37 we start with a clone of our behavioral data frame (113 columns and 881 rows) and assess needed variables (questionnaire questions , responses, participant ID, reaction time (RT)). RT is kept here because it allows for removing items that were unnecessarily generated from the experiment structure (i.e., getting rid of rows with 0 RT). 
+
+\begin{lstlisting}[language=R,
+firstnumber=27]]
+#cleaned_data
+cleaned_quest_data<-task_data %>%
+  filter(display=="questionairre",na.omit=TRUE) %>%
+  select(Participant.Private.ID,
+         Screen.Name, #this is the "question"
+         Response,
+         Reaction.Time) %>%
+  filter(Response != "",Reaction.Time!=0) %>%
+  select(!Reaction.Time)
+\end{lstlisting}
+
+Now that we have a data frame with three columns (Participant.ID, question, response) we can restructure the data into tidy data (one observation per row). While this can be done with simple filter/select and joining, pivot\_wider and pivot\_longer offer a simple solution to this common data structure problem. Starting at line 36, we pivot wider to create a single row for each participant with each question having its own column.   
+
+\begin{lstlisting}[language=R]
+#tidy data
+tidy_quest_data<-cleaned_quest_data %>%
+  pivot_wider(names_from = Screen.Name, 
+    values_from = Response)%>%
+  # used for making lists into strings for easier wrangling
+  rowwise()%>%
+  mutate(across(c(accent_heard,other_languages_spoken), toString), 
+         across(where(is.character), tolower),
+         #changing variables types is useful for visualization purposes
+         across(c(chinese_study_duration,
+                  age,
+                  experience_chinese_accent), 
+                  as.numeric),
+        #making variables numeric is useful for visualization purposes
+         across(c(Participant.Private.ID), as.factor),
+         Here, we code for being a monolingual English speaker
+         speaks_L2 = if_else(
+            other_languages_spoken == "english"|
+            other_languages_spoken == "none"|
+            other_languages_spoken == ""|
+            other_languages_spoken == " ",0,1))
+\end{lstlisting}
+
+Starting at line 57, we find that two participants should be removed for language expertise outside English and one for exceeding the age cut off (both predetermined values). We can filter this data to remove the participants that do not qualify. See supplementary materials for example of visualizations created through specific data type (e.g., visualizing all numeric columns).
+\begin{lstlisting}[language=R]
+#filtered data
+filtered_quest_data<-tidy_quest_data%>%
+  filter(age<=40 & age>=18 &  #1 removed due to being 
+                              #outside of age range (part:7492145) 
+         chinese_study_duration==0 & #none removed 
+         speaks_L2==0 &        #2 participants removed that speak 
+                               #other languages
+         language_disorder == "No") #none removed
+\end{lstlisting}
+
+We can now answer our question, which participants should be excluded based on the background questionnaire. To finish this wrangling cycle, we can now use this data frame to filter out unqualified participants \%in\% the participants column of the next removal stage.
+\subsubsection{Behavioral-task wrangling}
+The next cycle of data wrangling begins with the question: which participants and items should be removed based on the behavioral results of the experiment. Cleaning is similar to the questionnaire cycle, but we start from scratch with a clone of the behavioral data frame (named: task\_behavior), because the new question has new goals, which requires different variables. However, we start this cycles implementation by filtering the participants in the behavioral-task clone with the questionnaire data from above in order to only keep those participants that qualified in the questionnaire wrangling cycle (line 66). We keep columns relating to all behavioral responses, visual stimuli, conditions, and experimental screens (see supplementary materials for specific columns). Lastly, to achieve tidy data, we split the visual image selection and comprehension question into two columns so that a single observation is now based on each trial for each participant (i.e., pivot into a wider structure (line 75)).
+
+\begin{lstlisting}[language=R]
+response_cleaned <- task_data%>%
+  filter(Participant.Private.ID %in% filtered_quest_data$Participant.Private.ID)%>%
+  select(talker,verb_type,center_image,
+         image_1,image_2,image_3,image_4,
+         Participant.Private.ID,Spreadsheet.Row,Trial.Number,
+         Zone.Type,object_start,Response)%>%
+  filter(Zone.Type == "response_button_image"|
+           Zone.Type == "response_button_text" &  image_4 != "")%>%
+  filter(verb_type == "Restricting" |verb_type == "NonRestricting")
+
+response_tidy<-response_cleaned%>%
+  pivot_wider(names_from = Zone.Type,values_from = Response)%>%
+  mutate(subject_img_file=center_image)
+\end{lstlisting}
+
+Additionally, we must load in a second data frame (line 78) from the original experiment (here, called OSF\_data) . We do this for three reasons: 1) because our experiment only has the quadrants or the visual stimuli without the target, competitor, and distractor information, 2) our data lacks the variable for marking nonce items, and 3) our experiment does not have the audio stimuli timing offset needed later in analysis. 
+
+\begin{lstlisting}[language=R]
+OSF_filt <- OSF_data%>%
+  select(talker,verb_type,subject_img_file,type,
+         img_1_file, img_2_file, img_3_file, img_4_file, 
+         target_obj,pic_verification,object_start)%>% 
+  filter(type == "Exp")
+\end{lstlisting}
+In line 83, we filter the OSF data for experimental items and use an inner join based on talker, condition, and the center visual image, which simultaneously pulls in the variables that we need and filters out nonce items (this step could be avoided by putting these variables in the original experimental spreadsheets). 
+
+\begin{lstlisting}[language=R]
+behaviorial_data <- OSF_filt %>% 
+  inner_join(response_tidy, by=c( "talker","verb_type","subject_img_file"))
+\end{lstlisting}
+Now that we have the variables we need from joining the datasets to create behavioral\_data using inner\_join, we can create variables for the answers being correct and incorrect for our removal process. We will do this for both the item selection (line 88) and the following comprehension question (line 89).
+
+\begin{lstlisting}[language=R]
+#clean combined OSF and Response data
+behaviorial_data$Participant.Private.ID<-as.factor(behaviorial_data$Participant.Private.ID)
+behaviorial_data <-behaviorial_data %>%
+  mutate(image_incorrect= if_else(img_1_file == response_button_image,0,1),
+         text_incorrect = if_else(response_button_text == "Yes",0,1))
+\end{lstlisting}
+Additionally, before beginning removal, we select criterion for removal. These numbers were created by us as the original study did not include this information, but we do suggest that future studies include such removal standards. 
+\begin{lstlisting}[language=R]
+#number is inclusive for removal
+remove_participant_threshold = 2
+remove_item_threshold = 4
+text_remove_participant_threshold = 3
+text_remove_item_threshold = 4
+\end{lstlisting}
+
+ We implemented these standards through a series of modular aggregating steps. That is, we aggregated the inaccuracies of participants by simply adding together incorrect items by participant and item for both item selection (lines 99-104) and comprehension question (lines 107-113) , respectively. Then in line 115, individuals incorrect trials are removed. Finally, we rename this data frame cleaned\_behavioral\_data.
+
+\begin{lstlisting}[language=R]
+#participant removal
+participant_agg<-behaviorial_data%>%
+  group_by(Participant.Private.ID)%>%
+  summarize(num_incorrect_image=sum(image_incorrect),
+            num_incorrect_text=sum(text_incorrect))%>%
+  filter(num_incorrect_image <= remove_participant_threshold&
+           num_incorrect_text <= text_remove_participant_threshold)
+
+#item removal
+item_agg<-behaviorial_data%>%
+  group_by(center_image)%>%
+  summarize(num_incorrect_image=sum(image_incorrect),
+            num_incorrect_text=sum(text_incorrect))%>%
+  filter(num_incorrect_image <= remove_item_threshold &
+           num_incorrect_text <= text_remove_item_threshold)
+
+#removal of remaining incorrect individual items
+individual_removal <-behaviorial_data%>%
+  filter(image_incorrect == 0 & text_incorrect == 0)           
+\end{lstlisting}
+
+One important note about this removal is that the results would be different if you sequentially piped in the participant\_agg data frame as the base frame for item removal. This is because it would remove some incorrect items scores simply based on the participants that were removed. We decided to pull in from the original behavioral\
+_data to avoid creating a bias in removal standard.
+
+
+\subsubsection{Combining behavioral and ET data and variable frame rates}
+In this last section of data removal, we start with a less strict standard as there is no current reference for expected results for frame rate. However, recent work has begun to fill this gap \parencite[see: ][, for examples]{Vos_2017,Prystauka_Altmann_Rothman_2023}. Here, we start with two questions: What type of variability in frame rate does online eye-tracking have? And, how can we use these eye-fixations and variable times to capture predictive processing? 
+
+Like, before, we must start with...
+
+
+\begin{lstlisting}[language=R]
+## ----combine eye tracking with response and OSF data frames-- 
+et_data<-eyetracking_data%>%
+  select(time_elapsed,participant_id,
+  spreadsheet_row,type,
+  x_pred_normalised,
+  y_pred_normalised)%>%
+  filter(type =="prediction" )
+et_data<-et_data%>%rename("Participant.Private.ID"="participant_id",
+                          "Spreadsheet.Row"="spreadsheet_row")
+et_data$Participant.Private.ID<-as.factor(et_data$Participant.Private.ID)
+
+#combine behaviral data and et data and simultaneously filter out unnevessary et by using inner join. 
+all_data <-behaviorial_data %>% inner_join(et_data, by=c("Participant.Private.ID", "Spreadsheet.Row"))
+
+lower=.4
+upper=.6
+
+all_data<-all_data%>%
+  mutate(image_viewing =  case_when(x_pred_normalised <= lower & y_pred_normalised >= upper ~ image_1,
+                                    x_pred_normalised >= upper & y_pred_normalised >= upper ~ image_2,
+                                    x_pred_normalised <= lower & y_pred_normalised <= lower ~ image_3,
+                                    x_pred_normalised >= upper & y_pred_normalised <= lower ~ image_4))
+all_data<-all_data%>%
+  filter(image_viewing == image_1|
+           image_viewing == image_2|
+           image_viewing == image_3|
+           image_viewing == image_4)
+
+all_data<-all_data %>% 
+  mutate(target = if_else(image_viewing == img_1_file, 1, 0), 
+         comp_1 = if_else(image_viewing == img_2_file, 1, 0), 
+         comp_2 = if_else(image_viewing == img_3_file, 1, 0), 
+         dist = if_else(image_viewing == img_4_file, 1, 0))
+\end{lstlisting}
+
+We start wrangling with the eye-fixation data frame. We exclude all non-experimental data by selecting time and eye-fixation related data that is within the prediction window. We then explore each participant's frame rates by grouping participant and trial and doing simple counts. 
+
+
+\begin{lstlisting}[language=R]
+## ---- fix time scaling and create empirical logit
+all_data<-all_data%>%
+  mutate(time_elapsed=time_elapsed-object_start.y-200)%>%
+  mutate(time_elapsed_rounded=50*round((time_elapsed)/50))
+
+agg_data <- all_data %>% 
+  group_by(time_elapsed_rounded,verb_type, talker)%>%
+  summarise(target_looks = mean(target), 
+            comp_1_looks = mean(comp_1),
+            comp_2_looks = mean(comp_2),
+            dist_looks = mean(dist),
+            target_n=n()) 
+
+agg_data<-agg_data%>%
+  filter(time_elapsed_rounded>-400 & time_elapsed_rounded<800)
+
+target_data<-agg_data%>%
+  mutate(emp_logit =log((target_looks+(0.5/target_n))/(1-(target_looks+(0.5/target_n)))))
+
+\end{lstlisting}
+
+
+Aggregate data then shows that two participants had excessively low frame rates that drop off throughout the experiment likely due to unstable connection. To better understand the binning of data and frame rate variability, a shiny app was produced in order to allow the readerto manipulate the data themselves.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{figures/framerates.jpeg}
+    \caption{This will be better later but for now this is all I could get here.}
+    \label{fig:framerates}
+\end{figure}
+
+
+Next we combine the eye-fixation data with the cleaned\_behavioral\_data through inner merge by participant and spreadsheet row. This simultaneously combines the data frames and filters out the participants and items that we removed from previous steps. To create areas of interest, we choose and upper and lower bound for what is categorized as a look. To maximize usable data we used a lower bound of .5 and upper bound of .5 (0, 0 is the bottom-left corner of the screen and 1, 1 is the upper-right) on both the x and y axis. We then created a new variable called image\_viewing that take the x and y normalised predicted eye-fixations and converts them to the image in that quadrant through control flow (e.g., if,else, case\_when). All looks that were not categorized were then excluded. Finally, target, competitor, and distractor looks were created through control flow which used the current visual image being viewed to deduce which type of look it was. Finally, we subtracted each audio stimulus' offset and an additional 200 ms for human eye movements to occur (this step was not explicit in \textcite{Porretta_et_al_2020}). This allowed us to remove fixations outside the -400 ms and positive 800 ms range (creating a first data frame called all\_data) and to calculate empirical logits through aggregation (for a second data frame called all\_data\_emp). In this final step, we export two data frames to .csv for later use in data analysis: one in the form of aggregate empirical logits (for GAMM analysis) and the other as looks to targets (for GLMER).
+
+\lstinputlisting[language=R]{figures/chunk-questionaire.R}
+
+
+
+
+    
+
+

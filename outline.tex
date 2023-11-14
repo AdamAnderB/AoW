@@ -1,0 +1,137 @@
+\section{Outline}
+\textbf{introduction}
+\begin{enumerate}
+   \item Data wrangling is an essential part \sout{in bi/multilingualism research} of data analysis
+   \begin{enumerate}
+        \item Raw data and cleaned data
+        \item No standardized practices or tools
+        \end{enumerate}
+    \item ET/MT studies require an even more extreme amount of wrangling
+       \begin{enumerate}
+        \item Usually only small description in studies of wrangling, if any
+        \item  Online ET is even worse (complexity wise) but it is here to stay!!!
+        \item Leaves out most important decisions/trusts software
+        \item Not replicable
+        \item COVID
+        \item It is reliable
+        \item Cheaper
+        \item Less prerequisites like a lab/huge funding for equipment
+        \item Gives more access to more people.(web gazer)
+        \item But, data can be huge and is even more complex because it isn’t formatted like the fancy paid companies
+        \end{enumerate}
+\end{enumerate}   
+
+\begin {itemize}
+\item Here we present best practices that we hope become standards in our field. Readers can follow along using our R code, data, Gorilla tutorials, and Shiny web links . One line here about how this helps with replications and open science and all that stuff you wanted to say.
+\end{itemize}
+
+\textbf{Act 1}
+
+\begin{enumerate}
+\item Explain 2x2 classic design 
+\item  Explain what data structure would look like. You can talk about raw and tidy data but keep it high-level and emphasize the important pieces a researcher needs like time stamp, x,y coordinates, etc. don’t get too detailed yet. It will really help the reader follow along if we introduce a basic set of variables and keep coming back to this. Maybe this can be packaged in a way like “the golden four” (participant, time stamp, x,y coordinates, and item) or something like that. 
+\item   Explain move to online studies and introduce Gorilla. Check out Gerry’s new article for help here https://link.springer.com/article/10.3758/s13428-023-02176-4 this is only one paragraph
+
+This might be a useful paper to look at for mouse tracking stuff:
+https://link.springer.com/article/10.3758/s13428-021-01575-9
+
+\item   Explain ET/MT design in Gorilla. No need to motivate Gorilla or web ET. We know it works, so go straight into the design. Again, this is about the best practices of data wrangling so we don’t need a lot of stuff here about why Gorilla is good. §  Building in Gorilla
+\begin{itemize}
+\item Eye tracker 2 and Mouse tracking
+\begin{enumerate}
+\item  What to select and not select
+\item  Screens vs displays
+\item  Capturing across screens
+\end{enumerate}
+\item Data that it can give you:
+\begin{enumerate}
+\item    Detailed data vs gorilla basic settings
+\item   Screen locations
+\item   Trial by trial data separated in csv
+\item    Behaviorial data in separate files and ET trial data- e.g.
+\end{enumerate}
+\end{itemize}
+\end{enumerate}
+
+\begin{itemize}
+\item The design is pretty standard especially among word recognition and sentence processing studies. This is not a paper about designing these studies; it is about taking these studies’ raw data and making a series of decisions about how to get to the tidy data in a way that is replicable and transparent. In this section, hint at what the important data variables are and what decisions a researcher needs to make related to these, so that the next section is a natural continuation of these ideas.
+\end{itemize}
+
+\textbf{Act 2}
+\begin{enumerate}
+\item  Explain Porretta et al study and design
+\item  Explain differences between our design and theirs
+\item  Make list of key decisions. This is what we promised:
+\end{enumerate}
+\begin{itemize}
+Crucially, we highlight and discuss every data wrangling decision we made in order to prepare the data for visualization (Figure 1) and statistical analysis, including variable frame rates, unstable connections, participant calibration, time bin sizes, among other issues. We propose a number of best practices and key decisions a researcher should report.
+\end{itemize}
+
+\begin{itemize}
+\item  	Frame rate issues
+\begin{itemize}
+\item  1000hz vs ~50hz
+\item  Normalizing frame rate and variable frame rates
+\end{itemize}
+\item  Unstable connections
+\begin{itemize}
+\item   Understanding the quality of a webcam as eye-tracker
+\end{itemize}
+\item 	Calibration requirements
+\begin{itemize}
+\item  Higher and lower standards
+\begin{itemize}
+Get out what you put in
+\end{itemize}
+\end{itemize}
+\item Merging as filtering, binding
+\begin{itemize}
+\item  Participant removal from questionnaire
+\item Participant and item removal by behavioral response
+\item Removing non looks to items
+\item Removal of participant by recording quality
+\end{itemize}
+\item  	Pivoting for data structure:
+\begin{itemize}
+\item   R wants tidy data
+\item   What tidy data is changes depending on needs
+\begin{itemize}
+\item What served us for removal needs to be restructured for analysis and visualization
+\end{itemize}
+\end{itemize}
+\end{itemize}
+\begin{itemize}
+\item This section needs to be aligned with that first section when we introduce the “golden four” or whatever and the key decisions a researcher has to make to visualize and analyze the data. Let’s keep this section largely about the visualization and cleanup rather than stats since that is the next section
+\end{itemize}
+
+\textbf{Act 3}
+
+\begin{enumerate}
+    \item Explain how to prepare data for analysis (would be great if it’s an easy fold-in from previous section)
+    \begin{itemize}
+        \item How to code your data
+        \item Modeling decision framework
+        \item LMERS
+        \begin{itemize}
+            \item Explanation basic
+            \item Syntax
+            \item Reading output
+            \item Demonstrate using our replication
+        \end{itemize}
+        \item GAMMS
+        \begin{itemize}
+            \item Explanation basic
+            \item Syntax
+            \item Reading output
+            \item Demonstrate using our replication
+        \end{itemize}
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Discussion}
+
+
+\begin{enumerate}
+    \item \sout{Summarize what we have learned. These are key decisions a researcher must make and what they should report in a study}
+    \item Return to your points about replication and Open Science and how by following our suggestions, both can be strengthened.
+\end{enumerate}
