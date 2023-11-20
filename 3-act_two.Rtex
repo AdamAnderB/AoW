@@ -73,7 +73,7 @@ Like, before, we must start with...
 
 We start wrangling with the eye-fixation data frame. We exclude all non-experimental data by selecting time and eye-fixation related data that is within the prediction window. We then explore each participant's frame rates by grouping participant and trial and doing simple counts. 
 
-\lstinputlisting[language=R, firstnumber=367]{scripts/chunk-Frame All Data: Clean.R}
+\lstinputlisting[language=R, firstnumber=367]{scripts/chunk-All Data: Clean.R}
 
 Aggregate data then shows that two participants had excessively low frame rates that drop off throughout the experiment likely due to unstable connection. To better understand the binning of data and frame rate variability, a shiny app was produced in order to allow the reader to manipulate the data themselves.
 
