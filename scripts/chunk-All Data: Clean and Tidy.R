@@ -14,4 +14,4 @@ all_data_cleaned<-all_data%>%
   mutate(time_elapsed_rounded=time_binning*round((time_elapsed)/time_binning))
 
 all_data_tidy <- all_data_cleaned%>%
-  filter(time_elapsed_rounded>-400 & time_elapsed_rounded<800)
+  filter(time_elapsed_rounded>=-400 & time_elapsed_rounded<=800)
