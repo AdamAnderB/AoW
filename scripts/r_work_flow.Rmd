@@ -3,6 +3,10 @@ title: "R_workflow"
 output: 
   pdf_document:
     keep_tex: true
+
+
+
+
 ---
 ```{r libraries, message=FALSE, error=FALSE}
 library(tidyverse)
@@ -32,6 +36,8 @@ eyetracking_data<-read.csv(file.path(input_path,"et_data.csv"),
 OSF_data<-read.csv(file.path(input_path,"OSF_data.csv"),
                    header=TRUE, row.names=1)
 ```
+
+
 
 ```{r Questionnaire: Clean}
 cleaned_quest_data<-task_data%>%
@@ -68,12 +74,12 @@ filtered_quest_data<-tidy_quest_data%>%
          language_disorder == "No") #none removed
 ```
 ```{r Experimental Data: Clean and Tidy}
+View(experimental_cleaned)
 experimental_cleaned <- task_data%>%
   filter(Participant.Private.ID %in% 
            filtered_quest_data$Participant.Private.ID)%>%
   filter(Zone.Type == "response_button_image"|
-           Zone.Type == "response_button_text" &  
-           image_4 != "")%>%
+           Zone.Type == "response_button_text")%>%
   filter(verb_type == "Restricting" |verb_type == "NonRestricting")%>%
   select_if(~sum(!is.na(.)) > 0)
 
@@ -82,7 +88,7 @@ experimental_tidy<-experimental_cleaned%>%
             Screen.Number:Zone.Name,
             Reaction.Time:Response.Type))%>%
   pivot_wider(names_from = Zone.Type,values_from = Response)%>%
-  mutate(subject_img_file=center_image)
+  mutate(subject_img_file=center_image) #for renamed matching in next step
 ```
 ```{r OSF Data: Clean and Tidy}
 OSF_filt <- OSF_data%>%
@@ -162,7 +168,6 @@ shinny_binning_data <- apply(shinny_binning_data,2,as.character)
 write.csv(shinny_binning_data,file.path(shiny_path,"Frame_Rate_App/shiny_binning_data.csv"))
 write.csv(shinny_binning_data,file.path(shiny_path,"Eye_Fixations_App/shiny_binning_data.csv"))
 ```
-
 ```{r ET Data: Localizing Visual Stimuli}
 #logically equivalent to doing full join and removing non-experimental trials.
 all_data <-behavioral_data %>% 
@@ -194,7 +199,6 @@ all_data<-all_data %>%
          y_pred_normalised>center-beyond_screen &
            y_pred_normalised<center+beyond_screen)
 ```
-
 ```{r}
 time_start = -500
 time_end = 900
@@ -255,7 +259,6 @@ viz%>%
                            size=14, angle=0))
 ggsave(file.path(viz_path,"signal_noise.pdf"), width = 8, height = 4)
 ```
-
 ```{r ET Data: Varibility and Frame Rates}
 filter_median_hz_min<-0
 filter_median_hz_max<-1000
@@ -361,8 +364,7 @@ ggplot()+
   ylab("Total Looks Captured")
 ggsave(file.path(viz_path,"frame_rates_over_trial.pdf"), width = 8, height = 4)
 ```
-
-```{r Frame All Data: Clean}
+```{r All Data: Clean}
 frame_rate_cut_off<-5
 time_binning<-50
 all_data_cleaned<-all_data%>%
@@ -457,8 +459,6 @@ smooth_viz+scale_x_continuous(limits = c(-400,800),breaks=seq(-400,800, 400))+
          linetype = guide_legend(override.aes = list(fill = NA)))
 ggsave(file.path(viz_path,"smooth_plot.pdf"), width = 8, height = 4)
 ```
-
-
 ```{r All Data: Preparing for Models}
 participant_chinese_experience<-tidy_quest_data%>%
   select(Participant.Private.ID,experience_chinese_accent)

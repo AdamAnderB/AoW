@@ -1,4 +1,4 @@
-## ----Frame All Data: Clean----
+## ----All Data: Clean----
 frame_rate_cut_off<-5
 time_binning<-50
 all_data_cleaned<-all_data%>%
