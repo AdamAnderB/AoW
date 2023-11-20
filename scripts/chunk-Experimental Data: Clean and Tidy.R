@@ -1,5 +1,4 @@
 ## ----Experimental Data: Clean and Tidy----
-View(experimental_cleaned)
 experimental_cleaned <- task_data%>%
   filter(Participant.Private.ID %in% 
            filtered_quest_data$Participant.Private.ID)%>%
