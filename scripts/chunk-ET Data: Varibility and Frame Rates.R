@@ -18,7 +18,7 @@ participant_frame_rate<-all_data%>%
   group_by(Participant.Private.ID)%>%
   filter(median_frame_rate>filter_median_hz_min & median_frame_rate<filter_median_hz_max)
 overall_mean_rate<- mean(participant_frame_rate$frame_rate)
-
+sd(participant_frame_rate$frame_rate)
 library(ggExtra)
 plotter<-participant_frame_rate%>%
   ggplot(aes(y=frame_rate,
