@@ -25,26 +25,33 @@ firstnumber=49]{scripts/chunk-Questionnaire: Tidy.R}
     \label{fig:pivoting}
 \end{figure}
 
-Starting at line 69, we find that two participants should be removed for language expertise outside English and one for exceeding the age cut off (both predetermined values). We can filter this data to remove the participants that do not qualify. See supplementary materials for an example of visualizations created through specific data type (e.g., visualizing all numeric columns). Here we will stay focused on wrangling. One way to understand the importance of pivoting is by realizing that it is much easier to come up with standards for removal in the speaks/_L2, Age, or hear/_impaired columns than for the Response column, which would require conditional standards based on Screen.Name.
+Starting at line 69, we find that two participants should be removed for language expertise outside English and one for exceeding the age cut off (both predetermined values). We can filter this data to remove the participants that do not qualify. See supplementary materials for an example of visualizations created through specific data type (e.g., visualizing all numeric columns). Here we will stay focused on wrangling. One way to understand the importance of pivoting is by realizing that it is much easier to come up with standards for removal in the speaks\_L2, Age, or hear\_impaired columns than for the Response column, which would require conditional standards based on Screen.Name.
 
 \lstinputlisting[language=R,
 firstnumber=69]{scripts/chunk-Questionnaire: Filtered.R}
 
 We can now answer our question: Which participants should be excluded based on the background questionnaire? To finish this wrangling cycle, we can now use this data frame to filter out unqualified participants in the participant column of the next removal stage.
+
+
+
+
+
+
 \subsubsection{Behavioral-task wrangling}
-The next cycle of data wrangling begins with the question: Which participants and items should be removed based on the behavioral results of the experiment? Cleaning is similar to the questionnaire cycle, but we start from scratch with a clone of the behavioral data frame (named: task\_behavior) because the new question has new goals, which requires different variables. However, we start this cycle's implementation by filtering the participants in the behavioral-task clone with the questionnaire data from above in order to only keep those participants that qualified in the questionnaire wrangling cycle (line 70). We then remove all rows except ones relating to behavioral data questions (lines 69-70) followed by removal of nonce items in the experiment (line 76), followed by removing columns with all NAs. Lastly, to achieve tidy data, we split the visual image selection and comprehension question into two columns so that a single observation is now based on each trial for each participant (i.e., pivot into a wider structure (line 84)). Removal of columns in lines 81-83 is performed to make pivoting possible. Pivoting requires that rows do not have uniquely identifiable information outside the data columns being "widened". 
+
+The next cycle of data wrangling begins with the question: Which participants and items should be removed based on the behavioral results of the experiment? Cleaning is similar to the questionnaire cycle, but we start from scratch with a clone of the behavioral data frame (named: task\_behavior) because the new question has new goals, which requires different variables. However, we start this cycle's implementation by filtering the participants in the behavioral-task clone with the questionnaire data from above in order to only keep those participants that qualified in the questionnaire wrangling cycle (line 77). We then remove all rows except ones relating to behavioral data questions (lines 78-79) and experimental items (line 80), followed by removing columns with all NAs. Lastly, to achieve tidy data, we split the visual image selection and comprehension question into two columns so that a single observation is now based on each trial for each participant (e.g., pivot into a wider structure (line 84)). Removal of columns in lines 86-88 is performed to make pivoting possible. Pivoting requires that rows do not have uniquely identifiable information outside the data columns being "widened" (This could also be achieved with the column argument of pivot\_wider). 
 
 \lstinputlisting[language=R, firstnumber=76]{scripts/chunk-Experimental Data: Clean and Tidy.R}
 
-Additionally, we must load in a second data frame (line 78) from the original experiment (here, called OSF\_data). We do this for three reasons: 1) because our experiment only has the quadrants or the visual stimuli without the target, competitor, and distractor information, 2) our data lacks the variable for marking nonce items, and 3) our experiment does not have the audio stimuli timing offset needed later in the analysis. 
+Additionally, we must load in a second data frame (line 94) from the original experiment (here, called OSF\_data). We do this for two reasons: 1) because our experiment only has the quadrants or the visual stimuli without the target, competitor, and distractor information, and 2) our experiment does not have SUBTLWF\_obj, which is the log frequency of the object words needed much later in the statistical models. 
 
 \lstinputlisting[language=R, firstnumber=93]{scripts/chunk-OSF Data: Clean and Tidy.R}
 
-In line 83, we filter the OSF data for experimental items and use an inner join based on talker, condition, and the center visual image, which simultaneously pulls in the variables that we need and filters out nonce items (this step could be avoided by putting these variables in the original experimental spreadsheets). 
+In line 99, we filter the OSF data for experimental items and use a left\_join based on talker, condition, and the center visual image, which simultaneously pulls in the variables that we need and filters out nonce items (this step could be avoided by putting these variables in the original experimental spreadsheets). 
 
 \lstinputlisting[language=R, firstnumber=98]{scripts/chunk-Behavioral Data: Join OSF and Experimental Data.R}
 
-Now that we have the variables we need from joining the datasets to create behavioral\_data using inner\_join, we can create variables for the answers being correct and incorrect for our removal process. We will do this for both the item selection (line 88) and the following comprehension question (line 89).
+Now that we have the variables we need from joining the datasets to create behavioral\_data using left\_join, we can create variables for the answers being correct and incorrect for our removal process. We will do this for both the item selection (line 88) and the following comprehension question (line 89).
 
 \lstinputlisting[language=R, firstnumber=102]{scripts/chunk-Behavioral Data: Clean and Tidy.R}
 
