@@ -3,12 +3,12 @@
 
 We carried out a single change replication study \parencite{Marsden_2018} involving internet-based data collection of  \textcite{Porretta_et_al_2020}'s in-person VWP experiment, which found that a foreign accent impedes predictive processing but does not preclude it. \textcite{Porretta_et_al_2020} used a standard 2x2 VWP design discussed above \parencite[e.g.,][]{Allopenna_1998} to explore predictive sentence processing for accented and unaccented speech. On each trial (24 target, 24 filler), participants were presented with a 500-ms fixation cross followed by a 2x2 visual stimuli with an additional center image that represented the subject of the sentence. Each visual set of 2x2 visual stimuli were previewed for 200ms. Next, participants heard a transitive sentence that was either restrictive (e.g., “the fireman will climb the ladder”, \textit{climb} allows for object prediction) or nonrestrictive (e.g., “the fireman will need the ladder”, \textit{need} does not allow for object prediction) and spoken by either a native or Chinese accented English speaker. Participants then must answer a simple comprehension question to ensure attention. All recordings were taken from \parencite{Porretta_et_al_2020} and speaker was counterbalanced across four lists. The experiment contains 250 images, 50 of which are center images and 200 that make up the 2x2 design. (10 practice, 120 filler, 120 experimental). 99 of the images were identical to the original experiment (all 50 center images for subjects in the sentences and 49 of the visual stimuli for objects across practice, filler, and experimental items). The remaining 151 images were obtained following the same specifications of the initial study (open source line-drawn images). 
 
-Whereas our study changed only the method of collecting data from in person to online, the reader will see below, this single change leads to a variety of differences that required explicit choices to be made throughout data analysis (e.g., inclusion and exclusion, classification of eye-fixations, time binning (adjusted time classification), frame rate (eye-fixation per time bin), unstable , among other issues). Below, we propose a number of best practices in this report to help improve transparency in these data wrangling choices, which we hope will become standard reporting procedures in both online and in-person eye-tracking studies, where applicable.
+Whereas our study changed only the method of collecting data from in person to online, the reader will see below, this single change leads to a variety of differences that required explicit choices to be made throughout data analysis (e.g., inclusion and exclusion, classification of eye-fixations, time binning (adjusted time classification), frame rate (eye-fixation per time bin), unstable, among other issues). Below, we propose a number of best practices in this report to help improve transparency in these data wrangling choices, which we hope will become standard reporting procedures in both online and in-person eye-tracking studies, where applicable.
 
 \subsection{"Enter: Wrangling"} 
 
 \subsubsection{Questionnaire wrangling}
-After combing data, all data wrangling starts with data removal (see combining\_data.R in supplementary materials for details on creating data frames from complex and relational data structures). In a VWP experiment, removal occurs at four levels (questionnaire based, item based, behavior based, fixation quality based). While the exact point you start is unimportant, here, we start with simple first (questionnaire based removal). Our first data wrangling cycle question is: Which participants should be excluded based on not being qualified from information provided in the background questionnaire (e.g., not an English speaker and not between the ages of 18 and 40)? In line 43, we start with a clone of our behavioral data frame (113 columns and 881 rows) and assess needed variables (questionnaire questions, responses, participant ID, reaction time (RT)). RT is kept here because it allows for removing items that were unnecessarily generated from the experiment structure (i.e., getting rid of rows with 0 RT). All line numbers refer to actual line numbers in r\_work\_flow.rmd.
+After combing data, all data wrangling starts with data removal (see combining\_data.R in supplementary materials for details on creating data frames from complex and relational data structures). In a VWP experiment, removal occurs at four levels (questionnaire based, item based, behavior based, fixation quality based). While the exact point you start is unimportant, here, we start with simple first (questionnaire based removal). Our first data wrangling cycle question is: Which participants should be excluded based on not being qualified from information provided in the background questionnaire (e.g., not an English speaker and not between the ages of 18 and 40)? In line 43, we start with a clone of our behavioral data frame (113 columns and 881 rows) and assess needed variables (questionnaire questions, responses, participant ID, reaction time (RT)). RT is kept here because it allows for removing items that were unnecessarily generated from the experiment structure (i.e., getting rid of rows with 0 RT). All line numbers refer to actual line numbers in r\_work\_flow.rmd and will be referred to with "L:"+line number; e.g., L: 156-157 refers through lines 156-157.
 
 \lstinputlisting[language=R,
 firstnumber=42]{scripts/chunk-Questionnaire: Clean.R}
@@ -39,19 +39,25 @@ We can now answer our question: Which participants should be excluded based on t
 
 \subsubsection{Behavioral-task wrangling}
 
-The next cycle of data wrangling begins with the question: Which participants and items should be removed based on the behavioral results of the experiment? Cleaning is similar to the questionnaire cycle, but we start from scratch with a clone of the behavioral data frame (named: task\_behavior) because the new question has new goals, which requires different variables. However, we start this cycle's implementation by filtering the participants in the behavioral-task clone with the questionnaire data from above in order to only keep those participants that qualified in the questionnaire wrangling cycle (line 77). We then remove all rows except ones relating to behavioral data questions (lines 78-79) and experimental items (line 80), followed by removing columns with all NAs. Lastly, to achieve tidy data, we split the visual image selection and comprehension question into two columns so that a single observation is now based on each trial for each participant (e.g., pivot into a wider structure (line 84)). Removal of columns in lines 86-88 is performed to make pivoting possible. Pivoting requires that rows do not have uniquely identifiable information outside the data columns being "widened" (This could also be achieved with the column argument of pivot\_wider). 
+The next cycle of data wrangling begins with the question: Which participants and items should be removed based on the behavioral results of the experiment? Cleaning is similar to the questionnaire cycle, but we start from scratch with a clone of the behavioral data frame (named: task\_behavior) because the new question has new goals, which requires different variables. However, we start this cycle's implementation by filtering the participants in the behavioral-task clone with the questionnaire data from above in order to only keep those participants that qualified in the questionnaire wrangling cycle (L: 77). We then remove all rows except ones relating to behavioral data questions (L: 78-79) and experimental items (L: 80), followed by removing columns with all NAs. Lastly, to achieve tidy data, we split the visual image selection and comprehension question into two columns so that a single observation is now based on each trial for each participant (e.g., pivot into a wider structure (L: 84)). Removal of columns in lines 86-88 is performed to make pivoting possible. Pivoting requires that rows do not have uniquely identifiable information outside the data columns being "widened" (This could also be achieved with the column argument of pivot\_wider). 
 
 \lstinputlisting[language=R, firstnumber=76]{scripts/chunk-Experimental Data: Clean and Tidy.R}
 
-Additionally, we must load in a second data frame (line 94) from the original experiment (here, called OSF\_data). We do this for two reasons: 1) because our experiment only has the quadrants or the visual stimuli without the target, competitor, and distractor information, and 2) our experiment does not have SUBTLWF\_obj, which is the log frequency of the object words needed much later in the statistical models. 
+Additionally, we must load in a second data frame (L: 94) from the original experiment (here, called OSF\_data). We do this for two reasons: 1) because our experiment only has the quadrants or the visual stimuli without the target, competitor, and distractor information, and 2) our experiment does not have SUBTLWF\_obj, which is the log frequency of the object words needed much later in the statistical models. 
 
 \lstinputlisting[language=R, firstnumber=93]{scripts/chunk-OSF Data: Clean and Tidy.R}
 
-In line 99, we filter the OSF data for experimental items and use a left\_join based on talker, condition, and the center visual image, which simultaneously pulls in the variables that we need and filters out nonce items (this step could be avoided by putting these variables in the original experimental spreadsheets). 
+In line 99, we filter the OSF data for experimental items and use a left\_join based on talker, condition, and the center visual image, which simultaneously pulls in the variables that we need and filters out nonce items (this step could be avoided by putting these variables in the original experimental spreadsheets). See figure \ref{fig:joins} for 
 
 \lstinputlisting[language=R, firstnumber=98]{scripts/chunk-Behavioral Data: Join OSF and Experimental Data.R}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{figures/joins.png}
+    \caption{Joins act as filters, determining what data to include or exclude based on commonalities and differences between data frames. Solid portions refer to what is kept.}
+    \label{fig:joins}
+\end{figure}
 
-Now that we have the variables we need from joining the datasets to create behavioral\_data using left\_join, we can create variables for the answers being correct and incorrect for our removal process. We will do this for both the item selection (line 88) and the following comprehension question (line 89).
+Now that we have the variables we need from joining the datasets to create behavioral\_data using left\_join, we can create variables for the answers being correct and incorrect for our removal process. We will do this for both the item selection (L: 105) and the following comprehension question (L: 106).
 
 \lstinputlisting[language=R, firstnumber=102]{scripts/chunk-Behavioral Data: Clean and Tidy.R}
 
@@ -59,23 +65,32 @@ Additionally, before beginning removal, we select criteria for removal. These nu
 
 \lstinputlisting[language=R, firstnumber=108]{scripts/chunk-Behavioral Data: Removal Standards.R}
 
- We implemented these standards through a series of modular aggregating steps. That is, we aggregated the inaccuracies of participants by simply adding together incorrect items by participant and item for both item selection (lines 99-104) and comprehension question (lines 107-113), respectively. Then in line 115, individuals incorrect trials are removed. Finally, we rename this data frame cleaned\_behavioral\_data.
+ We implemented these standards through a series of modular aggregating steps. That is, we aggregated the inaccuracies of participants by simply adding together incorrect items by participant and item for both item selection (L: 118-129) and comprehension question (L: 131-142), respectively. Then in line 144, individuals incorrect trials are removed. Finally, we rename this data frame cleaned\_behavioral\_data.
 
 \lstinputlisting[language=R, firstnumber=116]{scripts/chunk-Behavioral Data: Participant and Item Removal.R}
 
-One important note about this removal is that the results would be different if you sequentially piped in the participant\_agg data frame as the base frame for item removal. This is because it would remove some incorrect items' scores simply based on the participants that were removed. We decided to pull in from the original behavioral\_data to avoid creating a bias in removal standard.
-
-\lstinputlisting[language=R, firstnumber=147]{scripts/chunk-Behavioral Data: Removing with IN Operator.R}
+One important note about this removal is that the results would be different if you sequentially piped in the participant\_agg data frame as the base frame for item removal. This is because it would remove some incorrect items' scores simply based on the participants that were removed. We decided to pull in from the original behavioral\_data to avoid creating a bias in removal standards. We end here with removing the incorrect trials to prepare for the eye-tracking data wranling.
 
 \subsubsection{Combining behavioral and ET data and variable frame rates}
 
-In this last section of data removal, we start with a less strict standard as there is no current reference for expected results for frame rate. However, recent work has begun to fill this gap \parencite[see:][, for examples]{Vos_2017,Prystauka_Altmann_Rothman_2023}. Here, we start with two questions: What type of variability in frame rate does online eye-tracking have? And, how can we use these eye-fixations and variable times to capture predictive processing? 
+In this last section of data removal, removal is done through an exploratory lens as there is little current reference for expected results for eye-fixations and frame rate in web-based eye-tracking. However, recent work has begun to fill this gap \parencite[see:][, for other pioneering work in web-based eye-tracking]{Vos_2017,Prystauka_Altmann_Rothman_2023}. Here, two questions guide us: How should eye-fixations be classified into quadrants in web-based eye-tracking? And, what quality of frame rate is needed to capture effects of predictive sentence processing? Like before, we start with filtering out participants from the previous data sets. Here, the retained participants (L: 118) and items (L: 131) from the previous step are used to define what we want to keep in behavioral data (L: 148-150) with the IN operator.
 
-Like, before, we must start with...
+\lstinputlisting[language=R, firstnumber=147]{scripts/chunk-Behavioral Data: Removing with IN Operator.R}
+Whereas the et\_data is much larger than the previous data frames, the same methods are used. Selection of data can be reduced to only the time, participant, and eye-fixations (L: 154-156), which is filtered by only usable fixation points where the variables are renamed (L: 158-159)
 
 \lstinputlisting[language=R, firstnumber=153]{scripts/chunk-ET Data: Tidying and Filtering with an Inner Join.R}
 
+Now that both behavioral\_data and et\_data are cleaned and tidy. left join (L: 173) is used to create all\_data with left join from our behavioral data and eye\_tracking data. This data frame now has all of the eye-tracking data and behavioral-task data from the entire experiment. However, the data from the et\_data only includes eye-fixations. Specifically, the x and y coordinates discussed in Act 1. The task now is to create a classification of eye-fixations into the four quadrants of a screen that the different visual stimuli are put into. A shiny app was created to explore how eye-fixations are distributed at four crucial points in the data: 
+
 \lstinputlisting[language=R, firstnumber=171]{scripts/chunk-ET Data: Localizing Visual Stimuli.R}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{figures/signal_noise.pdf}
+    \caption{}
+    \label{fig:signal_noise}
+\end{figure}
+
 
 We start wrangling with the eye-fixation data frame. We exclude all non-experimental data by selecting time and eye-fixation related data that is within the prediction window. We then explore each participant's frame rates by grouping participant and trial and doing simple counts. 
 
