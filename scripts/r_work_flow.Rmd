@@ -285,7 +285,7 @@ participant_frame_rate<-all_data%>%
   group_by(Participant.Private.ID)%>%
   filter(median_frame_rate>filter_median_hz_min & median_frame_rate<filter_median_hz_max)
 overall_mean_rate<- mean(participant_frame_rate$frame_rate)
-
+sd(participant_frame_rate$frame_rate)
 library(ggExtra)
 plotter<-participant_frame_rate%>%
   ggplot(aes(y=frame_rate,
@@ -370,7 +370,7 @@ ggplot()+
   ylab("Total Looks Captured")
 ggsave(file.path(viz_path,"frame_rates_over_trial.pdf"), width = 8, height = 4)
 ```
-```{r All Data: Clean}
+```{r All Data: Clean and Tidy}
 frame_rate_cut_off<-5
 time_binning<-50
 all_data_cleaned<-all_data%>%
@@ -381,15 +381,16 @@ all_data_cleaned<-all_data%>%
   ungroup()%>%
   group_by(Participant.Private.ID)%>%
   mutate(median_frame_rate = median(frame_rate))%>%
-    filter(median_frame_rate>=5)%>%
+    filter(median_frame_rate>=frame_rate_cut_off)%>%
   mutate(time_elapsed=time_elapsed-object_start-200)%>% 
   mutate(time_elapsed_rounded=time_binning*round((time_elapsed)/time_binning))
-```
-```{r All Data: Preparing for Visualization}
 
 all_data_tidy <- all_data_cleaned%>%
   filter(time_elapsed_rounded>-400 & time_elapsed_rounded<800)
 
+
+```
+```{r All Data: Preparing for Visualization}
 all_data_tidy_viz <- all_data_tidy%>% 
   group_by(time_elapsed_rounded,verb_type, talker)%>%
   summarise(target_looks = mean(target), 
@@ -477,6 +478,7 @@ mem_data<-all_data_tidy%>%
 gamm_data<-mem_data%>%
   mutate(Condition = paste(talker,verb_type,sep="."))
 ```
+
 ```{r GLMER: Leveling the Data}
 mem_data$verb_type<-as.factor(mem_data$verb_type)
 mem_data$talker<-as.factor(mem_data$talker)
