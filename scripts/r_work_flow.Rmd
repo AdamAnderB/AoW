@@ -206,12 +206,19 @@ actual_distance=.3
 actual_screen=.5
 
 viz<-all_data%>%
-  mutate(time_elapsed=time_elapsed-object_start-200)%>% mutate(time_elapsed_rounded=time_bin_size*round((time_elapsed)/time_bin_size))%>%
+  mutate(time_elapsed=time_elapsed-object_start-200)%>%
+  mutate(time_elapsed_rounded=time_bin_size*round((time_elapsed)/time_bin_size))%>%
   filter(time_elapsed_rounded>time_start &time_elapsed_rounded<time_end)%>%
   mutate(object_viewing = if_else(target == 1,"Target",
                                   if_else(comp_1 == 1,"Competitors",
                                           if_else(comp_2 == 1,"Competitors",
                                                   if_else(dist == 1,"Competitors","")))))
+viz<-viz%>%
+  mutate(time_elapsed_round_coded = 
+           case_when(as.character(time_elapsed_rounded) == "-400"~"-400 \nSentence Onset",
+                     as.character(time_elapsed_rounded) == "0"~"0 \nVerb Onset",
+                     as.character(time_elapsed_rounded) == "400"~ "400 \nObject Onset",
+                     as.character(time_elapsed_rounded) == "800"~"800 \nSelection of Visual Stimuli"))
 viz%>%
   ggplot(aes(x=x_pred_normalised,y=y_pred_normalised,color = as.factor(object_viewing)))+
   stat_density_2d(geom = "raster",
@@ -240,7 +247,7 @@ viz%>%
            xmin = center+actual_screen, xmax = center+actual_distance, 
            ymin = center+actual_distance, ymax = center+actual_screen,
              alpha = 0, color= "white")+
-  facet_grid(as.factor(object_viewing)~time_elapsed_rounded)+
+  facet_grid(as.factor(object_viewing)~time_elapsed_round_coded)+
   theme_minimal()+
   theme(legend.position="none")+
   ylab("Screen height - Y axis")+
