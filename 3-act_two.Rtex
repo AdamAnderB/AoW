@@ -5,8 +5,7 @@ We carried out a single change replication study \parencite{Marsden_2018} involv
 
 Whereas our study changed only the method of collecting data from in person to online, the reader will see below, this single change leads to a variety of differences that required explicit choices to be made throughout data analysis (e.g., inclusion and exclusion, classification of eye-fixations, time binning (adjusted time classification), frame rate (eye-fixation per time bin), unstable , among other issues). Below, we propose a number of best practices in this report to help improve transparency in these data wrangling choices, which we hope will become standard reporting procedures in both online and in-person eye-tracking studies, where applicable.
 
-\subsection{"Enter: Wrangling"}
-The cycle of data wrangling always starts with a motivated question, see figure  
+\subsection{"Enter: Wrangling"} 
 
 \subsubsection{Questionnaire wrangling}
 After combing data, all data wrangling starts with data removal (see combining\_data.R in supplementary materials for details on creating data frames from complex and relational data structures). In a VWP experiment, removal occurs at four levels (questionnaire based, item based, behavior based, fixation quality based). While the exact point you start is unimportant, here, we start with simple first (questionnaire based removal). Our first data wrangling cycle question is: Which participants should be excluded based on not being qualified from information provided in the background questionnaire (e.g., not an English speaker and not between the ages of 18 and 40)? In line 43, we start with a clone of our behavioral data frame (113 columns and 881 rows) and assess needed variables (questionnaire questions, responses, participant ID, reaction time (RT)). RT is kept here because it allows for removing items that were unnecessarily generated from the experiment structure (i.e., getting rid of rows with 0 RT). All line numbers refer to actual line numbers in r\_work\_flow.rmd.
@@ -26,7 +25,7 @@ firstnumber=49]{scripts/chunk-Questionnaire: Tidy.R}
     \label{fig:pivoting}
 \end{figure}
 
-Starting at line 69, we find that two participants should be removed for language expertise outside English and one for exceeding the age cut off (both predetermined values). We can filter this data to remove the participants that do not qualify. See supplementary materials for an example of visualizations created through specific data type (e.g., visualizing all numeric columns). Here we will stay focused on wrangling.
+Starting at line 69, we find that two participants should be removed for language expertise outside English and one for exceeding the age cut off (both predetermined values). We can filter this data to remove the participants that do not qualify. See supplementary materials for an example of visualizations created through specific data type (e.g., visualizing all numeric columns). Here we will stay focused on wrangling. One way to understand the importance of pivoting is by realizing that it is much easier to come up with standards for removal in the speaks/_L2, Age, or hear/_impaired columns than for the Response column, which would require conditional standards based on Screen.Name.
 
 \lstinputlisting[language=R,
 firstnumber=69]{scripts/chunk-Questionnaire: Filtered.R}
