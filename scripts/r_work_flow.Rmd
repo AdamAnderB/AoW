@@ -11,47 +11,48 @@ library(dplyr)
 library(ggplot2)
 library(stringr)
 library(readxl)
+library(lmerTest)
+library(lme4)
+library(mgcv)
 ```
-
 ```{r data_load,echo=FALSE}
 #set the path to be the folder where the et_data.csv,OSF_data.csv, 
 #and task_data.csv are located
 path<-"/Users/adambramlett/scripts/the_art_of_wrangling/"
 input_path<-file.path(path,"data")
 output_path<-file.path(path,"cleaned_data")
+shiny_path<-file.path(path,"shiny_apps")
+viz_path<-file.path(path,"AoW/figures")
 
 #change screens to question in task
-task_data<-read.csv(file.path(input_path,"task_data.csv"))
-eyetracking_data<-read.csv(file.path(input_path,"et_data.csv"))
-OSF_data<-read.csv(file.path(input_path,"OSF_data.csv"))
+task_data<-read.csv(file.path(input_path,"task_data.csv"),
+                    header=TRUE, row.names=1)
+eyetracking_data<-read.csv(file.path(input_path,"et_data.csv"),
+                           header=TRUE, row.names=1)
+OSF_data<-read.csv(file.path(input_path,"OSF_data.csv"),
+                   header=TRUE, row.names=1)
 ```
 
 ```{r Questionnaire: Clean}
-###participant removal by questionnaire
 cleaned_quest_data<-task_data%>%
   filter(display=="questionairre",na.omit=TRUE)%>%
   select(Participant.Private.ID,Screen.Name,Response,Reaction.Time)%>%
   filter(Response != "",Reaction.Time!=0)%>%
   select(!Reaction.Time)
 ```
-
 ```{r Questionnaire: Tidy}
-tidy_quest_data<-cleaned_quest_data%>%
-  pivot_wider(names_from=Screen.Name,values_from=Response,values_fn=list)%>%
-  rowwise()%>%
-  mutate(across(c(accent_heard,other_languages_spoken), toString),
-         across(where(is.character), tolower),
+tidy_quest_data<-cleaned_quest_data%>% 
+  group_by(Participant.Private.ID,Screen.Name)%>%
+  summarise_all(toString)%>%
+  pivot_wider(names_from=Screen.Name,values_from=Response)%>%
+  mutate(speaks_L2 = 
+           if_else(str_detect(other_languages_spoken,"German") &
+                     !is.na(other_languages_spoken),1,0),
          across(c(chinese_study_duration,age,experience_chinese_accent),
                 as.numeric),
-         across(c(Participant.Private.ID), as.factor),
-         speaks_L2 = if_else(other_languages_spoken == "english"|
-                               other_languages_spoken == "none"|
-                               other_languages_spoken == ""|
-                               other_languages_spoken == " ",0,1))
+         Participant.Private.ID = as.factor(Participant.Private.ID))
 ```
-
 ```{r Questionnaire: visualization numeric variables}
-#visualize numeric variables
 tidy_quest_data%>%
   keep(is.numeric) %>% 
   gather() %>% 
@@ -60,58 +61,42 @@ tidy_quest_data%>%
     geom_histogram()
 ```
 ```{r Questionnaire: Filtered}
-#filtered data
 filtered_quest_data<-tidy_quest_data%>%
-  filter(age<=40 & age>=18 #1 removed due to being outside of age range
-         chinese_study_duration==0 & #none removed 
-         speaks_L2==0,#2 participants removed that speak other languages
+  filter(age<=40 & age>=18, #1 removed for age range
+         chinese_study_duration==0,  #none removed 
+         speaks_L2==0,#2 removed that speak other languages
          language_disorder == "No") #none removed
 ```
-```{r Sanity}
-#sanity check
-#length(unique(task_data$Participant.Private.ID))
-#length(unique(filtered_quest_data$Participant.Private.ID))
-
-```
 ```{r Experimental Data: Clean and Tidy}
-#response for quadrant data
 experimental_cleaned <- task_data%>%
   filter(Participant.Private.ID %in% 
            filtered_quest_data$Participant.Private.ID)%>%
-  select(talker,verb_type,center_image,
-         image_1,image_2,image_3,image_4,
-         Participant.Private.ID,Spreadsheet.Row,Trial.Number,
-         Zone.Type,object_start,Response)%>%
   filter(Zone.Type == "response_button_image"|
-           Zone.Type == "response_button_text" &  image_4 != "")%>%
-  filter(verb_type == "Restricting" |verb_type == "NonRestricting")
+           Zone.Type == "response_button_text" &  
+           image_4 != "")%>%
+  filter(verb_type == "Restricting" |verb_type == "NonRestricting")%>%
+  select_if(~sum(!is.na(.)) > 0)
 
 experimental_tidy<-experimental_cleaned%>%
+  select(!c(Event.Index:Local.Date, 
+            Screen.Number:Zone.Name,
+            Reaction.Time:Response.Type))%>%
   pivot_wider(names_from = Zone.Type,values_from = Response)%>%
   mutate(subject_img_file=center_image)
-
 ```
 ```{r OSF Data: Clean and Tidy}
-
-#combine OSF Data and experimental data
-#OSF for target, competitor, distractors
 OSF_filt <- OSF_data%>%
-  select(talker,verb_type,subject_img_file,type,
-         img_1_file, img_2_file, img_3_file, img_4_file, 
-         target_obj,pic_verification,object_start)%>% 
-  filter(type == "Exp")
+  select(talker,verb_type,subject_img_file,img_1_file, img_2_file, 
+         img_3_file, img_4_file,log_SUBTLWF_Obj)
 ```
 ```{r Behavioral Data: Join OSF and Experimental Data}
-#combine data and filter out non experimental trials
-behavioral_data <- OSF_filt %>% 
-  inner_join(experimental_tidy, by=c( "talker","verb_type","subject_img_file"))
+behavioral_data <-experimental_tidy%>%
+  left_join(OSF_filt, by=c( "talker","verb_type","subject_img_file"))
 ```
 ```{r Behavioral Data: Clean and Tidy}
-#clean combined OSF and Response data
-behavioral_data$Participant.Private.ID<-
-  as.factor(behavioral_data$Participant.Private.ID)
 behavioral_data <-behavioral_data %>%
-  mutate(image_incorrect= if_else(img_1_file == response_button_image,0,1),
+  mutate(participant = as.factor(Participant.Private.ID),
+         image_incorrect= if_else(img_1_file == response_button_image,0,1),
          text_incorrect = if_else(response_button_text == "Yes",0,1))
 ```
 ```{r Behavioral Data: Removal Standards}
@@ -150,191 +135,426 @@ item_agg<-behavioral_data%>%
          num_incorrect_text <= mean_text_score+
            (sd_text_score*text_item_threshold))
 
-individual_removal <-behavioral_data%>%
+behavioral_data <-behavioral_data%>%
   filter(image_incorrect == 0 & text_incorrect == 0)
 ```
-```{r Behavioral Data: Removing with in Operator}
-#removal of remaining incorrect individual items
+```{r Behavioral Data: Removing with IN Operator}
 behavioral_data<-behavioral_data%>%
   filter(Participant.Private.ID %in% participant_agg$Participant.Private.ID &
-           center_image %in% item_agg$center_image) 
-           #image_incorrect == 0 & text_incorrect == 0)
-
-behavioral_data <-behavioral_data%>%
-  select(-c(text_incorrect,image_incorrect,response_button_text,
-            pic_verification,target_obj,type))
+           center_image %in% item_agg$center_image)%>%
+  select(-c(text_incorrect,image_incorrect,response_button_text))
 ```
 ```{r ET Data: Tidying and Filtering with an Inner Join}
 et_data<-eyetracking_data%>%
   select(time_elapsed,participant_id,spreadsheet_row,
          type,x_pred_normalised,y_pred_normalised)%>%
-  filter(type =="prediction" )
-et_data<-et_data%>%rename("Participant.Private.ID"="participant_id",
-                          "Spreadsheet.Row"="spreadsheet_row")
-et_data$Participant.Private.ID<-as.factor(et_data$Participant.Private.ID)
+  filter(type =="prediction" )%>%
+  rename("Participant.Private.ID"="participant_id",
+         "Spreadsheet.Row"="spreadsheet_row")
 ```
-```{r ET Data: Localizing Visual Stimuli}
-all_data <-behavioral_data %>% 
-  inner_join(et_data, by=c("Participant.Private.ID", "Spreadsheet.Row"))
 
-lower=.4
-upper=.6
+```{r,eval = FALSE,echo=FALSE,}
+#this chunk of code was created for the purposes of make the shiny app in 
+#a seperate script. Can be ignored if you are only interested in the analysis
+shinny_binning_data<-behavioral_data %>% 
+  left_join(et_data, by=c("Participant.Private.ID", "Spreadsheet.Row"))
+shinny_binning_data <- apply(shinny_binning_data,2,as.character)
+write.csv(shinny_binning_data,file.path(shiny_path,"Frame_Rate_App/shiny_binning_data.csv"))
+write.csv(shinny_binning_data,file.path(shiny_path,"Eye_Fixations_App/shiny_binning_data.csv"))
+```
+
+```{r ET Data: Localizing Visual Stimuli}
+#logically equivalent to doing full join and removing non-experimental trials.
+all_data <-behavioral_data %>% 
+  left_join(et_data, by=c("Participant.Private.ID", "Spreadsheet.Row"))
+
+center=.5#center of screen
+distance=0#distance to visual stimuli
+beyond_screen=1 #distance to beyond_screen
 
 all_data<-all_data%>%
   mutate(image_viewing=
-  case_when(x_pred_normalised <= lower & y_pred_normalised >= upper ~ image_1,
-            x_pred_normalised >= upper & y_pred_normalised >= upper ~ image_2,
-            x_pred_normalised <= lower & y_pred_normalised <= lower ~ image_3,
-            x_pred_normalised >= upper & y_pred_normalised <= lower ~ image_4))
-
-all_data<-all_data%>%
-  filter(image_viewing == image_1|
-           image_viewing == image_2|
-           image_viewing == image_3|
-           image_viewing == image_4)
+  case_when(x_pred_normalised <= center-distance & 
+              y_pred_normalised >= center+distance ~ image_1,
+            x_pred_normalised >= center+distance & 
+              y_pred_normalised >= center+distance ~ image_2,
+            x_pred_normalised <= center-distance & 
+              y_pred_normalised <= center-distance ~ image_3,
+            x_pred_normalised >= center+distance & 
+              y_pred_normalised <= center-distance ~ image_4))%>%
+  filter(!is.na(image_viewing))
 
 all_data<-all_data %>% 
   mutate(target = if_else(image_viewing == img_1_file, 1, 0), 
          comp_1 = if_else(image_viewing == img_2_file, 1, 0), 
          comp_2 = if_else(image_viewing == img_3_file, 1, 0), 
-         dist = if_else(image_viewing == img_4_file, 1, 0))
+         dist = if_else(image_viewing == img_4_file, 1, 0))%>%
+  filter(x_pred_normalised>center-beyond_screen &
+           x_pred_normalised<center+beyond_screen&
+         y_pred_normalised>center-beyond_screen &
+           y_pred_normalised<center+beyond_screen)
 ```
-```{r ET Data: Time and Empirical Logits}
-all_data<-all_data%>%
-  mutate(time_elapsed=time_elapsed-object_start.y-200)%>%
-  mutate(time_elapsed_rounded=50*round((time_elapsed)/50))
 
-agg_data <- all_data %>% 
+```{r}
+time_start = -500
+time_end = 900
+time_bin_size<-400
+actual_distance=.3
+actual_screen=.5
+
+viz<-all_data%>%
+  mutate(time_elapsed=time_elapsed-object_start-200)%>% mutate(time_elapsed_rounded=time_bin_size*round((time_elapsed)/time_bin_size))%>%
+  filter(time_elapsed_rounded>time_start &time_elapsed_rounded<time_end)%>%
+  mutate(object_viewing = if_else(target == 1,"Target",
+                                  if_else(comp_1 == 1,"Competitors",
+                                          if_else(comp_2 == 1,"Competitors",
+                                                  if_else(dist == 1,"Competitors","")))))
+viz%>%
+  ggplot(aes(x=x_pred_normalised,y=y_pred_normalised,color = as.factor(object_viewing)))+
+  stat_density_2d(geom = "raster",
+  aes(fill = after_stat(density)),
+  contour = FALSE)+
+  #geom_point(alpha=.1,size=3)+
+  #scale_fill_viridis_c(option="inferno")+
+  scale_fill_gradient(low = "white", high = "#C41230")+
+  annotate("rect", 
+           xmin = center-actual_screen, xmax = center+actual_screen, 
+           ymin = center-actual_screen, ymax = center+actual_screen
+           ,alpha = 0, color= "white")+
+  annotate("rect", 
+           xmin = center-actual_screen, xmax = center-actual_distance, 
+           ymin = center+actual_distance, ymax = center+actual_screen,
+             alpha = 0, color= "white")+
+  annotate("rect", 
+           xmin = center+actual_distance, xmax = center+actual_screen, 
+           ymin = center-actual_screen, ymax = center-actual_distance,
+             alpha = 0, color= "white")+
+  annotate("rect", 
+           xmin = center-actual_screen, xmax = center-actual_distance, 
+           ymin = center-actual_screen, ymax = center-actual_distance,
+             alpha = 0, color= "white")+
+  annotate("rect", 
+           xmin = center+actual_screen, xmax = center+actual_distance, 
+           ymin = center+actual_distance, ymax = center+actual_screen,
+             alpha = 0, color= "white")+
+  facet_grid(as.factor(object_viewing)~time_elapsed_rounded)+
+  theme_minimal()+
+  theme(legend.position="none")+
+  ylab("Screen height - Y axis")+
+  xlab("Screen width - X axis")+
+  scale_y_continuous(breaks =c(0,.5,1))+
+  scale_x_continuous(breaks =c(0,.5,1))+
+  theme(panel.spacing = unit(0, "cm"),
+        axis.ticks.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.text.x = element_text(face="bold", color="#C41230", 
+                           size=14, angle=0),
+        axis.text.y = element_text(face="bold", color="#C41230", 
+                           size=14, angle=0))
+ggsave(file.path(viz_path,"signal_noise.pdf"), width = 8, height = 4)
+```
+
+```{r ET Data: Varibility and Frame Rates}
+filter_median_hz_min<-0
+filter_median_hz_max<-1000
+
+participant_frame_rate<-all_data%>%
+  group_by(Participant.Private.ID,subject_img_file,verb_type,talker)%>%
+  summarize(count = n(),
+            max_time = max(time_elapsed),
+            frame_rate = count/max_time*1000)%>%
+  ungroup()%>%
+  group_by(Participant.Private.ID)%>%
+  mutate(median_frame_rate = median(frame_rate),
+         frame_rate_cats = case_when(median_frame_rate>=30~"high",
+                                     median_frame_rate<30&median_frame_rate>=5~"medium",
+                                     median_frame_rate<5~"low"),
+         frame_rate_cats=as.factor(frame_rate_cats))%>%
+  ungroup()%>%
+  group_by(Participant.Private.ID)%>%
+  filter(median_frame_rate>filter_median_hz_min & median_frame_rate<filter_median_hz_max)
+overall_mean_rate<- mean(participant_frame_rate$frame_rate)
+
+library(ggExtra)
+plotter<-participant_frame_rate%>%
+  ggplot(aes(y=frame_rate,
+                   x=fct_reorder(as.factor(Participant.Private.ID), median_frame_rate),
+                   group=as.factor(Participant.Private.ID),color =frame_rate_cats))+
+  geom_jitter(alpha=.3)+
+  geom_violin()+
+  geom_boxplot(alpha=.2)+
+  geom_point(aes(y=median_frame_rate),color ="white")+
+  geom_hline(yintercept = overall_mean_rate,linetype=3)+
+  theme_minimal()+
+  scale_color_manual(values = c("#009647","#FDB515","#EF3A47"))+
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        panel.grid.major.x = element_blank(),
+        legend.position = c(.1,.75),
+        legend.direction="vertical",
+        legend.title = element_blank())+
+  xlab("Participants Ordered by Median Frame Rate")+
+  ylab("Frame Rate (Hz)")
+
+ggMarginal(plotter, groupColour = TRUE, groupFill = TRUE)
+ggsave(file.path(viz_path,"Participant_frame_rates.pdf"), width = 8, height = 4)
+
+#frame rates across time
+time_binning=400
+
+binned_data<-all_data%>%
+  mutate(time_elapsed=time_elapsed-object_start-200)%>% 
+  mutate(time_elapsed_rounded=time_binning*round((time_elapsed)/time_binning))%>%
+  filter(time_elapsed<2400&time_elapsed>-2400)
+
+frame_rate_cats<-participant_frame_rate%>%
+  select(frame_rate_cats,Participant.Private.ID,subject_img_file)%>%
+  distinct(Participant.Private.ID,frame_rate_cats)
+
+#across participants by item
+agg_data_item <- binned_data%>% 
+  group_by(time_elapsed_rounded,subject_img_file) %>%
+  summarise(target_n=n()) 
+
+#participant items by participants
+agg_data_part <- binned_data%>% 
+  group_by(time_elapsed_rounded,Participant.Private.ID)%>%
+  summarise(target_n=n())%>%
+  full_join(frame_rate_cats)
+
+ggplot()+
+  geom_vline(xintercept = -400,color="#007BC0")+
+  geom_vline(xintercept = 800,color ="#007BC0")+
+  geom_jitter(data=agg_data_part,aes(x=time_elapsed_rounded,
+                                     y=target_n,
+                                     color = frame_rate_cats),alpha=.2)+
+  geom_boxplot(data=agg_data_part,aes(x=time_elapsed_rounded,
+                                      y=target_n,
+                                      alpha=.1,
+                                      group =interaction(time_elapsed_rounded,frame_rate_cats),
+                                      color=frame_rate_cats,
+                                      fill=frame_rate_cats),
+               alpha=.4)+
+  geom_jitter(data=agg_data_item,aes(x=time_elapsed_rounded,
+                                     y=target_n),
+              alpha=.02,
+              color = "grey")+
+  geom_violin(data=agg_data_item,aes(x=time_elapsed_rounded,
+                                     y=target_n,
+                                     alpha=.1,
+                                     group=time_elapsed_rounded),
+              color = "grey",
+              fill= "grey",alpha=.1)+
+  scale_fill_manual(values = c("#009647","#FDB515","#EF3A47"))+
+  scale_color_manual(values = c("#009647","#FDB515","#EF3A47"))+
+  scale_x_continuous(limits = c(-2200,2400),breaks=seq(-2400,2400, 400))+
+  theme_minimal()+
+  theme(axis.ticks.x=element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.position = c(.8,.75),
+        legend.direction="vertical",
+        legend.title = element_blank())+
+  xlab("Adjusted Time")+
+  ylab("Total Looks Captured")
+ggsave(file.path(viz_path,"frame_rates_over_trial.pdf"), width = 8, height = 4)
+```
+
+```{r Frame All Data: Clean}
+frame_rate_cut_off<-5
+time_binning<-50
+all_data_cleaned<-all_data%>%
+  group_by(Participant.Private.ID,subject_img_file,verb_type,talker)%>%
+  mutate(count = n(),
+            max_time = max(time_elapsed),
+            frame_rate = count/max_time*1000)%>%
+  ungroup()%>%
+  group_by(Participant.Private.ID)%>%
+  mutate(median_frame_rate = median(frame_rate))%>%
+    filter(median_frame_rate>=5)%>%
+  mutate(time_elapsed=time_elapsed-object_start-200)%>% 
+  mutate(time_elapsed_rounded=time_binning*round((time_elapsed)/time_binning))
+```
+```{r All Data: Preparing for Visualization}
+
+all_data_tidy <- all_data_cleaned%>%
+  filter(time_elapsed_rounded>-400 & time_elapsed_rounded<800)
+
+all_data_tidy_viz <- all_data_tidy%>% 
   group_by(time_elapsed_rounded,verb_type, talker)%>%
   summarise(target_looks = mean(target), 
             comp_1_looks = mean(comp_1),
             comp_2_looks = mean(comp_2),
             dist_looks = mean(dist),
-            target_n=n()) 
-
-agg_data<-agg_data%>%
-  filter(time_elapsed_rounded>-400 & time_elapsed_rounded<800)
-
-target_data<-agg_data%>%
+            target_n=n())%>%
   mutate(emp_logit =log((target_looks+(0.5/target_n))/
                           (1-(target_looks+(0.5/target_n)))))
-
-
 ```
-```{r}
-all_data <- apply(all_data,2,as.character)
-write.csv(target_data,file.path(output_path,"target_data.csv"))
-write.csv(all_data,file.path(output_path,"all_data.csv"))
-write.csv(agg_data,file.path(output_path,"agg_data.csv"))
-```
+```{r Emp Logits visualizations}
+viz<-ggplot(all_data_tidy_viz, 
+                  aes(x=time_elapsed_rounded, y=emp_logit, 
+                      linetype = verb_type, color= talker))
+point_viz<-viz+geom_line()
+line_viz<-viz+geom_smooth(method = "lm")
+smooth_viz<-viz+geom_smooth()
 
-
-all_data<-all_data%>%
-  mutate(time_elapsed=time_elapsed-object_start.y-200)
-all_data <- all_data %>% 
-  mutate(time_elapsed_rounded=1000*round((time_elapsed)/1000))
-
-all_data_f<-all_data%>%
-  filter(time_elapsed_rounded>-400 & time_elapsed_rounded<800)
-
-all_data_f<-all_data_f%>%
-  filter(x_pred_normalised> -1 & x_pred_normalised<2&
-         y_pred_normalised> -1 & y_pred_normalised<2)
-
-all_data_f%>%
-  ggplot(aes(x_pred_normalised,y_pred_normalised,color=time_elapsed_rounded))+
-  geom_point()
-
-
-all_data_f_agg<-all_data_f%>%
-  group_by(time_elapsed_rounded,Participant.Private.ID,Trial.Number)%>%
-  count()
-
-all_data_f_agg%>%
-  ggplot(aes(x=time_elapsed_rounded,y=n,group=as.factor(time_elapsed_rounded)))+
-  geom_jitter()
-
-
-
-``
-
-#Taking a lookie at the viz
-
-ggplot(target_data, aes(x=time_elapsed_rounded , y=emp_logit, linetype = verb_type, color= talker)) + 
-  geom_line()+
-  scale_color_manual(values=c("#003f7d", "#FD7702"))
-
-ggplot(target_data, aes(x=time_elapsed_rounded , y=emp_logit, linetype = verb_type, color= talker)) + 
-  geom_smooth(method = "lm")+
-  scale_color_manual(values=c("#003f7d", "#FD7702"))
-
-target_data%>%
-  ggplot(aes(x=time_elapsed_rounded , y=target_looks, linetype =verb_type,color=talker))+geom_smooth()+
-  scale_color_manual(values=c("#003f7d", "#FD7702"))+
+point_viz+scale_x_continuous(limits = c(-400,800),breaks=seq(-400,800, 400))+
+  scale_linetype_discrete(labels=c('Non-Restricting','Restricting'))+
+  scale_color_manual(values=c("#007BC0", "#FDB515"),labels=c('Native','Non-Native'))+
   ylab("Average empirical logit looks to object")+
   xlab("Time (ms)")+
   theme(legend.position = c(.2, .7))+
   theme_minimal()+
   labs(title = "Online Replication (upper) vs. in person data (lower):",
-              subtitle = "Lower visual is from Poretta et al's (2020)")
+              subtitle = "Lower visual is from Poretta et al's (2020)")+
+  labs(color='Talker',
+       linetype="Verb Type")+
+  theme(legend.position = c(.2,.7),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.key=element_blank())+
+  guides(color = guide_legend(override.aes = list(fill = NA)),
+         linetype = guide_legend(override.aes = list(fill = NA)))
 
+line_viz+scale_x_continuous(limits = c(-400,800),breaks=seq(-400,800, 400))+
+  scale_linetype_discrete(labels=c('Non-Restricting','Restricting'))+
+  scale_color_manual(values=c("#007BC0", "#FDB515"),labels=c('Native','Non-Native'))+
+  scale_fill_manual(values=c("#007BC0", "#FDB515"),labels=c('Native','Non-Native'))+
+  ylab("Average empirical logit looks to object")+
+  xlab("Time (ms)")+
+  theme(legend.position = c(.2, .7))+
+  theme_minimal()+
+  labs(title = "Online Replication (upper) vs. in person data (lower):",
+              subtitle = "Lower visual is from Poretta et al's (2020)")+
+  labs(color='Talker',
+       linetype="Verb Type")+
+  theme(legend.position = c(.2,.7),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.key=element_blank())+
+  guides(color = guide_legend(override.aes = list(fill = NA)),
+         linetype = guide_legend(override.aes = list(fill = NA)))
+
+smooth_viz+scale_x_continuous(limits = c(-400,800),breaks=seq(-400,800, 400))+
+  scale_linetype_discrete(labels=c('Non-Restricting','Restricting'))+
+  scale_color_manual(values=c("#007BC0", "#FDB515"),labels=c('Native','Non-Native'))+
+  scale_fill_manual(values=c("#007BC0", "#FDB515"),labels=c('Native','Non-Native'))+
+  ylab("Average empirical logit looks to object")+
+  xlab("Time (ms)")+
+  theme(legend.position = c(.2, .7))+
+  theme_minimal()+
+  labs(title = "Online Replication (upper) vs. in person data (lower):",
+              subtitle = "Lower visual is from Poretta et al's (2020)")+
+  labs(color='Talker',
+       linetype="Verb Type")+
+  theme(legend.position = c(.2,.7),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.key=element_blank())+
+  guides(color = guide_legend(override.aes = list(fill = NA)),
+         linetype = guide_legend(override.aes = list(fill = NA)))
+ggsave(file.path(viz_path,"smooth_plot.pdf"), width = 8, height = 4)
 ```
 
 
+```{r All Data: Preparing for Models}
+participant_chinese_experience<-tidy_quest_data%>%
+  select(Participant.Private.ID,experience_chinese_accent)
+
+mem_data<-all_data_tidy%>%
+  select(Participant.Private.ID,verb_type,talker,
+         subject_img_file,target,Trial.Number,log_SUBTLWF_Obj,target_obj,time_elapsed)%>%
+  mutate(Participant.Private.ID=as.factor(Participant.Private.ID))%>%
+  left_join(participant_chinese_experience)
+gamm_data<-mem_data%>%
+  mutate(Condition = paste(talker,verb_type,sep="."))
 ```
-
-target_data$verb_type<-as.factor(target_data$verb_type)
-contrasts(target_data$verb_type)
-target_data$talker<-as.factor(target_data$talker)
-contrasts(target_data$talker)
-
-contrasts(target_data$verb_type)<-c(-.5,.5)
-contrasts(target_data$talker)<-c(-.5,.5)
-
-colnames(contrasts(target_data$talker))<- c('native')
-colnames(contrasts(target_data$talker))<- c('nonrestricting')
-
-m1<-lm(emp_logit~talker*verb_type,data=target_data)
-summary(m1)
+```{r GLMER: Leveling the Data}
+mem_data$verb_type<-as.factor(mem_data$verb_type)
+mem_data$talker<-as.factor(mem_data$talker)
+contrasts(mem_data$verb_type)
+contrasts(mem_data$talker)
+contrasts(mem_data$verb_type)<-c(-.5,.5)
+contrasts(mem_data$talker)<-c(-.5,.5)
+colnames(contrasts(mem_data$talker))<- c('native')
+colnames(contrasts(mem_data$verb_type))<- c('nonrestricting')
 ```
-
-``
-ana_data<-all_data
-
-ana_data$verb_type<-as.factor(ana_data$verb_type)
-contrasts(ana_data$verb_type)
-ana_data$talker<-as.factor(ana_data$talker)
-contrasts(ana_data$talker)
-
-contrasts(ana_data$verb_type)<-c(-.5,.5)
-contrasts(ana_data$talker)<-c(-.5,.5)
-
-colnames(contrasts(ana_data$talker))<- c('native')
-colnames(contrasts(ana_data$verb_type))<- c('nonrestricting')
-
+```{r GLMER: Model Comparison}
 #time correction
-ana_data<-ana_data%>%filter(time_elapsed_rounded>-400 &time_elapsed_rounded<800)
-
 # maximal model:(failed to converge)---
-m2<-glmer(target~talker*verb_type+(talker|subject_img_file)+(verb_type|Participant.Private.ID),family="binomial",data=ana_data)
+m2<-glmer(target~talker*verb_type+
+            (talker|subject_img_file)+
+            (verb_type|Participant.Private.ID),
+          family="binomial",data=mem_data)
 summary(m2)
 
 # Near maximal mode:l (failed to converge)---
-m3<-glmer(target~talker*verb_type+(talker||subject_img_file)+(verb_type||Participant.Private.ID),family="binomial",data=ana_data)
+m3<-glmer(target~talker*verb_type+
+            (talker||subject_img_file)+
+            (verb_type||Participant.Private.ID),
+          family="binomial",data=mem_data)
 summary(m3)
 
 #by item random effects removed first for first iteration
 # parsimonious model (removing item random effects but keeps random slopes for verb type---singularity 
-m4<-glmer(target~talker*verb_type+(1|subject_img_file)+(verb_type||Participant.Private.ID),family="binomial",data=ana_data)
+m4<-glmer(target~talker*verb_type+
+            (1|subject_img_file)+
+            (verb_type||Participant.Private.ID),
+          family="binomial",data=mem_data)
 summary(m4)
 
 #by item and subject random effects removed for second iteration
 # parsimonious model 2
-m5<-glmer(target~talker*verb_type+(1|subject_img_file)+(1|Participant.Private.ID),family="binomial",data=ana_data)
+m5<-glmer(target~talker*verb_type+
+            (1|subject_img_file)+
+            (1|Participant.Private.ID),
+          family="binomial",data=mem_data)
 summary(m5)
-
 anova(m4,m5)
 ```
+```{r GAMM: Leveling the Data}
+# turn categorical variables into factors with numeric values 
+gamm_data$subject_img_coded <- as.numeric(factor(gamm_data$subject_img_file)) -1
+gamm_data$talker_coded <- as.numeric( factor(gamm_data$talker) ) -1 
+gamm_data$verb_type_coded <- as.numeric( factor(gamm_data$verb_type) ) -1
+gamm_data$Condition <- factor(gamm_data$Condition) 
+gamm_data$event <- as.factor(paste(gamm_data$Trial.Number,gamm_data$talker_coded,sep="."))
+gamm_data$Participant.Private.ID <- as.numeric( factor(gamm_data$Participant.Private.ID) ) -1
+gamm_data$target_obj <- factor(gamm_data$target_obj) 
+
+```
+```{r GAMM: Model Comparison}
+#base model
+mod1 <- bam(target ~ Condition
+                  + s(time_elapsed, by=Condition) +
+                  + s(Trial.Number) + s(log_SUBTLWF_Obj) +
+                  + s(time_elapsed, Participant.Private.ID, bs="fs", m=1)
+                  + s(time_elapsed, target_obj, bs="fs", m=1)
+                  + s(event, bs = "re")
+            ,data=gamm_data,family="binomial",discrete=TRUE)
+summary(mod1)
 
 
+#without interaction
+mod3 <- bam(target ~ experience
+                  + s(time_elapsed, by=Condition) +
+                  + s(Trial.Number) + s(log_SUBTLWF_Obj) +
+                  + s(time_elapsed, Participant.Private.ID, bs="fs", m=1)
+                  + s(time_elapsed, target_obj, bs="fs", m=1)
+                  + s(event, bs = "re")
+            ,data=gamm_data_accented,family="binomial",discrete=TRUE)
+summary(mod3)
 
+#with interaction
+mod4 <- bam(target ~ experience
+                  + te(time_elapsed, experience, by=verb_type_coded)
+                  + s(time_elapsed, by=Condition) +
+                  + s(Trial.Number) + s(log_SUBTLWF_Obj) +
+                  + s(time_elapsed, Participant.Private.ID, bs="fs", m=1)
+                  + s(time_elapsed, target_obj, bs="fs", m=1)
+                  + s(event, bs = "re")
+            ,data=gamm_data_accented,family="binomial",discrete=TRUE)
+summary(mod4)
+```

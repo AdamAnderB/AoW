@@ -26,5 +26,5 @@ item_agg<-behavioral_data%>%
          num_incorrect_text <= mean_text_score+
            (sd_text_score*text_item_threshold))
 
-individual_removal <-behavioral_data%>%
+behavioral_data <-behavioral_data%>%
   filter(image_incorrect == 0 & text_incorrect == 0)

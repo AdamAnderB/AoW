@@ -1,0 +1,57 @@
+---
+title: "combining_data"
+author: "Adam A. Bramlett"
+date: "2023-11-18"
+output: html_document
+---
+
+```{r libraries, message=FALSE, error=FALSE}
+library(tidyverse)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(readxl)
+```
+
+```{r}
+#load all data
+library(plyr)
+#data eye_tracking
+
+data_eyetracking<-plyr::ldply(list.files("/Users/adambramlett/scripts/et/eye_tracking/uploads", pattern="eyetracking", full.names=TRUE),function(filename) {
+  dum=read_xlsx(filename)
+  return(dum)
+})
+
+#load responses
+data<-plyr::ldply(list.files("/Users/adambramlett/scripts/et/eye_tracking/", pattern="task", full.names=TRUE),function(filename) {
+  dum=read.csv(filename)
+  return(dum)
+})
+
+detach("package:plyr")
+#this is only necessary if you have more than one eye-tracking task
+task_dat <- data%>%filter(Task.Name == "Eye-tracking-task")
+#bird_dat <- data%>%filter(Task.Name == "bird_tracking")
+#load OSF data
+OSF_df <- read.csv("/Users/adambramlett/scripts/et/eye_tracking_practice/OSF_data.csv")
+```
+
+
+```{r}
+task_data<-task_dat
+task_data[task_data == "Screen 1"] <- "gender"
+task_data[task_data == "Screen 2"] <- "age"
+task_data[task_data == "Screen 4"] <- "language_disorder"
+task_data[task_data == "Screen 6"] <- "accent_heard"
+task_data[task_data == "Screen 7"] <- "chinese_study_duration"
+task_data[task_data == "Screen 8"] <- "experience_chinese_accent"
+task_data[task_data == "Screen 9"] <- "other_languages_spoken"
+task_data<-task_data%>%select(-c(Participant.Public.ID,Participant.External.Session.ID))
+
+path<-"/Users/adambramlett/scripts/the_art_of_wrangling/data"
+write.csv(task_data,file.path(path,"/task_data.csv"))
+write.csv(data_eyetracking,file.path(path,"/et_data.csv"))
+write.csv(OSF_df,file.path(path,"/OSF_data.csv"))
+```
