@@ -1,5 +1,12 @@
 \section{Act 3: Visualizing and analyzing ET data with GLMERs and GAMMs}
+
+\lstinputlisting[language=R, firstnumber=last]{scripts/chunk-All Data: Preparing for Models.R}
+
+
 We observed nearly identical time course of predictive processing, see figure \ref{fig:comparitive}, in which restricted sentences resulted in earlier looks to the target object than nonrestrictive sentences. Both GLMER and GAMMS require specific coding of the data for the model to predict in the expected manner.  However, each of these models start with coding the data correctly and building maximal models and working down to simpler models for model comparison. \parencite{max model}. Visualizations for model outputs will be provided.
+
+\lstinputlisting[language=R, firstnumber=last]{scripts/chunk-GLMER: Leveling the Data.R}
+
 
 GAMMS and GLMERS both have there own advantages and disadvantages \parencite{Ito_Knoeferle_2022}
 \begin{figure}[h]
@@ -20,6 +27,8 @@ Another possible model to use is Growth curve analysis. Prolly not cause space b
 
 
 \subsection{Generalized Additive Modeling}
+
+\lstinputlisting[language=R, firstnumber=last]{scripts/chunk-GAMM: Leveling the Data.R}
 
 GAMMS are becoming increasingly popular as they allow the research to model complex time course information without the need for assumptions of linearity.
 
