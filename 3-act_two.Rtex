@@ -104,7 +104,7 @@ In addition to more variable eye-fixation, web-based eye-tracking also has varia
 \end{figure}
 Like, other recent study on web-based eye-tracking our mean frame rate is in the low 20s: ~22.17 Hz (SD:11.61). Here we remove the five participants with less than 5Hz median frame rates and create time bins by first creating a standard for removal in L: 378 and a binning size (L: 379). We then aggregate participants, item, and by condition (L: 381) in order to remove all participants that are below the predetermined median (L: 381-388). Next, time bins are created by normalising the time range for each item (L: 389). Additionally, we subtracted 200 ms for human eye movements to occur (this step was not explicit in \textcite{Porretta_et_al_2020}). Said another way, we center the time so that 0 is always the onset of the verb of interest. After normalizing, bins are created by dividing the time by the bin size, rounding, then multiplying by the bin size (L: 390), which is simply rounding items to the nearest bin size number.
 
-\lstinputlisting[language=R, firstnumber=377]{scripts/chunk-All Data: Clean.R}
+\lstinputlisting[language=R, firstnumber=377]{scripts/chunk-All Data: Clean and Tidy.R}
 
 Creating time bins is fundamentally discretizing a continuous scale. In any fixed set of eye-tracking data the grain size of the time scale has an inverse relationship to the amount of data in each time bin. Said another way, if you increase the bin size, you will have more data per bin, but less bins across time. As you will see in Act 3, many statistical analyses can bypass the binning procedure all together by keeping time a continuous variable. Nevertheless, for analyses that do require time bins and for visualization alone, it is worth exploring weather specific bin sizes affect a researcher's ability to capture an effect. To do this, we created a second Shiny app that is depicted in figure \ref{fig:frame_rates_over_trial}, which allows the reader to explore the interactions between data removal based on participant median Frame rates, changing bin sizes, and seeing output in the form of empirical logits.
 
@@ -116,14 +116,7 @@ Creating time bins is fundamentally discretizing a continuous scale. In any fixe
     \label{fig:frame_rates_over_trial}
 \end{figure}
 
-The final step before visualizing and doing statistical analysis is to do a final tidying. Like, the first wrangling that we did. We create a tidy data frame by removing all binned data that is outside the time of interest -400-800. Note this will actually only remove data points outside this range +/- the binning number. This is because we are using the rounded varibale to filter the data. We then use this take
-
-\lstinputlisting[language=R, firstnumber=382]{scripts/chunk-All Data: Preparing for Visualization.R}
-
-
-
-Next, we combine the eye-fixation data with the cleaned\_behavioral\_data through inner merge by participant and spreadsheet row. This simultaneously combines the data frames and filters out the participants and items that we removed from previous steps. To create areas of interest, we choose an upper and lower bound for what is categorized as a look. To maximize usable data, we used a lower bound of .5 and an upper bound of .5 (0, 0 is the bottom-left corner of the screen, and 1, 1 is the upper-right) on both the x and y axis. We then created a new variable called image\_viewing that takes the x and y normalised predicted eye-fixations and converts them to the image in that quadrant through control flow (e.g., ifelse, case\_when). All looks that were not categorized were then excluded. Finally, target, competitor, and distractor looks were created through control flow, which used the current visual image being viewed to deduce which type of look it was. Finally, we subtracted each audio stimulus' offset and an additional 200 ms for human eye movements to occur (this step was not explicit in \textcite{Porretta_et_al_2020}). This allowed us to remove fixations outside the -400 ms and positive 800 ms range (creating a first data frame called all\_data) and to calculate empirical logits through aggregation (for a second data frame called all\_data\_emp). In this final step, we export two data frames to .csv for later use in data analysis: one in the form of aggregate empirical logits (for GAMM analysis) and the other as looks to targets (for GLMER).
-
+The final step before visualizing and doing statistical analysis is to do a final tidying. Like, the first wrangling that we did. We create a tidy data frame by removing all binned data that is outside the time of interest -400-800. Note this will actually only remove data points outside this range +/- the binning number. This is because we are using the round time variable to filter the data. We then use this take
 
 
 
