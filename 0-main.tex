@@ -57,21 +57,27 @@
 }
 
 \newcommand{\inlineR}[1]{\footnotesize\texttt{\colorbox{codegray}{#1}}}
-\newcounter{rrrrrrr}{32}
+
+\usepackage{datatool}
 
 % Load the CSV file
-\DTLloaddb{mydata}{your_data.csv}
+\DTLloaddb{chunk_nums}{scripts/chunk-num_lister.csv}
 
 % Define a command to look up content
-\newcommand{\lookupContent}[1]{%
-  \DTLforeach{scripts/}{\col1=Column1, \col2=Column2}{%
-    \ifthenelse{\equal{#1}{\col1}}{\col2}{}%
+%\newcommand{\liner}[1]{%
+%  \DTLforeach{chunk_nums}{\col1=content_cleaned, \col2=Line}{%
+%    \ifthenelse{\equal{#1}{\col1}}{\col2}{}%
+%  }%
+%}
+
+\newcommand{\getValue}[1]{%
+  \DTLforeach{chunk_nums}{\ColumnOne=content_cleaned,\ColumnTwo=Line}{%
+    \ifthenelse{\equal{\ColumnOne}{#1}}{%
+      \def\storedValue{\ColumnTwo}%
+    }{}%
   }%
 }
 
-
-
-\newcounter{ETData:TidyingandFilteringwithanInnerJoin}{32}
 
 %\usepackage{titlesec}
 
