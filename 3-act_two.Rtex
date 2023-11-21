@@ -10,16 +10,16 @@ Whereas our study changed only the method of collecting data from in person to o
 \subsubsection{Questionnaire wrangling}
 After combing data, all data wrangling starts with data removal (see combining\_data.R in supplementary materials for details on creating data frames from complex and relational data structures). In a VWP experiment, removal occurs at four levels (questionnaire based, item based, behavior based, fixation quality based). While the exact point you start is unimportant, here, we start with simple first (questionnaire based removal). Our first data wrangling cycle question is: Which participants should be excluded based on not being qualified from information provided in the background questionnaire (e.g., not an English speaker and not between the ages of 18 and 40)? In line 43, we start with a clone of our behavioral data frame (113 columns and 881 rows) and assess needed variables (questionnaire questions, responses, participant ID, reaction time (RT)). RT is kept here because it allows for removing items that were unnecessarily generated from the experiment structure (i.e., getting rid of rows with 0 RT). All line numbers refer to actual line numbers in r\_work\_flow.rmd and will be referred to with "L:+line number"; e.g., L: 156-157 refers through lines 156-157.
 
-
+\lstinputlisting[language=R,
+firstnumber=\getValue{Questionnaire:Clean}]{scripts/chunk-Questionnaire: Clean.R}
 
 Now that we have a data frame with three columns (Participant.ID, question, response), we can restructure the data into tidy data (one observation per row, and each column is a variable) \parencite{Wickham_2014}. While this can be done with simple \inlineR{filter()} or \inlineR{select()} and joining, \inlineR{pivot\_wider()} and \inlineR{pivot\_longer()} offer a simple solution to this common data structure problem, see figure \ref{fig:pivoting}. Starting at line 49, we pivot wider to create a single row for each participant with each question having its own column.
 
 
 \getValue{Questionnaire:Clean}
 
-flaisjdf
 \lstinputlisting[language=R,
-firstnumber=49]{scripts/chunk-Questionnaire: Tidy.R}
+firstnumber={\getValue{Questionnaire:Tidy}}]{scripts/chunk-Questionnaire: Tidy.R}
 
 \begin{figure}[h]
     \centering

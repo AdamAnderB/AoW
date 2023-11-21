@@ -61,6 +61,7 @@
 \usepackage{datatool}
 \usepackage{ifthen}
 
+\
 % Load the CSV file
 \DTLloaddb{chunknums}{scripts/chunk-num_lister.csv}
 
@@ -85,11 +86,11 @@
 \newcommand{\getValue}[1]{
   \DTLforeach{chunknums}{\ColumnOne=content_cleaned,\ColumnTwo=Line}{
     \ifthenelse{\equal{\ColumnOne}{#1}}{
-      \StrBefore{\ColumnTwo}{,}
-    }
+      \edef\myValue{\ignorespaces\ColumnTwo}
+      \m
+    }{}
   }
 }
-
 %\usepackage{titlesec}
 
 %\titleformat{\section}
