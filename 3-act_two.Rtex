@@ -17,7 +17,6 @@ Now that we have a data frame with three columns (Participant.ID, question, resp
 
 \getValue{Questionnaire:Clean}
 
-
 flaisjdf
 \lstinputlisting[language=R,
 firstnumber=49]{scripts/chunk-Questionnaire: Tidy.R}
