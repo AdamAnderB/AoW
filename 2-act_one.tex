@@ -31,10 +31,16 @@ For the remainder of this paper, these "core four" constructs will be used to gu
 
 To run an eye-tracking experiment in Gorilla, a basic forced alternative choice task can serve as the foundation with four visual stimuli as the choices (found here). We must also add a sound stimuli that plays at a specific point in the experiment. Specifically, each trial should start with a fixation cross, afterward provide either an initial, simultaneous, or delayed exposure to visual stimuli (e.g., 200 ms), followed or proceeded by an audio stimuli playing. The audio file and visual images must have a time locked relationship. The audio stimuli will either provide suggestive hints toward a specific visual stimuli or even explicitly tell the participant which to choose. When building the experiment, it is essential to focus on the timing of the trials, the types of data you want out of the trial, and when the webcam should track eye-fixations. 
 
-By following 
+Add stuff here about the things to do with a better workflow image. 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{figures/.png}
+    \caption{Note: Pivoting Wider and Pivoting longer are both useful in creating tidy data in different situations. Experimental data (e.g., Gorilla-tasks, Psychopy, E-Prime) often requires widening, whereas questionnaire data (e.g., Gorilla-questionnaires, Google forms, Qualtrix) need to be pivoted longer.}
+    \label{fig:pivoting}
 
 
-\subsection{Gorilla and Data Structure}
+\subsection{Gorilla and setting}
 
 The eye-tracker 2 from Gorilla has two explicit modes: calibration and recording. Calibration can be used throughout the experiment or only once at the beginning of the experiment. Additionally, two types of calibration standards can be used, five-point and nine-point, with any level set for calibration fail points or repeat calibrations. Nine-point calibration provides a better standard but takes longer and may fail more often. While not fully necessary because of the manner that webgazer.js functions \parencite[e.g.,][]{ Chen_et_al_2001}, it is highly recommended that the researcher uses calibration throughout the experiment. However, our experiment did not use a calibration requirement and still successfully captured predictive eye-movements \parencite[][]{Prystauka_Altmann_Rothman_2023}. The recording screen is for the experiment trials themselves. The first screen that you want the eye-tracker to start will nearly always be where the visual stimuli begins. Crucially, in the settings, selecting continue tracking on next display and collect detailed eye-tracking data are essential. All screen you wish to record eye-fixations for should also have an eye-tracker module. Basic eye-tracking data and detailed eye-tracking data are different in that basic data does not provide time course data. 
 
