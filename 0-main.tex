@@ -56,12 +56,11 @@
     urlcolor={blue!80!black}
 }
 
-\newcommand{\inlineR}[1]{\footnotesize\texttt{\colorbox{codegray}{#1}}}
+\newcommand{\inlineR}[1]{{\footnotesize\texttt{\colorbox{codegray}{#1}}}}
 
 \usepackage{datatool}
 \usepackage{ifthen}
 
-\
 % Load the CSV file
 \DTLloaddb{chunknums}{scripts/chunk-num_lister.csv}
 
@@ -83,14 +82,7 @@
 %}
 
 % Define the command to get the value
-\newcommand{\getValue}[1]{
-  \DTLforeach{chunknums}{\ColumnOne=content_cleaned,\ColumnTwo=Line}{
-    \ifthenelse{\equal{\ColumnOne}{#1}}{
-      \edef\myValue{\ignorespaces\ColumnTwo}
-      \m
-    }{}
-  }
-}
+
 %\usepackage{titlesec}
 
 %\titleformat{\section}
