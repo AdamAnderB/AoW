@@ -51,12 +51,12 @@ tidy_quest_data<-cleaned_quest_data%>%
   group_by(Participant.Private.ID,Screen.Name)%>%
   summarise_all(toString)%>%
   pivot_wider(names_from=Screen.Name,values_from=Response)%>%
-  mutate(speaks_L2 = 
-           if_else(str_detect(other_languages_spoken,"German") &
+  mutate(speaks_L2 =if_else(str_detect(other_languages_spoken,"German") &
                      !is.na(other_languages_spoken),1,0),
          across(c(chinese_study_duration,age,experience_chinese_accent),
                 as.numeric),
-         Participant.Private.ID = as.factor(Participant.Private.ID))
+         Participant.Private.ID = as.factor(Participant.Private.ID))%>%
+  select(!other_languages_spoken)
 ```
 ```{r Questionnaire: visualization numeric variables}
 tidy_quest_data%>%
@@ -466,14 +466,12 @@ smooth_viz+scale_x_continuous(limits = c(-400,800),breaks=seq(-400,800, 400))+
 ggsave(file.path(viz_path,"smooth_plot.pdf"), width = 8, height = 4)
 ```
 ```{r All Data: Preparing for Models}
-participant_chinese_experience<-tidy_quest_data%>%
-  select(Participant.Private.ID,experience_chinese_accent)
-
 mem_data<-all_data_tidy%>%
   select(Participant.Private.ID,verb_type,talker,
          subject_img_file,target,Trial.Number,log_SUBTLWF_Obj,target_obj,time_elapsed)%>%
   mutate(Participant.Private.ID=as.factor(Participant.Private.ID))%>%
-  left_join(participant_chinese_experience)
+  left_join(tidy_quest_data)
+
 gamm_data<-mem_data%>%
   mutate(Condition = paste(talker,verb_type,sep="."))
 ```
