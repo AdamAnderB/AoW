@@ -33,7 +33,8 @@ line_nums<-line_nums%>%
   filter(chunk=="```")%>%
   filter(Content!="```")%>%
   mutate(file_name = paste("\\",content_cleaned,".R",sep=""))%>%
-  select(content_cleaned,Line)
+  select(content_cleaned,Line)%>%
+  filter(content_cleaned != "")
 
 write.csv(line_nums,"chunk-num_lister.csv")
 
