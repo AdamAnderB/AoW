@@ -59,6 +59,17 @@
 \newcommand{\inlineR}[1]{\footnotesize\texttt{\colorbox{codegray}{#1}}}
 \newcounter{rrrrrrr}{32}
 
+% Load the CSV file
+\DTLloaddb{mydata}{your_data.csv}
+
+% Define a command to look up content
+\newcommand{\lookupContent}[1]{%
+  \DTLforeach{scripts/}{\col1=Column1, \col2=Column2}{%
+    \ifthenelse{\equal{#1}{\col1}}{\col2}{}%
+  }%
+}
+
+
 
 \newcounter{ETData:TidyingandFilteringwithanInnerJoin}{32}
 
