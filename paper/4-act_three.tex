@@ -5,7 +5,7 @@ We observed nearly identical time course of predictive processing, see figure \r
 \subsection{Visualizations}
 While 
 
-\lstinputlisting[language=R, firstnumber=last]{scripts/chunk-All Data: Preparing for Visualization.R}
+\lstinputlisting[style=mystyle, firstnumber=last]{scripts/chunk-All Data: Preparing for Visualization.R}
 
 
 
@@ -26,7 +26,7 @@ Good visuals and clean analysis make or break a study. However, these visuals we
 
 
 
-\lstinputlisting[language=R, firstnumber=last]{scripts/chunk-All Data: Preparing for Models.R}
+\lstinputlisting[style=mystyle, firstnumber=last]{scripts/chunk-All Data: Preparing for Models.R}
 
 
 GAMMS and GLMERS both have there own advantages and disadvantages \parencite{Ito_Knoeferle_2022}
@@ -34,7 +34,7 @@ GAMMS and GLMERS both have there own advantages and disadvantages \parencite{Ito
 \subsection{Mixed Effects Modeling}
 Final model and visualization preparation, 
 
-\lstinputlisting[language=R, firstnumber=last]{scripts/chunk-GLMER: Leveling the Data.R}
+\lstinputlisting[style=mystyle, firstnumber=last]{scripts/chunk-GLMER: Leveling the Data.R}
 
 
 %Mixed-effect logistic regression was carried out in R [6], formula: glmer(target ~ talker accent * verb type + (1| item)+(verb type||Participant), family= binomial)). Like [1]’s model, our model yielded an effect of verb type for the restrictive condition (β = 0.08, SE = .04, t = 2.28, p = .029) indicating that prediction occurs irrespective of accent. Additionally, our model found neither an effect of talker accent nor a two-way interaction, thus mirroring the results of [1].
@@ -46,7 +46,7 @@ Another possible model to use is Growth curve analysis. Prolly not cause space b
 
 \subsection{Generalized Additive Modeling}
 
-\lstinputlisting[language=R, firstnumber=last]{scripts/chunk-GAMM: Leveling the Data.R}
+\lstinputlisting[style=mystyle, firstnumber=last]{scripts/chunk-GAMM: Leveling the Data.R}
 
 GAMMS are becoming increasingly popular as they allow the research to model complex time course information without the need for assumptions of linearity.
 
