@@ -23,20 +23,34 @@ extract_line_info_from_rmd <- function(file_path) {
 rmd_file_path <- "r_work_flow.Rmd"
 line_nums<-extract_line_info_from_rmd(rmd_file_path)
 line_nums$content_cleaned <- gsub("```", "", line_nums$Content)
-line_nums$content_cleaned <- gsub("\\{r", "", line_nums$content_cleaned)
+line_nums$content_cleaned <- gsub("\\{r ", "", line_nums$content_cleaned)
 line_nums$content_cleaned <- gsub("\\}", "", line_nums$content_cleaned)
 line_nums$chunk <- gsub("[^`]+", "", line_nums$Content)
 line_nums$chunk <- gsub("[^`]+", "", line_nums$Content)
-line_nums$content_cleaned <- gsub(" ", "", line_nums$content_cleaned)
+#line_nums$content_cleaned <- gsub(" ", "", line_nums$content_cleaned)
 
-line_nums<-line_nums%>%
+line_nums2<-line_nums%>%
   filter(chunk=="```")%>%
   filter(Content!="```")%>%
   mutate(file_name = paste("\\",content_cleaned,".R",sep=""))%>%
   select(content_cleaned,Line)%>%
   filter(content_cleaned != "")
 
-write.csv(line_nums,"chunk-num_lister.csv")
+write.csv(line_nums2,"chunk-num_lister.csv")
 
+```
+
+```{r}
+
+line_nums3<-line_nums%>%
+  filter(chunk=="```")%>%
+  filter(Content!="```")%>%
+  mutate(file_name = paste("\\",content_cleaned,".R",sep=""))%>%
+  select(content_cleaned,Line)%>%
+  filter(content_cleaned != "")%>%
+  mutate(var = paste("\\newcommand{\\var",content_cleaned,"}{",Line,"}",sep=""))%>%
+  select(var)
+
+writeLines(line_nums3$var, "var.tex")
 ```
 

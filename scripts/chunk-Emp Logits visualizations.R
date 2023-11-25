@@ -22,7 +22,7 @@ point_viz+scale_x_continuous(limits = c(-400,800),breaks=seq(-400,800, 400))+
         panel.grid.minor.y = element_blank(),
         legend.key=element_blank())+
   guides(color = guide_legend(override.aes = list(fill = NA)),
-         linetype = guide_legend(override.aes = list(fill = NA)))
+         linetype = guide_legend(override.aes = list(fill = NA)))+facet_wrap(Participant.Private.ID~1)
 
 line_viz+scale_x_continuous(limits = c(-400,800),breaks=seq(-400,800, 400))+
   scale_linetype_discrete(labels=c('Non-Restricting','Restricting'))+
@@ -41,7 +41,7 @@ line_viz+scale_x_continuous(limits = c(-400,800),breaks=seq(-400,800, 400))+
         panel.grid.minor.y = element_blank(),
         legend.key=element_blank())+
   guides(color = guide_legend(override.aes = list(fill = NA)),
-         linetype = guide_legend(override.aes = list(fill = NA)))
+         linetype = guide_legend(override.aes = list(fill = NA)))+facet_wrap(Participant.Private.ID~1)
 
 smooth_viz+scale_x_continuous(limits = c(-400,800),breaks=seq(-400,800, 400))+
   scale_linetype_discrete(labels=c('Non-Restricting','Restricting'))+
@@ -61,5 +61,5 @@ smooth_viz+scale_x_continuous(limits = c(-400,800),breaks=seq(-400,800, 400))+
         legend.key=element_blank())+
   guides(color = guide_legend(override.aes = list(fill = NA)),
          linetype = guide_legend(override.aes = list(fill = NA)),
-         fill = FALSE)
-ggsave(file.path(viz_path,"smooth_plot.pdf"), width = 8, height = 4)
+         fill = FALSE)+facet_wrap(Participant.Private.ID~1)
+ggsave(file.path(viz_path,"smooth_plot_individual_differences.pdf"), width = 8, height = 20)
