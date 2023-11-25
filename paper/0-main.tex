@@ -12,40 +12,64 @@
 % subfiles
 \usepackage{csquotes}
 \usepackage{subfiles}
+\usepackage[right]{lineno}
+\linenumbers
+
+\usepackage{xcolor}
 %hyperlink colors fix
 \usepackage{listings}
-\lstset{ 
-  language=R,                     % the language of the code
-  basicstyle=\footnotesize\ttfamily, % the size of the fonts that are used for the code
-  numbers=left,                   % where to put the line-numbers
-  firstnumber=last,
-  numberstyle=\small\color{bluethread},  % the style that is used for the line-numbers
-  stepnumber=1,                   % the step between two line-numbers. If it is 1, each line
-                                  % will be numbered
-  numbersep=5pt,                  % how far the line-numbers are from the code
-  backgroundcolor=\color{codegray},  % choose the background color. You must add \usepackage{color}
-  showspaces=false,               % show spaces adding particular underscores
-  showstringspaces=false,         % underline spaces within strings
-  showtabs=false,                 % show tabs within strings adding particular underscores
-  %frame=single,                   % adds a frame around the code
-  %rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
-  tabsize=2,                      % sets default tabsize to 2 spaces
-  captionpos=b,                   % sets the caption-position to bottom
-  breaklines=true,                % sets automatic line breaking
-  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
-  keywordstyle=\color{rose_red},      % keyword style
-  otherkeywords={!,!=,~,\$,*,\&,\%/\%,\%*\%,\%\%,<-,<<-,_},
-  otherkeywords=\color{green},
-  commentstyle=\color{green},   % comment style
-  stringstyle=\color{green}      % string literal style
-} 
-\usepackage{xcolor}
-\definecolor{bluethread}{RGB}{4,54,115}
+  
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\definecolor{orange}{RGB}{253,181,21}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{codegray},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    morecomment=[l]{\#},
+    alsoletter={\#},
+    commentstyle=\color{cmu_red},
+    keywordstyle=\color{rose_red},
+    numberstyle=\ttfamily\footnotesize,
+    stringstyle=\color{orange},
+    numbers=left,
+    showstringspaces=false,
+    frame=none,
+    morestring=[b]",
+    morestring=[b]',
+    literate={<}{{\textcolor{bluethread}{<}}}1
+             {=}{{\textcolor{bluethread}{=}}}1
+             {:}{{\textcolor{bluethread}{:}}}1
+             {\%in\%}{{\textcolor{bluethread}{\%in\%}}}4
+             {\%}{{\textcolor{bluethread}{\%}}}1
+             {<-}{{\textcolor{bluethread}{<-}}}2
+             {!}{{\textcolor{bluethread}{!}}}1
+             {\&}{{\textcolor{bluethread}{\&}}}1
+             {|}{{\textcolor{bluethread}{|}}}1
+             {>}{{\textcolor{bluethread}{>}}}1,
+    morekeywords=[2]{TRUE, FALSE},
+    keywordstyle=[2]\color{pink},
+    morekeywords=[3]{time}
+}
+
+\definecolor{custombg}{RGB}{220,220,220} % Adjust the background color
+\definecolor{pink}{RGB}{255,105,180}
+\definecolor{customgreen}{RGB}{0,128,0}
+\definecolor{customorange}{RGB}{255,165,0}
+\definecolor{bluethread}{RGB}{8,146,208}
 \definecolor{codegray}{RGB}{246,246,246}
 \definecolor{cmu_red}{RGB}{196,18,48}
 \definecolor{rose_red}{RGB}{239,58,71}
-\definecolor{rose_red}{RGB}{239,58,71}
+\definecolor{cmu_blue}{RGB}{4,54,115}
 \definecolor{green}{RGB}{0,150,71}
+\definecolor{cmu_grey}{RGB}{109,110,113}
+
+\definecolor{yellow}{RGB}{255,255,204}
+
 \usepackage{ulem}
 \usepackage{booktabs}
 \usepackage{amssymb}
@@ -62,7 +86,7 @@
 \usepackage{ifthen}
 
 % Load the CSV file
-\DTLloaddb{chunknums}{scripts/chunk-num_lister.csv}
+%\DTLloaddb{chunknums}{scripts/chunk-num_lister.csv}
 
 % Define a command to look up content
 %\newcommand{\liner}[1]{%
@@ -118,7 +142,7 @@
 %\abstract{\subfile{0-abstract}}
 
 % biblatex reference file
-\addbibresource{references.bib}
+\addbibresource{paper/references.bib}
 
 \begin{document}
 \maketitle
@@ -128,11 +152,11 @@
 
 % Add all section subfiles here. More can be created if needed
 \subfile{abstract}
-\subfile{1-introduction}
-\subfile{2-act_one}
-\subfile{3-act_two}
-\subfile{4-act_three}
-\subfile{5-Discussion_Conclusion}
+\subfile{paper/1-introduction}
+\subfile{paper/2-act_one}
+\subfile{paper/3-act_two}
+\subfile{paper/4-act_three}
+\subfile{paper/5-Discussion_Conclusion}
 %\subfile{outline}
 
 % sections are done with \section, \subsection and \subsubsection.
@@ -143,5 +167,4 @@
 % cite sources in text with \autocite, or:
 % \parencite for "(Author, 2023)"
 % \textcite for "Author (2023)"
-\end{document}
 \end{document}
