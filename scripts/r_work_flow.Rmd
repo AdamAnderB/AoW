@@ -4,9 +4,6 @@ output:
   pdf_document:
     keep_tex: true
 
-
-
-
 ---
 ```{r libraries, message=FALSE, error=FALSE}
 library(tidyverse)
@@ -28,18 +25,18 @@ library(mgcv)
 #shiny_path<-file.path(path,"shiny_apps")
 #viz_path<-file.path(path,"AoW/figures")
 ```
+Here, three dialogue boxes will pop up. You simply need to select task data from the file you downloaded from the OSF link. The rest should run automatically
 ```{r Data Reading}
-#change screens to question in task
+#select task_data
 task_data_select <- file.choose()
 task_data<-read.csv(task_data_select,header=TRUE, row.names=1)
-eyetracking_data_select <- file.choose()
-eyetracking_data<-read.csv(eyetracking_data_select,header=TRUE, row.names=1)
-OSF_data_select <- file.choose()
-OSF_data<-read.csv(OSF_data,
-                   header=TRUE, row.names=1)
+#change for ET data
+et_data_select<-sub("task_data", "et_data", task_data_select)
+eyetracking_data<-read.csv(et_data_select,header=TRUE, row.names=1)
+#change for OSF data
+OSF_data_select<-sub("task_data", "OSF_data", task_data_select)
+OSF_data<-read.csv(OSF_data_select,header=TRUE, row.names=1)
 ```
-
-
 
 ```{r Questionnaire: Clean}
 cleaned_quest_data<-task_data%>%
@@ -398,7 +395,6 @@ all_data_tidy_viz <- all_data_tidy%>%
             comp_2_looks = mean(comp_2),
             dist_looks = mean(dist),
             target_n=n())%>%
-  mutate(emp_logit = target_looks/target_n)
   mutate(emp_logit =log((target_looks+(0.5/target_n))/
                           (1-(target_looks+(0.5/target_n)))))
 ```
