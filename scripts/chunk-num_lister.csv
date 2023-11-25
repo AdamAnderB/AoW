@@ -1,28 +1,28 @@
 "","content_cleaned","Line"
 "1","libraries, message=FALSE, error=FALSE",11
 "2","data_load,echo=FALSE",22
-"3","Data Reading",30
-"4","Questionnaire: Clean",42
-"5","Questionnaire: Tidy",49
-"6","Questionnaire: visualization numeric variables",61
-"7","Questionnaire: Filtered",69
-"8","Experimental Data: Clean and Tidy",76
-"9","OSF Data: Clean and Tidy",92
-"10","Behavioral Data: Join OSF and Experimental Data",97
-"11","Behavioral Data: Clean and Tidy",101
-"12","Behavioral Data: Removal Standards",107
-"13","Behavioral Data: Participant and Item Removal",115
-"14","Behavioral Data: Removing with IN Operator",146
-"15","ET Data: Tidying and Filtering with an Inner Join",152
-"16","{r,eval = FALSE,echo=FALSE,",161
-"17","ET Data: Localizing Visual Stimuli",170
-"18","{r",201
-"19","ET Data: Varibility and Frame Rates",268
-"20","All Data: Clean and Tidy",373
-"21","All Data: Preparing for Visualization",391
-"22","Emp Logits visualizations",402
-"23","All Data: Preparing for Models",468
-"24","GLMER: Leveling the Data",479
-"25","GLMER: Model Comparison",489
-"26","GAMM: Leveling the Data",522
-"27","GAMM: Model Comparison",533
+"3","Data Reading",31
+"4","Questionnaire: Clean",43
+"5","Questionnaire: Tidy",50
+"6","Questionnaire: visualization numeric variables",62
+"7","Questionnaire: Filtered",70
+"8","Experimental Data: Clean and Tidy",77
+"9","OSF Data: Clean and Tidy",93
+"10","Behavioral Data: Join OSF and Experimental Data",98
+"11","Behavioral Data: Clean and Tidy",102
+"12","Behavioral Data: Removal Standards",108
+"13","Behavioral Data: Participant and Item Removal",116
+"14","Behavioral Data: Removing with IN Operator",147
+"15","ET Data: Tidying and Filtering with an Inner Join",153
+"16","{r,eval = FALSE,echo=FALSE,",162
+"17","ET Data: Localizing Visual Stimuli",171
+"18","{r",202
+"19","ET Data: Varibility and Frame Rates",269
+"20","All Data: Clean and Tidy",374
+"21","All Data: Preparing for Visualization",392
+"22","Emp Logits visualizations",404
+"23","All Data: Preparing for Models",470
+"24","GLMER: Leveling the Data",481
+"25","GLMER: Model Comparison",491
+"26","GAMM: Leveling the Data",524
+"27","GAMM: Model Comparison",535
