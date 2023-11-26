@@ -19,10 +19,12 @@ model_effects%>%ggplot(aes(x=Estimate,y=effect,color=as.factor(filler)))+
   geom_text(aes(x=-2,label = significance))+
   theme_minimal()+
   ylab("")+
-  theme(panel.grid.minor.y = element_blank(),
-        legend.position = "none")+
+  theme(
+    panel.grid.minor.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    legend.position = "none")+
   scale_color_manual(values=c("#007BC0", "#FDB515"))
-ggsave(file.path(viz_path,"model_1.pdf"), width = 6, height = 4)
+ggsave(file.path(viz_path,"GLMER_base_model.pdf"), width = 6, height = 4)
 
 #accent model viz
 model2_effects <- as.data.frame(coef(summary(m2)))
@@ -45,6 +47,7 @@ model2_effects%>%ggplot(aes(x=Estimate,y=effect,color=as.factor(filler)))+
   theme_minimal()+
   ylab("")+
   theme(panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
         legend.position = "none")+
   scale_color_manual(values=c("#007BC0", "#FDB515"))
-ggsave(file.path(viz_path,"model_1.pdf"), width = 6, height = 4)
+ggsave(file.path(viz_path,"GLMER_accent_model.pdf"), width = 6, height = 2)
