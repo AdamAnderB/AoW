@@ -14,7 +14,7 @@ fin = '/Users/adambramlett/scripts/the_art_of_wrangling/AoW/figures/AOW.wav'
 
 # read in audio file
 data = readWave(fin)
-
+citation()
 # extract signal
 snd = data@left
 snd

@@ -3,9 +3,10 @@ title: "R_workflow"
 output: 
   pdf_document:
     keep_tex: true
-
 ---
 ```{r libraries, message=FALSE, error=FALSE}
+library(sjPlot)
+library(forcats)
 library(tidyverse)
 library(tidyr)
 library(dplyr)
@@ -26,7 +27,6 @@ library(mgcv)
 #viz_path<-file.path(path,"AoW/figures")
 ```
 Here, three dialogue boxes will pop up. You simply need to select task data from the file you downloaded from the OSF link. The rest should run automatically
-
 
 ```{r Data Reading}
 #select task_data
@@ -400,32 +400,11 @@ all_data_tidy_viz <- all_data_tidy%>%
                           (1-(target_looks+(0.5/target_n)))))
 ```
 ```{r Emp Logits visualizations}
-viz<-ggplot(all_data_tidy_viz, 
-                  aes(x=time_elapsed_rounded, y=emp_logit, 
-                      linetype = verb_type, fill = talker,color= talker))
-point_viz<-viz+geom_line()
-line_viz<-viz+geom_smooth(method = "lm")
-smooth_viz<-viz+geom_smooth()
-
-point_viz+scale_x_continuous(limits = c(-400,800),breaks=seq(-400,800, 400))+
-  scale_linetype_discrete(labels=c('Non-Restricting','Restricting'))+
-  scale_color_manual(values=c("#007BC0", "#FDB515"),labels=c('Native','Non-Native'))+
-  ylab("Average empirical logit looks to object")+
-  xlab("Time (ms)")+
-  theme(legend.position = c(.2, .7))+
-  theme_minimal()+
-  labs(title = "Online Replication (upper) vs. in person data (lower):",
-              subtitle = "Lower visual is from Poretta et al's (2020)")+
-  labs(color='Talker',
-       linetype="Verb Type")+
-  theme(legend.position = c(.2,.7),
-        panel.grid.minor.x = element_blank(),
-        panel.grid.minor.y = element_blank(),
-        legend.key=element_blank())+
-  guides(color = guide_legend(override.aes = list(fill = NA)),
-         linetype = guide_legend(override.aes = list(fill = NA)))+facet_wrap(Participant.Private.ID~1)
-
-line_viz+scale_x_continuous(limits = c(-400,800),breaks=seq(-400,800, 400))+
+all_data_tidy_viz%>%
+  ggplot(aes(x=time_elapsed_rounded, y=emp_logit,linetype = verb_type, 
+             fill = talker,color= talker))+
+  geom_smooth(method = "lm")+
+  scale_x_continuous(limits = c(-400,800),breaks=seq(-400,800, 400))+
   scale_linetype_discrete(labels=c('Non-Restricting','Restricting'))+
   scale_color_manual(values=c("#007BC0", "#FDB515"),labels=c('Native','Non-Native'))+
   scale_fill_manual(values=c("#007BC0", "#FDB515"),labels=c('Native','Non-Native'))+
@@ -435,34 +414,35 @@ line_viz+scale_x_continuous(limits = c(-400,800),breaks=seq(-400,800, 400))+
   theme_minimal()+
   labs(title = "Online Replication (upper) vs. in person data (lower):",
               subtitle = "Lower visual is from Poretta et al's (2020)")+
-  labs(color='Talker',
-       linetype="Verb Type")+
+  labs(color='Talker',linetype="Verb Type")+
   theme(legend.position = c(.2,.7),
         panel.grid.minor.x = element_blank(),
         panel.grid.minor.y = element_blank(),
         legend.key=element_blank())+
-  guides(color = guide_legend(override.aes = list(fill = NA)),
-         linetype = guide_legend(override.aes = list(fill = NA)))+facet_wrap(Participant.Private.ID~1)
+        guides(color = guide_legend(override.aes = list(fill = NA)),
+        linetype = guide_legend(override.aes = list(fill = NA)))
 
-smooth_viz+scale_x_continuous(limits = c(-400,800),breaks=seq(-400,800, 400))+
+all_data_tidy_viz%>%
+  ggplot(aes(x=time_elapsed_rounded, y=emp_logit,linetype = verb_type, 
+             fill = talker,color= talker))+
+  geom_smooth()+
+  scale_x_continuous(limits = c(-400,800),breaks=seq(-400,800, 400))+
   scale_linetype_discrete(labels=c('Non-Restricting','Restricting'))+
-  scale_color_manual(values=c("#007BC0", "#FDB515"),labels=c('Native','Non-Native'),guide="none")+
+  scale_color_manual(values=c("#007BC0", "#FDB515"),labels=c('Native','Non-Native'))+
   scale_fill_manual(values=c("#007BC0", "#FDB515"),labels=c('Native','Non-Native'))+
   ylab("Average empirical logit looks to object")+
   xlab("Time (ms)")+
   theme(legend.position = c(.2, .7))+
   theme_minimal()+
-  labs(title = "",
-              subtitle = "Our Web-Based Replication")+
-  labs(color='Talker',
-       linetype="Verb Type")+
+  labs(title = "Online Replication (upper) vs. in person data (lower):",
+              subtitle = "Lower visual is from Poretta et al's (2020)")+
+  labs(color='Talker',linetype="Verb Type")+
   theme(legend.position = c(.2,.7),
         panel.grid.minor.x = element_blank(),
         panel.grid.minor.y = element_blank(),
         legend.key=element_blank())+
-  guides(color = guide_legend(override.aes = list(fill = NA)),
-         linetype = guide_legend(override.aes = list(fill = NA)),
-         fill = FALSE)+facet_wrap(Participant.Private.ID~1)
+        guides(color = guide_legend(override.aes = list(fill = NA)),
+        linetype = guide_legend(override.aes = list(fill = NA)))
 ggsave(file.path(viz_path,"smooth_plot_individual_differences.pdf"), width = 8, height = 20)
 ```
 ```{r All Data: Preparing for Models}
@@ -479,145 +459,117 @@ gamm_data<-mem_data%>%
 ```{r GLMER: Leveling the Data}
 mem_data$verb_type<-as.factor(mem_data$verb_type)
 mem_data$talker<-as.factor(mem_data$talker)
-contrasts(mem_data$verb_type)
-contrasts(mem_data$talker)
 contrasts(mem_data$verb_type)<-c(-.5,.5)
 contrasts(mem_data$talker)<-c(-.5,.5)
-colnames(contrasts(mem_data$talker))<- c('native')
-colnames(contrasts(mem_data$verb_type))<- c('nonrestricting')
+colnames(contrasts(mem_data$talker))<- c('Native:')
+rownames(contrasts(mem_data$talker))<-c("Native","NonNative")
+colnames(contrasts(mem_data$verb_type))<- c('Restricting:')
+rownames(contrasts(mem_data$verb_type))<-c("Non-Restricting","Restricting")
+mem_data$experience_chinese <- 
+  (mem_data$experience_chinese_accent - min(mem_data$experience_chinese_accent)) / 
+  (max(mem_data$experience_chinese_accent) - min(mem_data$experience_chinese_accent))
+mem_data$time_normalized <- 
+  (mem_data$time_elapsed - min(mem_data$time_elapsed)) / 
+  (max(mem_data$time_elapsed) - min(mem_data$time_elapsed))
 ```
-```{r GLMER: Model Comparison}
-#time correction
-# maximal model:(failed to converge)---
-m2<-glmer(target~talker*verb_type+
+```{r GLMER: Models}
+m1_1<-glmer(target~talker*verb_type*experience_chinese+
             (talker|subject_img_file)+
-            (verb_type|Participant.Private.ID),
+            (verb_type|Participant.Private.ID)+
+            (1|time_normalized),
           family="binomial",data=mem_data)
-summary(m2)
 
-# Near maximal mode:l (failed to converge)---
-m3<-glmer(target~talker*verb_type+
+#remove correlations
+m1_2<-glmer(target~talker*verb_type*experience_chinese+
+            (talker||subject_img_file)+
+            (verb_type||Participant.Private.ID)+
+            (1|time_normalized),
+          family="binomial",data=mem_data)
+#remove timing random effect
+m1_3<-glmer(target~talker*verb_type*experience_chinese+
             (talker||subject_img_file)+
             (verb_type||Participant.Private.ID),
           family="binomial",data=mem_data)
-summary(m3)
 
-#by item random effects removed first for first iteration
-# parsimonious model (removing item random effects but keeps random slopes for verb type---singularity 
-m4<-glmer(target~talker*verb_type+
-            (1|subject_img_file)+
-            (verb_type||Participant.Private.ID),
-          family="binomial",data=mem_data)
-summary(m4)
+anova(m1_3,m1_2)
+#m2 is a more parsimonious and preferable model compared to m1_1 or m1_3 because of lower AIC and BIC
+#as well as the anova coming up significant in comparison to simpler model m1_3.
 
-#by item and subject random effects removed for second iteration
-# parsimonious model 2
-m5<-glmer(target~talker*verb_type+
+#accent models
+accent_mem_data<-mem_data%>%filter(talker == "NonNativeMale")
+m2<-glmer(target~verb_type*experience_chinese+
             (1|subject_img_file)+
-            (1|Participant.Private.ID),
-          family="binomial",data=mem_data)
-summary(m5)
-anova(m4,m5)
+            (verb_type|Participant.Private.ID)+
+            (1|time_normalized),
+          family="binomial",data=accent_mem_data)
+```
+```{r GLMER: Visualizations}
+#verb type model viz
+model_effects <- as.data.frame(coef(summary(m1_2)))
+model_effects$effect<-as.factor(rownames(model_effects))
+model_effects$effect <- fct_rev(fct_inorder(model_effects$effect))
+model_effects <- model_effects %>%
+  mutate(significance = case_when(
+    `Pr(>|z|)` <= 0.001 ~ "***",
+    `Pr(>|z|)` <= 0.01 ~ "**",
+    `Pr(>|z|)` <= 0.05 ~ "*",
+    `Pr(>|z|)` > 0.05 ~ "",))%>%
+  mutate(filler = case_when(
+    Estimate <= 0.0 ~ -1,
+    Estimate >= 0.0 ~ 1))
+
+model_effects%>%ggplot(aes(x=Estimate,y=effect,color=as.factor(filler)))+
+  geom_pointrange(aes(xmin = Estimate-1.96 * `Std. Error`, xmax = Estimate+1.96 * `Std. Error`))+
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black")+
+  geom_text(aes(x=-2,label = significance))+
+  theme_minimal()+
+  ylab("")+
+  theme(panel.grid.minor.y = element_blank(),
+        legend.position = "none")+
+  scale_color_manual(values=c("#007BC0", "#FDB515"))
+ggsave(file.path(viz_path,"model_1.pdf"), width = 6, height = 4)
+
+#accent model viz
+model2_effects <- as.data.frame(coef(summary(m2)))
+model2_effects$effect<-as.factor(rownames(model2_effects))
+model2_effects$effect <- fct_rev(fct_inorder(model2_effects$effect))
+model2_effects <- model2_effects %>%
+  mutate(significance = case_when(
+    `Pr(>|z|)` <= 0.001 ~ "***",
+    `Pr(>|z|)` <= 0.01 ~ "**",
+    `Pr(>|z|)` <= 0.05 ~ "*",
+    `Pr(>|z|)` > 0.05 ~ "",))%>%
+  mutate(filler = case_when(
+    Estimate <= 0.0 ~ -1,
+    Estimate >= 0.0 ~ 1))
+
+model2_effects%>%ggplot(aes(x=Estimate,y=effect,color=as.factor(filler)))+
+  geom_pointrange(aes(xmin = Estimate-1.96 * `Std. Error`, xmax = Estimate+1.96 * `Std. Error`))+
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black")+
+  geom_text(aes(x=-2,label = significance))+
+  theme_minimal()+
+  ylab("")+
+  theme(panel.grid.minor.y = element_blank(),
+        legend.position = "none")+
+  scale_color_manual(values=c("#007BC0", "#FDB515"))
+ggsave(file.path(viz_path,"model_1.pdf"), width = 6, height = 4)
 ```
 ```{r GAMM: Leveling the Data}
-# turn categorical variables into factors with numeric values 
-gamm_data$subject_img_coded <- as.numeric(factor(gamm_data$subject_img_file)) -1
-gamm_data$talker_coded <- as.numeric( factor(gamm_data$talker) ) -1 
-gamm_data$verb_type_coded <- as.numeric( factor(gamm_data$verb_type) ) -1
-gamm_data$Condition <- factor(gamm_data$Condition) 
-gamm_data$event <- as.factor(paste(gamm_data$Trial.Number,gamm_data$talker_coded,sep="."))
-gamm_data$Participant.Private.ID <- as.numeric( factor(gamm_data$Participant.Private.ID) ) -1
-gamm_data$target_obj <- factor(gamm_data$target_obj) 
-
-```
-```{r GAMM: Model Comparison}
-#base model
-mod1 <- bam(target ~ Condition
-                  + s(time_elapsed, by=Condition) +
-                  + s(Trial.Number) + s(log_SUBTLWF_Obj) +
-                  + s(time_elapsed, Participant.Private.ID, bs="fs", m=1)
-                  + s(time_elapsed, target_obj, bs="fs", m=1)
-                  + s(event, bs = "re")
-            ,data=gamm_data,family="binomial",discrete=TRUE)
-summary(mod1)
-
-
-#without interaction
-mod3 <- bam(target ~ experience
-                  + s(time_elapsed, by=Condition) +
-                  + s(Trial.Number) + s(log_SUBTLWF_Obj) +
-                  + s(time_elapsed, Participant.Private.ID, bs="fs", m=1)
-                  + s(time_elapsed, target_obj, bs="fs", m=1)
-                  + s(event, bs = "re")
-            ,data=gamm_data_accented,family="binomial",discrete=TRUE)
-summary(mod3)
-
-#with interaction
-mod4 <- bam(target ~ experience
-                  + te(time_elapsed, experience, by=verb_type_coded)
-                  + s(time_elapsed, by=Condition) +
-                  + s(Trial.Number) + s(log_SUBTLWF_Obj) +
-                  + s(time_elapsed, Participant.Private.ID, bs="fs", m=1)
-                  + s(time_elapsed, target_obj, bs="fs", m=1)
-                  + s(event, bs = "re")
-            ,data=gamm_data_accented,family="binomial",discrete=TRUE)
-summary(mod4)
-```
-
-```{r}
-
-eyetracking_dat<-gamm_data
-eyetracking_dat <- transform(eyetracking_dat, 
-                             Condition = ifelse(talker=="NativeMale" & verb_type == "NonRestricting",
-                                                                 "Native.NonRestricting",
-                                                ifelse(talker=="NativeMale" & verb_type == "Restricting",
-                                                                       "Native.Restricting",
-                                                       ifelse(talker=="NonNativeMale" & verb_type ==
-                                                                "NonRestricting","NonNative.NonRestricting", "NonNative.Restricting"))))
-eyetracking_dat$Condition <- as.factor(eyetracking_dat$Condition)
-
-
-
-
-# UNUSED: turn categorical variables into factors with numeric values 
-eyetracking_dat$subject_img_coded <- as.numeric( factor(eyetracking_dat$subject_img_file) ) -1
-# levels(factor(eyetracking_dat$subject_img_file)) starts from 0
-eyetracking_dat$talker_coded <- as.numeric( factor(eyetracking_dat$talker) ) -1 
+gamm_data$Condition <- as.factor(gamm_data$Condition)
+gamm_data$subject_img_coded <- as.numeric(factor(gamm_data$subject_img_file) ) -1
+gamm_data$talker_coded <- as.numeric(factor(gamm_data$talker) ) -1 
 # NativeMale = 0, NonNativeMale = 1
-eyetracking_dat$verb_type_coded <- as.numeric( factor(eyetracking_dat$verb_type) ) -1
+gamm_data$verb_type_coded <- as.numeric(factor(gamm_data$verb_type) ) -1
 # Nonrestricting = 0, Restricting = 1
-eyetracking_dat$Participant.Private.ID <- as.factor(eyetracking_dat$Participant.Private.ID)
-
-# Event is a factor in Poretta et al.'s model 
-eyetracking_dat$Event <-as.factor(paste(eyetracking_dat$Participant.Private.ID,eyetracking_dat$Trial.Number,sep="."))
-eyetracking_dat$Event <- as.factor(eyetracking_dat$Event)
-eyetracking_dat$experience_chinese_accent
-eyetracking_dat<-eyetracking_dat%>%
+gamm_data$Participant.Private.ID <- as.factor(gamm_data$Participant.Private.ID)
+gamm_data$Event <-as.factor(paste(gamm_data$Participant.Private.ID,gamm_data$Trial.Number,sep="."))
+gamm_data$Event <- as.factor(gamm_data$Event)
+gamm_data<-gamm_data%>%
   select(Event,Participant.Private.ID,Trial.Number,verb_type_coded,talker_coded,subject_img_coded,Condition,target,time_elapsed,log_SUBTLWF_Obj,experience_chinese_accent,Event)
-# orthogonal contrast coding: does not change significnat of model coefficients
-# contrasts(eyetracking_dat$Condition) <- matrix(c(-0.25, 0.75, -0.25, -0.25,
-#                                                  -0.25, -0.25, 0.75, -0.25,
-#                                                  -0.25, -0.25, -0.25, 0.75), ncol=3)
-#contrasts(eyetracking_dat$Condition)
 ```
 
 # GAM 
-```{r}
-############## Poretta model #############################
-# m1_trim <- bam(IA_1_ELogit ~ Condition + s(Time, by = Condition) + # main effect Condition (NR, NNR, NNR, NNNR); smooth for time by each factor of condition
-#             s(Trial_c) + s(log_SUBTLWF_Obj) + # smooth for trial order; smooth for log frequency of target object 
-#             s(Time, Subject, bs = "fs", m = 1) + # smooth random slope for each participant by Time  
-#             s(Time, target_obj, bs = "fs", m = 1) + # smooth random slope for Target object and Time 
-#             s(Event, bs = "re"),   # smooth random intercept for Event 
-#           data = DatCor_400_0_800, weights = 1/IA_1_wts,  # weight
-#           AR.start = StartEvent, method = "ML", rho = 0.740431,  # method of Maximum Likelihood to estimate lambda the smoothing parameter (the penalty), Baysian approach rather than predictive mode 
-#          subset = abs(scale(resid(m1))) < 2.5)
-# no k set -> no expectation for the maximum wiggliness of the functions 
-########################################################
-any(is.na(eyetracking_dat))
-View(eyetracking_dat)
-
-library(bam)
+```{r GAMM: Models}
 mod1 <- bam(target ~ talker_coded + 
               s(time_elapsed, by=talker_coded) + 
               verb_type_coded + 
@@ -628,42 +580,45 @@ mod1 <- bam(target ~ talker_coded +
               s(time_elapsed, Participant.Private.ID, bs="fs", m=1)+
               s(time_elapsed, subject_img_coded, bs="fs", m=1)+
               s(Event, bs="re"), 
-                  family="binomial", data=eyetracking_dat, discrete=TRUE, method="fREML")
+                  family="binomial", data=gamm_data, discrete=TRUE, method="fREML")
 summary(mod1)
-library(sjPlot)
-plot_model(mod1, type = "pred", terms = c("talker", "time_elapsed_rounded"))
 
-plot_model(mod1, type = "std", title = "Model Plot")
-plot_model(mod1, type = "int", terms = c("talker", "verb_type"))
-plot_model(mod1, type = "pr")
-
-mod1
-
-
-#without interaction
-exp_gam_mod1 <- bam(target ~ experience_chinese_accent + 
-              s(time_elapsed, by=talker_coded) + 
+#accent models
+gamm_data<-gamm_data%>%filter(talker_coded == 1)
+mod2 <- bam(target ~ experience_chinese_accent + 
               verb_type_coded + 
               s(time_elapsed, by=verb_type_coded) +
-              talker_coded:verb_type_coded + 
               s(time_elapsed, by=Condition)+
               s(log_SUBTLWF_Obj)+
               s(time_elapsed, Participant.Private.ID, bs="fs", m=1)+
               s(time_elapsed, subject_img_coded, bs="fs", m=1)+
               s(Event, bs="re"), 
-                  family="binomial", data=eyetracking_dat, discrete=TRUE, method="fREML")
-summary(exp_gam_mod1)
+                  family="binomial", data=gamm_data, discrete=TRUE, method="fREML")
+summary(mod2)
+```
+```{r GAMM: Visualization}
+gamm_effects <- as.data.frame(summary(mod1)$p.table)
+#smooth_significance <- as.data.frame(summary(mod1)$s.table)
 
-#with interaction
-exp_gam_mod2 <- bam(target ~ experience
-                  + te(time_elapsed, experience, by=verb_type_coded)
-                  + s(time_elapsed, by=Condition) +
-                  + s(Trial.Number) + s(log_SUBTLWF_Obj) +
-                  + s(time_elapsed, Participant.Private.ID, bs="fs", m=1)
-                  + s(time_elapsed, target_obj, bs="fs", m=1)
-                  + s(event, bs = "re")
-            ,data=gamm_data_accented,family="binomial",discrete=TRUE)
-summary(mod4)
+gamm_effects$effect<-as.factor(rownames(gamm_effects))
+gamm_effects$effect <- fct_rev(fct_inorder(gamm_effects$effect))
+gamm_effects <- gamm_effects %>%
+  mutate(significance = case_when(
+    `Pr(>|z|)` <= 0.001 ~ "***",
+    `Pr(>|z|)` <= 0.01 ~ "**",
+    `Pr(>|z|)` <= 0.05 ~ "*",
+    `Pr(>|z|)` > 0.05 ~ "",))%>%
+  mutate(filler = case_when(
+    Estimate <= 0.0 ~ -1,
+    Estimate >= 0.0 ~ 1))
 
+gamm_effects%>%ggplot(aes(x=Estimate,y=effect,color=as.factor(filler)))+
+  geom_pointrange(aes(xmin = Estimate-1.96 * `Std. Error`, xmax = Estimate+1.96 * `Std. Error`))+
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black")+
+  geom_text(aes(x=-2,label = significance))+
+  theme_minimal()+
+  theme(panel.grid.minor.y = element_blank(),
+        legend.position = "none")
+ggsave(file.path(viz_path,"model_1.pdf"), width = 6, height = 4)
 ```
 sj
