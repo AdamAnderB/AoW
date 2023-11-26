@@ -26,6 +26,8 @@ library(mgcv)
 #viz_path<-file.path(path,"AoW/figures")
 ```
 Here, three dialogue boxes will pop up. You simply need to select task data from the file you downloaded from the OSF link. The rest should run automatically
+
+
 ```{r Data Reading}
 #select task_data
 task_data_select <- file.choose()
@@ -37,8 +39,6 @@ eyetracking_data<-read.csv(et_data_select,header=TRUE, row.names=1)
 OSF_data_select<-sub("task_data", "OSF_data", task_data_select)
 OSF_data<-read.csv(OSF_data_select,header=TRUE, row.names=1)
 ```
-
-
 ```{r Questionnaire: Clean}
 cleaned_quest_data<-task_data%>%
   filter(display=="questionairre",na.omit=TRUE)%>%
