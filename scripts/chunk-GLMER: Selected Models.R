@@ -4,3 +4,4 @@ selected_model<-glmer(target~talker*verb_type+
             (verb_type||Participant.Private.ID)+
             (1|time_normalized),
           family="binomial",data=mem_data)
+summary(m1_2)
