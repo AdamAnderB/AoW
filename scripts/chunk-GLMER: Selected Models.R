@@ -1,4 +1,4 @@
-## ----GLMER: Selected Model----
+## ----GLMER: Selected Models----
 selected_model<-glmer(target~talker*verb_type+
             (talker||subject_img_file)+
             (verb_type||Participant.Private.ID)+

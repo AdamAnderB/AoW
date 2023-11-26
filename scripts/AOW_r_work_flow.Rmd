@@ -465,9 +465,10 @@ colnames(contrasts(mem_data$talker))<- c('Native:')
 rownames(contrasts(mem_data$talker))<-c("Native","NonNative")
 colnames(contrasts(mem_data$verb_type))<- c('Restricting:')
 rownames(contrasts(mem_data$verb_type))<-c("Non-Restricting","Restricting")
+mem_data$experience_chinese<-mem_data$experience_chinese
 mem_data$experience_chinese <- 
-  (mem_data$experience_chinese_accent - min(mem_data$experience_chinese_accent)) / 
-  (max(mem_data$experience_chinese_accent) - min(mem_data$experience_chinese_accent))
+  (mem_data$experience_chinese - min(mem_data$experience_chinese)) / 
+  (max(mem_data$experience_chinese) - min(mem_data$experience_chinese))
 mem_data$time_normalized <- 
   (mem_data$time_elapsed - min(mem_data$time_elapsed)) / 
   (max(mem_data$time_elapsed) - min(mem_data$time_elapsed))
@@ -504,7 +505,7 @@ m2<-glmer(target~verb_type*experience_chinese+
           family="binomial",data=accent_mem_data)
 summary(m2)
 ```
-```{r GLMER: Selected Model}
+```{r GLMER: Selected Models}
 selected_model<-glmer(target~talker*verb_type+
             (talker||subject_img_file)+
             (verb_type||Participant.Private.ID)+
