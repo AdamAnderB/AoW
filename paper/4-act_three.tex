@@ -35,13 +35,13 @@ effects coding L: 413-417. Random intercepts for \inlineR{subject\_img\_file},\i
 
 \lstinputlisting[style=mystyle, firstnumber=last]{scripts/chunk-GLMER: Selected Models.R}
 
-Results from the GLMER found significant effect in the \inlineR{verbtype}-Restricting ($\beta$ = 0.28076, SE = 0.069, z = 2.35, p < .05), tone ($\beta$ = .99, SE = .43, z = 4.192, p < .001), indicating more looks to targets for restricting items over non-restricted items. Additionally, an interaction between speaker and verb type ($\beta$ = -0.13737, SE = 0.05346, z = -2.570, p<.05). 
+Results from the GLMER found significant effect in the \inlineR{verbtype}-Restricting  ($\beta$ = 0.28076, SE = 0.06697, z = 4.192, p < .001), indicating more looks to targets for restricting items over non-restricted items, see figure \ref{fig:GLMER_base_model}. Additionally, an interaction between speaker and verb type ($\beta$ = -0.13737, SE = 0.05346, z = -2.570, p<.05). 
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=\textwidth]{figures/GLMER_base_model.pdf}
     \caption{place holder for real model outputs later}
-    \label{fig:model_outputs}
+    \label{fig:GLMER_base_model}
 \end{figure}
  
  Similar to the above model, an accent specific model was ran only on the data of accented speech. more here.
@@ -50,7 +50,7 @@ Results from the GLMER found significant effect in the \inlineR{verbtype}-Restri
     \centering
     \includegraphics[width=\textwidth]{figures/GLMER_accent_model.pdf}
     \caption{place holder for real model outputs later}
-    \label{fig:model_outputs}
+    \label{fig:GLMER_accent_model}
 \end{figure}
 
 \subsection{Growth Curve Analysis}
@@ -60,15 +60,15 @@ Another possible model to use is Growth curve analysis. Prolly not cause space b
 
 \subsection{Generalized Additive Modeling}
 
-GAMMS are becoming increasingly popular as they allow the research to model complex time course information without the need for assumptions of linearity. Like the GLMER, the data must be coded and prepared for the GAMM analysis (L:438-445). Here we turn factors to varaibles and level them at the same time (e.g., L: 442).codings are provided in line for those that are interesting
+GAMMS are becoming increasingly popular as they allow the research to model complex time course information without the need for assumptions of linearity. Like the GLMER, the data must be coded and prepared for the GAMM analysis (L:438-445). Here we turn factors to variables and level them at the same time (e.g., L: 442).codings are provided in line for those that are interesting
 
 \lstinputlisting[style=mystyle, firstnumber=last]{scripts/chunk-GAMM: Leveling the Data.R}
 
-
+Like the GLMER, Results from the GLMER found significant effect in the \inlineR{verbtype}-Restricting ($\beta$ = 0.3981, SE = 0.1293, z = 3.078, p < .005), indicating more looks to targets for restricting items over non-restricted items, see figure \ref{fig:model_gamm_effects}. Additionally, an interaction between speaker and verb type ($\beta$ = -0.13737, SE = 0.05346, z = -2.570, p<.05). 
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=\textwidth]{figures/model_gamm_effects.pdf}
     \caption{place holder for real model outputs later}
-    \label{fig:model_outputs}
+    \label{fig:model_gamm_effects}
 \end{figure}
