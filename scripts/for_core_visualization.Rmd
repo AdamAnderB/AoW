@@ -40,7 +40,7 @@ sound<-sound%>%mutate(faceter = if_else(x< -100,"pre window of interest",if_else
 
 
 sound_plot<-sound%>%ggplot(aes(x=x,y=snd))+
-  annotate("rect", fill = "#999999", alpha = .5, 
+  annotate("rect", fill = "#999999", alpha = .2, 
         xmin = -100, xmax = 500,
         ymin = -Inf, ymax = Inf)+
   geom_vline(aes(xintercept = 0),color="#007BC0")+
@@ -131,7 +131,6 @@ sample_plot<-sample%>%ggplot()+
 fixations<-ggbackground(sample_plot, img)
 fixations
 plot_grid(sound_plot, fixations, nrow = 2, align = "v")
-getwd()
 list.files("/Users/adambramlett/scripts/the_art_of_wrangling/AoW/figures/")
 ggsave(file.path(viz_path,"/Users/adambramlett/scripts/the_art_of_wrangling/AoW/figures/Core_four_R.jpeg"), width = 7, height = 8)
 ```
