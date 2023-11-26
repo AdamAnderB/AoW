@@ -1,0 +1,141 @@
+---
+title: "audio_vizualization and Eye-Fixation visualization"
+author: "Adam A. Bramlett"
+date: "2023-10-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tuneR) 
+library(cowplot)
+list.files(aow.wav)
+# define path to audio file
+fin = '/Users/adambramlett/scripts/the_art_of_wrangling/AoW/figures/AOW.wav'
+
+# read in audio file
+data = readWave(fin)
+
+# extract signal
+snd = data@left
+snd
+# determine duration
+dur = length(snd)/data@samp.rate
+dur # seconds
+## [1] 3.588
+
+# determine sample rate
+fs = data@samp.rate
+fs # Hz
+## [1] 2000
+
+snd = snd - mean(snd)
+snd
+# plot waveform
+plot(snd, type = 'l', xlab = 'Samples', ylab = 'Amplitude')
+sound<-data.frame(snd=snd)
+sound$x=c(1:nrow(sound))
+sound$x=(sound$x/100)-300
+sound<-sound%>%mutate(faceter = if_else(x< -100,"pre window of interest",if_else(x> -100 & x<500,"window of interest","post window of interest")))
+
+
+
+sound_plot<-sound%>%ggplot(aes(x=x,y=snd))+
+  annotate("rect", fill = "#999999", alpha = .5, 
+        xmin = -100, xmax = 500,
+        ymin = -Inf, ymax = Inf)+
+  geom_vline(aes(xintercept = 0),color="#007BC0")+
+  geom_line(color="#719F94")+
+  scale_y_continuous(expand=c(.1,-.15))+
+  scale_x_continuous(breaks=c(-400,-100,0,500,900),limits = c(-500,900),
+                     labels = c("0\n\n\n-400","300\n\n\n-100","400\n\n\n0","800\n\n\n400","1200\n\n\n800"))+
+  theme_minimal()+
+  xlab("Trial Time (ms)\n\nAdjusted Time (ms)")+
+  theme(axis.line=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        axis.title=element_blank(),
+        legend.position="none",
+        panel.background=element_blank(),
+        panel.border=element_blank(),
+        panel.grid.major.y=element_blank(),
+        panel.grid.major.x = element_line(size = 1,colour="#007BC0"),
+        panel.grid.minor=element_blank(),
+        plot.background=element_blank(),
+        axis.text.x = element_text(colour="#007BC0"),
+        axis.title.x = element_text(vjust = 15,hjust =.55, color="#007BC0", size=14, face="bold"),
+        plot.margin = unit(c(0, 0, -13, 0), "mm")
+    )+
+  geom_text(x=250,y=-3000,label = "Audio Stimuli", size = 5,color = "#719F94")+
+  geom_text(x=250,y=7000,label = "Window of Interest", size = 5,color = "#999999")
+sound_plot
+```
+
+```{r}
+removal_list<-as.character(c(1:25))
+removal_list
+View(sound)
+sound$name ="asdf"
+
+sound<-sound%>%seperate(name,c("q1","trash") ,"s" )
+sound
+
+df$new_question<-str_replace(df$Question,"/[^0-9]+/","" )
+```
+
+```{r}
+list.files('/Users/adambramlett/scripts/the_art_of_wrangling/cleaned_data/')
+all_data<-read.csv('/Users/adambramlett/scripts/the_art_of_wrangling/cleaned_data/all_data.csv')
+
+library("jpeg") 
+library("ggplot2") 
+library("patchwork")
+library("grid")
+library("magick")
+library("ggimage") 
+```
+```{r}
+
+img = "/Users/adambramlett/scripts/the_art_of_wrangling/AoW/figures/core_four_background.jpeg"
+
+# adding image to graph  
+all_data<-all_data%>%
+  filter(x_pred_normalised< 1.5 & x_pred_normalised> -.5&
+                  y_pred_normalised< 1.5 & y_pred_normalised> -.5)%>%
+  filter(response_button_image == image_1)%>%
+  filter(time_elapsed>= -400 & time_elapsed<= 800)
+sample<-sample_n(all_data,500)
+
+sample_plot<-sample%>%ggplot()+
+  geom_point(aes(x=(x_pred_normalised-.5)*2.5,y=(y_pred_normalised-.75)*2),color="#941120",alpha=.5)+
+   geom_segment(aes(x=(x_pred_normalised-.5)*2.5,y=(y_pred_normalised-.75)*2, xend = (time_elapsed/150)-1.5, yend = 2),alpha=.1,color="#941120")+
+  geom_point(aes(x=(time_elapsed/150)-1.5,y=2),color="#007BC0",alpha=.1)+
+  scale_x_continuous(breaks = seq(-2.85, 2.15,1.25),labels = c(0,.25,.5,.75,1))+
+  scale_y_continuous(limits = c(-3, 2),breaks = seq(-2.15, 1.35,.875),labels = c(0,.25,.5,.75,1))+
+  theme_minimal()+
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        legend.position="none",
+        plot.margin = unit(c(-.4, 0, .4, .2), "cm"))+
+  xlab("X Coordinates")+
+  ylab("Y Coordinates")+
+  theme(
+    axis.title.x = element_text(vjust = 15,hjust =.5, color="#941120", size=10),
+    axis.title.y = element_text(vjust = -15,hjust =.5, color="#941120", size=10),
+    axis.text.x = element_text(color="#941120", size=10, face="bold"),
+    axis.text.y = element_text(color="#941120", size=10, face="bold")
+        )+
+  geom_text(x=-0.25,y=1.75,label = "Eye-Fixations", size = 5,color = "white",face="bold")+
+  geom_text(x=-0.25,y=1.75,label = "Eye-Fixations", size = 5,color = "#941120",face="bold")+
+  geom_text(x=1.4,y=-2.7,label = "Visual Stimuli", size = 5,color = "black",face="bold")
+
+fixations<-ggbackground(sample_plot, img)
+fixations
+plot_grid(sound_plot, fixations, nrow = 2, align = "v")
+getwd()
+list.files("/Users/adambramlett/scripts/the_art_of_wrangling/AoW/figures/")
+ggsave(file.path(viz_path,"/Users/adambramlett/scripts/the_art_of_wrangling/AoW/figures/Core_four_R.jpeg"), width = 7, height = 8)
+```
+
+
+
+
