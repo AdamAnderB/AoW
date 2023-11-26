@@ -7,9 +7,10 @@ colnames(contrasts(mem_data$talker))<- c('Native:')
 rownames(contrasts(mem_data$talker))<-c("Native","NonNative")
 colnames(contrasts(mem_data$verb_type))<- c('Restricting:')
 rownames(contrasts(mem_data$verb_type))<-c("Non-Restricting","Restricting")
+mem_data$experience_chinese<-mem_data$experience_chinese
 mem_data$experience_chinese <- 
-  (mem_data$experience_chinese_accent - min(mem_data$experience_chinese_accent)) / 
-  (max(mem_data$experience_chinese_accent) - min(mem_data$experience_chinese_accent))
+  (mem_data$experience_chinese - min(mem_data$experience_chinese)) / 
+  (max(mem_data$experience_chinese) - min(mem_data$experience_chinese))
 mem_data$time_normalized <- 
   (mem_data$time_elapsed - min(mem_data$time_elapsed)) / 
   (max(mem_data$time_elapsed) - min(mem_data$time_elapsed))
