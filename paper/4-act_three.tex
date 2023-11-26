@@ -1,11 +1,20 @@
 \section{Act 3: Visualizing and analyzing ET data with GMEMs and GAMMs}
 
-We observed nearly identical time course of predictive processing, see figure \ref{fig:comparitive}, in which restricted sentences resulted in earlier looks to the target object than nonrestrictive sentences. Both GLMER and GAMMS require specific coding of the data for the model to predict in the expected manner. However, each of these models start with coding the data correctly and building maximal models and working down to simpler models for model comparison. \parencite{max model}. Visualizations for model outputs will be provided.
+In all previous steps, wrangling can be thought of as a condensing process, where the primary object is to remove, clean, and transform the data into a structure that is usable. However, once the data is put into tidy form, then the data must be transformed for specific  visualizations and analyses. In this section, we think of \inlineR{all\_data\_cleaned} and \inlineR{all\_data\_tidy} as launching points to gain understanding of our data. 
 
-\subsection{Visualizations}
-While 
+For data visualization, it is often necessary to put the data into a form that is quite different than the cleaned data, either through aggregation,by filtering, splitting into multiple data frames. In L: 395, we begin such an example of aggregation for visualization. Here, our goal is to create a visualization to compare looks to targets in different conditions (e.g., looks to targets for \inlineR{verb\_type} restricting vs. \inlineR{verb\_type} non-restricting sentences). In L: 397 we group by participant to prepare for aggregating mean looks to targets, competitors and distractors in L: 397-400. L:400 is created as a raw count for the calculation of empirical logits in L:402-403.
 
 \lstinputlisting[style=mystyle, firstnumber=last]{scripts/chunk-All Data: Preparing for Visualization.R}
+
+For \inlineR{ggplot()} visualizations, see \inlineR{AOW\_r\_work\_flow.rmd}. We observed nearly identical time course of predictive processing, see figure \ref{fig:comparitive}, in which restricted sentences resulted in earlier looks to the target object than nonrestrictive sentences. However, 
+
+
+
+Both GLMER and GAMMS require specific coding of the data for the model to predict in the expected manner. However, each of these models start with coding the data correctly and building maximal models and working down to simpler models for model comparison. \parencite{max model}. Visualizations for model outputs will be provided.
+
+\subsection{Visualizations}
+
+
 
 
 
