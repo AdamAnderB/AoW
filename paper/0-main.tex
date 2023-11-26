@@ -68,8 +68,11 @@
 \definecolor{cmu_blue}{RGB}{4,54,115}
 \definecolor{green}{RGB}{0,150,71}
 \definecolor{cmu_grey}{RGB}{109,110,113}
+%\definecolor{gorilla_red}{RGB}{231,18,52}
+\definecolor{gorilla_red}{RGB}{254,243,245}
 
-\definecolor{yellow}{RGB}{255,255,204}
+\definecolor{yellow}{RGB}{255,255,0}
+
 
 \usepackage{ulem}
 \usepackage{booktabs}
@@ -82,6 +85,9 @@
 }
 
 \newcommand{\inlineR}[1]{{\footnotesize\texttt{\colorbox{codegray}{#1}}}}
+
+\newcommand{\gorilla}[1]{{\small\texttt{\colorbox{gorilla_red}{\textcolor{black}{\fontfamily{ptm}\selectfont \textit{#1}}}}}}
+
 
 \usepackage{datatool}
 \usepackage{ifthen}
