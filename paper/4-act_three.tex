@@ -15,9 +15,6 @@ Both GLMER and GAMMS require specific coding of the data for the model to predic
 \subsection{Visualizations}
 
 
-
-
-
 \begin{figure}[h]
     \centering
     \includegraphics[width=\textwidth]{figures/smooth_comparison_plot.pdf}
@@ -32,9 +29,6 @@ Good visuals and clean analysis make or break a study. However, these visuals we
 
 
 
-
-
-
 \lstinputlisting[style=mystyle, firstnumber=last]{scripts/chunk-All Data: Preparing for Models.R}
 
 
@@ -42,6 +36,8 @@ GAMMS and GLMERS both have there own advantages and disadvantages \parencite{Ito
 
 \subsection{Mixed Effects Modeling}
 Final model and visualization preparation, 
+
+\lstinputlisting[style=mystyle, firstnumber=last]{scripts/chunk-GLMER: Leveling the Data.R}
 
 \lstinputlisting[style=mystyle, firstnumber=last]{scripts/chunk-GLMER: Leveling the Data.R}
 
@@ -56,6 +52,7 @@ Another possible model to use is Growth curve analysis. Prolly not cause space b
 \subsection{Generalized Additive Modeling}
 
 \lstinputlisting[style=mystyle, firstnumber=last]{scripts/chunk-GAMM: Leveling the Data.R}
+
 
 GAMMS are becoming increasingly popular as they allow the research to model complex time course information without the need for assumptions of linearity.
 
