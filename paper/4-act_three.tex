@@ -15,29 +15,28 @@ For \inlineR{ggplot()} visualizations, see \inlineR{AOW\_r\_work\_flow.rmd}. We 
     \label{fig:smooth}
 \end{figure}
 
-GAMMS and GLMERS both have there own advantages and disadvantages \parencite{Ito_Knoeferle_2022}. GLMERS are simply generalized linear Mixed effect Models. The models are simple logistic regressions that estimage both fixed and random effects. GLMERS are simple to use, flexible and provide highly interpretable results. Further, they offer powerful insight into data that can be assumed to be linear. In contrast, GAMMs (generalized linear mixed effects models) are able to model both linear and non-linear data. more here.
-
-
-Both GLMER and GAMMS require specific coding of the data for the model to predict in the expected manner. However, each of these models start with coding the data correctly and building maximal models and working down to simpler models for model comparison. \parencite{max model}. Here, we are creating two data frames from \inlineR{all\_data\_tidy}: \inlineR{mem\_data} in L: 405 and then \inlineR{gamm\_data} in L: 411. In general in data wrangling, keeping as much data as possible is essential to creating a usable data frame. However, in model wrangling, it is often best to remove variables that you will not be using. This is because some models can have issues being interpreted through unprocessed data types. For \inlineR{mem\_data},we start by selecting all necessary columns for the model: \inlineR{Participant.Private.ID}, \inlineR{verb\_type},\inlineR{talker},item \inlineR{subject\_img\_file},\inlineR{target},log frequency of object item\inlineR{log\_SUBTLWF\_Obj}, and  \inlineR{ time\_elapsed\_rounded}. \inlineR{Participant.Private.ID} is turned into a factor in L:48. Finally, \inlineR{tidy\_quest\_data} is joined to \inlineR{mem\_data}. In addition to the \inlineR{mem\_data}, we create \inlineR{gamm\_data} by simply cloning \inlineR{mem\_data} in L:411 and by adding a single variable needed in the GAMM models
+ Here, we are creating two data frames from \inlineR{all\_data\_tidy}: \inlineR{mem\_data} in L: 405 and then \inlineR{gamm\_data} in L: 411. In general in data wrangling, keeping as much data as possible is essential to creating a usable data frame. However, in model wrangling, it is often best to remove variables that you will not be using. This is because some models can have issues being interpreted through unprocessed data types. For \inlineR{mem\_data},we start by selecting all necessary columns for the model: \inlineR{Participant.Private.ID}, \inlineR{verb\_type},\inlineR{talker},item \inlineR{subject\_img\_file},\inlineR{target},log frequency of object item\inlineR{log\_SUBTLWF\_Obj}, and  \inlineR{ time\_elapsed\_rounded}. \inlineR{Participant.Private.ID} is turned into a factor in L:48. Finally, \inlineR{tidy\_quest\_data} is joined to \inlineR{mem\_data}. In addition to the \inlineR{mem\_data}, we create \inlineR{gamm\_data} by simply cloning \inlineR{mem\_data} in L:411 and by adding a single variable needed in the GAMM models
 
 \lstinputlisting[style=mystyle, firstnumber=last]{scripts/chunk-All Data: Preparing for Models.R}
 
-GLMER Models were built using the lme4 package \parencite{Bates2014-eq}. The models included three fixed effects: \inlineR{verb_type} (Restrictive or Non-Restrictive), \inlineR{talker}(Native, Non-Native) and their interaction. \inlineR{verb_type}(Restrictive) and \inlineR{talker}-Native were set as reference levels. All variables were coded with
-effects coding L: 413-417. Random intercepts for \inlineR{subject\_img\_file},\inlineR{time\normalized}, and
-\inlineR{Participant.Private.ID} were included, as were random slopes for \inlineR{talker} and \inlineR{verb_type}, but correlations were removed after model comparison showed preference for simpler model with lower AIC.
+GAMMS and GLMERS both have there own advantages and disadvantages \parencite{Ito_Knoeferle_2022}. GLMERS means generalized linear Mixed effect Models. The models are logistic regression models that estimate both fixed and random effects. GLMERS are simple to use, flexible and provide highly interpretable results. Further, they offer powerful insight into data that can be assumed to be linear. In contrast, GAMMs (generalized linear mixed effects models) are able to model both linear and non-linear data. more here.
 
+Both GLMER and GAMMS require specific coding of the data for the model to predict in the expected manner. However, each of these models start with coding the data correctly and building maximal models and working down to simpler models for model comparison. \parencite{max model}.
 
+\subsection{GLMERs}
 
-
-
-
-
-\subsection{Mixed Effects Modeling}
-Final model and visualization preparation, 
-
-
+For GLMERs coding 
 
 \lstinputlisting[style=mystyle, firstnumber=last]{scripts/chunk-GLMER: Leveling the Data.R}
+
+
+GLMER Models were built using the lme4 package \parencite{Bates2014-eq}. The models included three fixed effects: \inlineR{verb\_type} (Restrictive or Non-Restrictive), \inlineR{talker}(Native, Non-Native) and their interaction. \inlineR{verb\_type}(Restrictive) and \inlineR{talker}-Native were set as reference levels. All variables were coded with
+effects coding L: 413-417. Random intercepts for \inlineR{subject\_img\_file},\inlineR{time\_normalized}, and
+\inlineR{Participant.Private.ID} were included, as were random slopes for \inlineR{talker} and \inlineR{verb\_type}, but correlations were removed after model comparison showed preference for simpler model with lower AIC.
+
+
+
+
 
 \lstinputlisting[style=mystyle, firstnumber=last]{scripts/chunk-GLMER: Leveling the Data.R}
 
