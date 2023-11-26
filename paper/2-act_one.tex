@@ -17,7 +17,7 @@ For the remainder of this paper, these "core four" constructs will be used to gu
 
 \textbf{Audio Stimuli.} This is the auditory input a participant receives on each trial. The audio stimuli can be a word, a sentence, or even a non-speech noise. The audio informs the participant about the visual stimuli, often indicating which on screen stimulus is the target or topic of the sentence. The audio stimuli must be carefully locked to time. In this manner, eye-movements are guided by information in the auditory stimuli.   
 
-\textbf{Visual Stimuli:} This is the visual information shown to a participant on each trial. As noted, visual stimuli can be presented at different points in time, either before presentation of audio stimuli (e.g., preview time cite) or simulataneously with the audio stimuli. Visual stimuli are minimally made up of two types: targets and competitors. In the case of four visual stimuli, an additional two visual stimuli include either a second competitor and a single distractor (or two distractors, if a second competitor is not built into the design). Visual stimuli are always counterbalanced across the four quadrants so as to reduce the chances of bias in eye-movements in a particular direction Note that quadrants are absolute positions on the computer screen (e.g., upper right, upper left, bottom left, bottom right). Figure xx shows an example . 
+\textbf{Visual Stimuli:} This is the visual information shown to a participant on each trial. As noted, visual stimuli can be presented at different points in time, either before presentation of audio stimuli (e.g., preview time cite) or simultaneously with the audio stimuli. Visual stimuli are minimally made up of two types: targets and competitors. In the case of four visual stimuli, an additional two visual stimuli include either a second competitor and a single distractor (or two distractors, if a second competitor is not built into the design). Visual stimuli are always counterbalanced across the four quadrants so as to reduce the chances of bias in eye-movements in a particular direction. Note that quadrants are absolute positions on the computer screen (e.g., upper right, upper left, bottom left, bottom right). Figure \ref{fig:Visual_stimuli.png} shows an example. 
 
 \begin{figure}[h]
     \centering
@@ -26,13 +26,13 @@ For the remainder of this paper, these "core four" constructs will be used to gu
     \label{fig:Visual_stimuli.png}
 \end{figure}
 
-\textbf{Eye-Fixations:} Eye-fixations are time-stamped x, y coordinates on the screen that are recorded throughout a trial. In other words, where a participant is looking at a particular time. The rate of recording is a function of the measurements recorded per second (e.g., measuring 1000 times in one second = 1000Hz). Eye-fixations get categorized into absolute positions on the screen (quadrants) and then mapped to visual stimuli. Where a participant is looking over time is informed by the audio stimuli.
+\textbf{Eye-Fixations:} Eye-fixations are time-stamped x- and y- coordinates on the screen that are recorded throughout a trial. In other words, where a participant is looking at a particular time. The rate of recording is a function of the measurements recorded per second (e.g., measuring 1000 times in one second = 1000Hz). Eye-fixations get categorized into absolute positions on the screen (quadrants) and then mapped to visual stimuli. Where a participant is looking over time is informed by the audio stimuli.
 
 \subsection{Building an Eye-tracking Experiment in Gorilla}
 
-Beginning with Task Builder 2, each trial should start with a fixation cross for roughly xxx ms. Next, a basic `forced alternative choice task` can serve as the foundation of the experiment with four visual stimuli as the choices (found here). Audio input comes from the `sound stimuli` task that plays at a specific point in time for each trial (e.g., simultaneous, delayed). The audio and visual stimuli must have a time locked relationship. The audio stimuli will either provide suggestive hints toward a specific visual stimulus or even explicitly tell the participant which to choose. When building the experiment, it is essential to focus on the timing of the trials, the types of data you want out of the trial, and when the webcam should track eye-fixations. 
+Beginning with Task Builder 2, each trial should start with a fixation cross for roughly 200 ms. Next, a simple forced choice task can serve as the foundation of the experiment with four visual stimuli as the choices (see, Gorilla link \footnote{Gorilla link: Experimental ET Tasks: simple forced choice} on OSF \footnote{https://osf.io/a3e5s/?view\_only=bb6015f2526f4a02bdd22dcd7449e9dd}). Audio input comes from the `web audio` zone that plays at the beginning of a specific screen (e.g., delayed). The audio and visual stimuli must have a time locked relationship. The audio stimuli will either provide suggestive hints toward a specific visual stimulus or even explicitly tell the participant which to choose. When building the experiment, it is essential to focus on the timing of the trials, the types of data you want out of the trial, and when the webcam should track eye-fixations. 
 
-Add stuff here about the things to do with a better workflow image. 
+In Gorilla, `displays` can be thought of as trials. Each `display` makes up a recursive set of `screens`. `Screens` are made up of `zones`. `Zones` include functionality like (`Response Buttons`,`web audio` and `eye-tracker 2`). The overall timing within a trial is controlled through `screens` with smaller adjustments made within `configuration settings` of each `zone`.  That is, to control the overall relationship between the timing of audio stimuli and visual stimuli (i.e., preview, simultaneous, delayed), web audio should be placed either in the screen before, the screen of, or the screen after the visual stimuli (see example experiments of each in the Gorilla link). From the perspective of 
 
 \begin{figure}[h]
     \centering
@@ -54,7 +54,7 @@ Raw data from a VWP experiment downloaded from Gorilla has two basic parts: beha
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=.3]{figures/data_structure.png}
-    \caption{Behaviorial data (left) and trial by trial eye-tracking data (right)-\textit{uploads} data. Colors match figure \ref{fig:core_four} layout for ease.}
+    \caption{Behaviorial data (left) and trial by trial eye-tracking data (right)-\textit{upfloads} data. Colors match figure \ref{fig:core_four} layout for ease.}
     \label{fig:data_structure}
 \end{figure}
 
