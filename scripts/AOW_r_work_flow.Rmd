@@ -478,7 +478,6 @@ m1_1<-glmer(target~talker*verb_type+
             (verb_type|Participant.Private.ID)+
             (1|time_normalized),
           family="binomial",data=mem_data)
-
 #remove correlations
 m1_2<-glmer(target~talker*verb_type+
             (talker||subject_img_file)+
@@ -505,9 +504,16 @@ m2<-glmer(target~verb_type*experience_chinese+
           family="binomial",data=accent_mem_data)
 summary(m2)
 ```
+```{r GLMER: Selected Model}
+selected_model<-glmer(target~talker*verb_type+
+            (talker||subject_img_file)+
+            (verb_type||Participant.Private.ID)+
+            (1|time_normalized),
+          family="binomial",data=mem_data)
+```
 ```{r GLMER: Visualizations}
 #verb type model viz
-model_effects <- as.data.frame(coef(summary(m1_2)))
+model_effects <- as.data.frame(coef(summary(selected_model)))
 model_effects$effect<-as.factor(rownames(model_effects))
 model_effects$effect <- fct_rev(fct_inorder(model_effects$effect))
 model_effects <- model_effects %>%

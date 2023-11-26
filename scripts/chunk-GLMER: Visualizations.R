@@ -1,6 +1,6 @@
 ## ----GLMER: Visualizations----
 #verb type model viz
-model_effects <- as.data.frame(coef(summary(m1_2)))
+model_effects <- as.data.frame(coef(summary(selected_model)))
 model_effects$effect<-as.factor(rownames(model_effects))
 model_effects$effect <- fct_rev(fct_inorder(model_effects$effect))
 model_effects <- model_effects %>%
