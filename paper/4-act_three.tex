@@ -44,6 +44,20 @@ Final model and visualization preparation,
 
 %Mixed-effect logistic regression was carried out in R [6], formula: glmer(target ~ talker accent * verb type + (1| item)+(verb type||Participant), family= binomial)). Like [1]’s model, our model yielded an effect of verb type for the restrictive condition (β = 0.08, SE = .04, t = 2.28, p = .029) indicating that prediction occurs irrespective of accent. Additionally, our model found neither an effect of talker accent nor a two-way interaction, thus mirroring the results of [1].
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{figures/GLMER_base_model.pdf}
+    \caption{place holder for real model outputs later}
+    \label{fig:model_outputs}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{figures/GLMER_accent_model.pdf}
+    \caption{place holder for real model outputs later}
+    \label{fig:model_outputs}
+\end{figure}
+
 \subsection{Growth Curve Analysis}
 
 Another possible model to use is Growth curve analysis. Prolly not cause space but it seems so logical here. glmer:linear-> GCA:manual polynomials (relax linearity)-> GAMM:automated polynomials (forget about linearity)
@@ -59,7 +73,7 @@ GAMMS are becoming increasingly popular as they allow the research to model comp
 include comparitive visual of 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=\textwidth]{figures/model_outputs}
+    \includegraphics[width=\textwidth]{figures/model_gamm_effects.pdf}
     \caption{place holder for real model outputs later}
     \label{fig:model_outputs}
 \end{figure}
