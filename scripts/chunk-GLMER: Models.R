@@ -4,7 +4,6 @@ m1_1<-glmer(target~talker*verb_type+
             (verb_type|Participant.Private.ID)+
             (1|time_normalized),
           family="binomial",data=mem_data)
-
 #remove correlations
 m1_2<-glmer(target~talker*verb_type+
             (talker||subject_img_file)+
