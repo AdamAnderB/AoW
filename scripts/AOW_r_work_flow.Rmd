@@ -38,6 +38,7 @@ OSF_data_select<-sub("task_data", "OSF_data", task_data_select)
 OSF_data<-read.csv(OSF_data_select,header=TRUE, row.names=1)
 ```
 
+
 ```{r Questionnaire: Clean}
 cleaned_quest_data<-task_data%>%
   filter(display=="questionairre",na.omit=TRUE)%>%
