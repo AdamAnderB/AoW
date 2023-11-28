@@ -9,5 +9,5 @@ mod1 <- bam(target ~ talker_coded +
               s(time_elapsed, Participant.Private.ID, bs="fs", m=1)+
               s(time_elapsed, subject_img_coded, bs="fs", m=1)+
               s(Event, bs="re"), 
-                  family="binomial", data=gamm_data, discrete=TRUE, method="fREML")
+              family="binomial", data=gamm_data, discrete=TRUE, method="fREML")
 summary(mod1)
