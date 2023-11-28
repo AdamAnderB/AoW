@@ -42,7 +42,6 @@ plotter<-participant_frame_rate%>%
 
 ggMarginal(plotter, groupColour = TRUE, groupFill = TRUE)
 ggsave(file.path(viz_path,"Participant_frame_rates.pdf"), width = 8, height = 4)
-
 #frame rates across time
 time_binning=400
 

@@ -1,4 +1,4 @@
-## ----GAMM: accent models----
+## ----GAMM: Accent Model----
 mod2 <- bam(target ~ experience_chinese + 
               verb_type_coded + 
               s(time_elapsed, by=verb_type_coded) +
