@@ -15,7 +15,7 @@
 %this is off because I figured out a process for making it a word file but it requires that the numbers are off to do it
 %\usepackage[right]{lineno}%numbers on the right
 %\linenumbers
-
+\usepackage{lipsum}
 \usepackage{xcolor}
 %hyperlink colors fix
 \usepackage{listings}
@@ -151,19 +151,21 @@
 % biblatex reference file
 \addbibresource{paper/references.bib}
 
+
 \begin{document}
 \maketitle
 
-\tableofcontents
+%\tableofcontents
 \newpage
 
 % Add all section subfiles here. More can be created if needed
-\subfile{abstract}
-\subfile{paper/1-introduction}
-\subfile{paper/2-act_one}
-\subfile{paper/3-act_two}
-\subfile{paper/4-act_three}
-\subfile{paper/5-Discussion_Conclusion}
+\subfile{paper/1-abstract}
+\subfile{paper/2-introduction}
+\subfile{paper/3-act_one}
+\subfile{paper/4-act_two}
+\subfile{paper/5-act_three}
+\subfile{paper/6-Discussion}
+\subfile{paper/7-Conclusion}
 %\subfile{outline}
 
 % sections are done with \section, \subsection and \subsubsection.
