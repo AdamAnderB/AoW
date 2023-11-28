@@ -12,13 +12,13 @@ There are a handful of excellent papers that outline the advantages and disadvan
 
 For GLMMs coding, start with data type conversion (L: 414-415). We then, can re-level both \inlineR{talker}(Native, Non-Native) and \inlineR{verb\_type}(Restrictive or Non-Restrictive) so that \inlineR{verb\_type}(Restrictive) and \inlineR{talker}-Native are both set as reference levels (L: 416-418).  We can then rename the contrasts to improve model output readability (L: 418-421). Lastly, in L: 423 through L: 430 we normalize the two variables \inlineR{time\_elapsed} and \inlineR{experience\_chinese}.
 
-\lstinputlisting[style=mystyle, firstnumber=last]{scripts/chunk-GLMER: Leveling the Data.R}
+\lstinputlisting[style=mystyle, firstnumber=last]{scripts/chunk-GLMM: Leveling the Data.R}
 
 GLMMs were built using the \inlineR{lme4} package \parencite{Bates2014-eq}. Looks to the target (coded as 1, 0) served as the dependent variable. The models included three fixed effects: \inlineR{verb\_type} (Restrictive or Non-Restrictive), \inlineR{talker}(Native, Non-Native) and their interaction (L: 432). All factor variables were coded with
 effects coding L: 414-417. Random intercepts for \inlineR{subject\_img\_file}, \inlineR{time\_normalized}, and
 \inlineR{Participant.Private.ID} were included, as were random slopes for \inlineR{talker} and \inlineR{verb\_type}, but correlations were removed after model comparison showed preference for parsimonious model over full model and simplified models with lower AIC and ANOVA comparisons (p<.001). The logit link function ("binomial") was specified in the model, equivalent to modeling logit-transformed response probability with identity link function. 
 
-\lstinputlisting[style=mystyle, firstnumber=last]{scripts/chunk-GLMER: Selected Models.R}
+\lstinputlisting[style=mystyle, firstnumber=last]{scripts/chunk-GLMM: Main Model.R}
 
 Results from the GLMM revealed a significant effect of  \inlineR{verbtype}-Restricting  ($\beta$ = 0.281, SE = 0.067, z = 4.192, p = .001), indicating more looks to targets for restrictive \inlineR{verb\_types} over non-restrictive \inlineR{verb\_types}, see figure \ref{fig:GLMER_base_model}. Additionally, an interaction between speaker and verb type was found ($\beta$ = -0.13737, SE = 0.05346, z = -2.570, p=.05).
 \begin{figure}[H]
