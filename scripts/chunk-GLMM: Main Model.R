@@ -1,4 +1,4 @@
-## ----GLMM: Model----
+## ----GLMM: Main Model----
 glmm1_2<-glmer(target~talker*verb_type+
             (talker||subject_img_file)+
             (verb_type||Participant.Private.ID)+
