@@ -16,17 +16,18 @@ library(readxl)
 library(lmerTest)
 library(lme4)
 library(mgcv)
+library(cowplot)
 ```
 ```{r data_load,echo=FALSE}
-#set the path to be the folder where the et_data.csv,OSF_data.csv, 
-#and task_data.csv are located
-#path<-"/Users/adambramlett/scripts/the_art_of_wrangling/"
-#input_path<-file.path(path,"data")
-#output_path<-file.path(path,"cleaned_data")
-#shiny_path<-file.path(path,"shiny_apps")
-#viz_path<-file.path(path,"AoW/figures")
+#This is only for csv and figure saving. Feel free to ignore or use.
+path<-"/Users/adambramlett/scripts/the_art_of_wrangling/"
+input_path<-file.path(path,"data")
+output_path<-file.path(path,"cleaned_data")
+shiny_path<-file.path(path,"shiny_apps")
+viz_path<-file.path(path,"AoW/figures")
 ```
 Here, three dialogue boxes will pop up. You simply need to select task data from the file you downloaded from the OSF link. The rest should run automatically
+
 
 ```{r Data Reading}
 #select task_data
@@ -456,7 +457,7 @@ gamm_data<-mem_data%>%
   mutate(Condition = paste(talker,verb_type,sep="."))
 ```
 
-```{r GLMER: Leveling the Data}
+```{r GLMM: Leveling the Data}
 mem_data$verb_type<-as.factor(mem_data$verb_type)
 mem_data$talker<-as.factor(mem_data$talker)
 contrasts(mem_data$verb_type)<-c(-.5,.5)
@@ -465,109 +466,79 @@ colnames(contrasts(mem_data$talker))<- c('Native:')
 rownames(contrasts(mem_data$talker))<-c("Native","NonNative")
 colnames(contrasts(mem_data$verb_type))<- c('Restricting:')
 rownames(contrasts(mem_data$verb_type))<-c("Non-Restricting","Restricting")
-mem_data$experience_chinese<-mem_data$experience_chinese
-mem_data <- mem_data %>%
-  mutate(experience_chinese_normalized = 
-           (experience_chinese - min(experience_chinese)) / 
-           (max(experience_chinese) - min(experience_chinese)))
+mem_data$experience_chinese<-mem_data$experience_chinese_accent
 mem_data <- mem_data %>%
   mutate(time_normalized = 
            (time_elapsed - min(time_elapsed)) / 
            (max(time_elapsed) - min(time_elapsed)))
+accent_mem_data<-mem_data%>%filter(talker == "NonNativeMale")
 ```
-```{r GLMER: Models}
-m1_1<-glmer(target~talker*verb_type+
-            (talker|subject_img_file)+
-            (verb_type|Participant.Private.ID)+
-            (1|time_normalized),
-          family="binomial",data=mem_data)
-#remove correlations
-m1_2<-glmer(target~talker*verb_type+
-            (talker||subject_img_file)+
-            (verb_type||Participant.Private.ID)+
-            (1|time_normalized),
-          family="binomial",data=mem_data)
-#remove timing random effect
-m1_3<-glmer(target~talker*verb_type+
-            (talker||subject_img_file)+
-            (verb_type||Participant.Private.ID),
-          family="binomial",data=mem_data)
-
-anova(m1_2,m1_1)
-anova(m1_3,m1_2)
+```{r GLMM: Main Model Comparison}
+#glmm1_1<-glmer(target~talker*verb_type+
+#            (talker|subject_img_file)+
+#            (verb_type|Participant.Private.ID)+
+#            (1|time_normalized),
+#          family="binomial",data=mem_data)
+##remove correlations
+#glmm1_2<-glmer(target~talker*verb_type+
+#            (talker||subject_img_file)+
+#            (verb_type||Participant.Private.ID)+
+#            (1|time_normalized),
+#          family="binomial",data=mem_data)
+##remove timing random effect
+#glmm1_3<-glmer(target~talker*verb_type+
+#            (talker||subject_img_file)+
+#            (verb_type||Participant.Private.ID),
+#          family="binomial",data=mem_data)
+#
+#anova(glmm1_2,glmm1_1)
+#anova(glmm1_3,glmm1_2)
 #m2 is a more parsimonious and preferable model compared to m1_1 or m1_3 because of lower AIC and BIC
 #as well as the anova coming up significant in comparison to simpler model m1_3.
-
-#accent models
-accent_mem_data<-mem_data%>%filter(talker == "NonNativeMale")
-m2<-glmer(target~verb_type*experience_chinese+
-            (1|subject_img_file)+
-            (verb_type|Participant.Private.ID)+
-            (1|time_normalized),
-          family="binomial",data=accent_mem_data)
-summary(m2)
+#summary(glmm1_1)
+#summary(glmm1_2)
+#summary(glmm1_3)
+#anova(glmm1_2,glmm1_1)
+#anova(glmm1_3,glmm1_2)
 ```
-```{r GLMER: Selected Models}
-selected_model<-glmer(target~talker*verb_type+
+
+```{r GLMM: Model}
+glmm1_2<-glmer(target~talker*verb_type+
             (talker||subject_img_file)+
             (verb_type||Participant.Private.ID)+
             (1|time_normalized),
           family="binomial",data=mem_data)
-summary(m1_2)
+summary(glmm1_2)
 ```
-```{r GLMER: Visualizations}
-#verb type model viz
-model_effects <- as.data.frame(coef(summary(selected_model)))
-model_effects$effect<-as.factor(rownames(model_effects))
-model_effects$effect <- fct_rev(fct_inorder(model_effects$effect))
-model_effects <- model_effects %>%
-  mutate(significance = case_when(
-    `Pr(>|z|)` <= 0.001 ~ "***",
-    `Pr(>|z|)` <= 0.01 ~ "**",
-    `Pr(>|z|)` <= 0.05 ~ "*",
-    `Pr(>|z|)` > 0.05 ~ "",))%>%
-  mutate(filler = case_when(
-    Estimate <= 0.0 ~ -1,
-    Estimate >= 0.0 ~ 1))
 
-model_effects%>%ggplot(aes(x=Estimate,y=effect,color=as.factor(filler)))+
-  geom_pointrange(aes(xmin = Estimate-1.96 * `Std. Error`, xmax = Estimate+1.96 * `Std. Error`))+
-  geom_vline(xintercept = 0, linetype = "dashed", color = "black")+
-  geom_text(aes(x=-2,label = significance))+
-  theme_minimal()+
-  ylab("")+
-  theme(
-    panel.grid.minor.y = element_blank(),
-    panel.grid.minor.x = element_blank(),
-    legend.position = "none")+
-  scale_color_manual(values=c("#007BC0", "#FDB515"))
-ggsave(file.path(viz_path,"GLMER_base_model.pdf"), width = 6, height = 4)
 
-#accent model viz
-model2_effects <- as.data.frame(coef(summary(m2)))
-model2_effects$effect<-as.factor(rownames(model2_effects))
-model2_effects$effect <- fct_rev(fct_inorder(model2_effects$effect))
-model2_effects <- model2_effects %>%
-  mutate(significance = case_when(
-    `Pr(>|z|)` <= 0.001 ~ "***",
-    `Pr(>|z|)` <= 0.01 ~ "**",
-    `Pr(>|z|)` <= 0.05 ~ "*",
-    `Pr(>|z|)` > 0.05 ~ "",))%>%
-  mutate(filler = case_when(
-    Estimate <= 0.0 ~ -1,
-    Estimate >= 0.0 ~ 1))
-
-model2_effects%>%ggplot(aes(x=Estimate,y=effect,color=as.factor(filler)))+
-  geom_pointrange(aes(xmin = Estimate-1.96 * `Std. Error`, xmax = Estimate+1.96 * `Std. Error`))+
-  geom_vline(xintercept = 0, linetype = "dashed", color = "black")+
-  geom_text(aes(x=-2,label = significance))+
-  theme_minimal()+
-  ylab("")+
-  theme(panel.grid.minor.y = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        legend.position = "none")+
-  scale_color_manual(values=c("#007BC0", "#FDB515"))
-ggsave(file.path(viz_path,"GLMER_accent_model.pdf"), width = 6, height = 2)
+```{r GLMM: Accent Model Comparison}
+#glmm2_1<-glmer(target~verb_type*experience_chinese+
+#            (1|subject_img_file)+
+#            (subject_img_file|Participant.Private.ID),
+#          family="binomial",data=accent_mem_data)
+##remove correlations
+#glmm2_2<-glmer(target~verb_type*experience_chinese+
+#            (1|subject_img_file)+
+#            (subject_img_file||Participant.Private.ID),
+#          family="binomial",data=accent_mem_data)
+##remove random effect
+#glmm2_3<-glmer(target~verb_type*experience_chinese+
+#            (1|subject_img_file)+
+#            (1|Participant.Private.ID),
+#          family="binomial",data=accent_mem_data)
+#summary(glmm2_1)
+#summary(glmm2_2)
+#summary(glmm2_3)
+#anova(glmm2_2,glmm2_1)
+#anova(glmm2_3,glmm2_2)
+```
+```{r GLMM: Accent Model}
+glmm2_3<-glmer(target~verb_type*experience_chinese+
+            (1|subject_img_file)+
+            (1|Participant.Private.ID),
+          family="binomial",data=accent_mem_data)
+summary(glmm2_3)
 ```
 ```{r GAMM: Leveling the Data}
 gamm_data <- gamm_data %>%
@@ -577,15 +548,16 @@ gamm_data <- gamm_data %>%
     talker_coded = as.numeric(factor(talker)) - 1,
     verb_type_coded = as.numeric(factor(verb_type)) - 1,
     Participant.Private.ID = as.factor(Participant.Private.ID),
-    Event = as.factor(paste(Participant.Private.ID, Trial.Number, sep = "."))
-  )%>%
+    Event = as.factor(paste(
+      Participant.Private.ID, Trial.Number, sep = ".")),
+    experience_chinese = experience_chinese_accent)%>%
   select(Event,Participant.Private.ID,Trial.Number,verb_type_coded,
          talker_coded,subject_img_coded,Condition,target,time_elapsed,
-         log_SUBTLWF_Obj,experience_chinese_accent,Event)
+         log_SUBTLWF_Obj,experience_chinese,Event)
+gamm_data_accented<-gamm_data%>%filter(talker_coded == 1)
 ```
-
 # GAM 
-```{r GAMM: Models}
+```{r GAMM: Main Model}
 mod1 <- bam(target ~ talker_coded + 
               s(time_elapsed, by=talker_coded) + 
               verb_type_coded + 
@@ -598,15 +570,12 @@ mod1 <- bam(target ~ talker_coded +
               s(Event, bs="re"), 
                   family="binomial", data=gamm_data, discrete=TRUE, method="fREML")
 summary(mod1)
-
-#accent models
-gamm_data_accented<-gamm_data%>%filter(talker_coded == 1)
-mod2 <- bam(target ~ experience_chinese_accent + 
-              s(time_elapsed, by=talker_coded) + 
+```
+```{r GAMM: accent models}
+mod2 <- bam(target ~ experience_chinese + 
               verb_type_coded + 
               s(time_elapsed, by=verb_type_coded) +
-              talker_coded:verb_type_coded + 
-              s(time_elapsed, by=Condition)+
+              experience_chinese:verb_type_coded + 
               s(log_SUBTLWF_Obj)+
               s(time_elapsed, Participant.Private.ID, bs="fs", m=1)+
               s(time_elapsed, subject_img_coded, bs="fs", m=1)+
@@ -614,18 +583,13 @@ mod2 <- bam(target ~ experience_chinese_accent +
                   family="binomial", data=gamm_data_accented, discrete=TRUE, method="fREML")
 summary(mod2)
 ```
-```{r GAMM: Visualization}
-gamm1_effects <- as.data.frame(summary(mod1)$p.table)
-gamm1_effects$Model<-"Main"
-
-#gamm2_effects <- as.data.frame(summary(mod2)$p.table)
-#gamm2_effects$Model<-"Accent"
-#gamm_effects<-rbind(gamm1_effects,gamm2_effects)
-#smooth_significance <- as.data.frame(summary(mod1)$s.table)
-gamm1_effects<-gamm1_effects
-gamm_effects$effect<-as.factor(rownames(gamm_effects))
-gamm_effects$effect <- fct_rev(fct_inorder(gamm_effects$effect))
-gamm_effects <- gamm_effects %>%
+#model visualizations
+```{r GLMM: Main model output as data for Visualization}
+#GLMM viz
+model1_effects <- as.data.frame(coef(summary(glmm1_2)))
+model1_effects$effect<-as.factor(rownames(model1_effects))
+model1_effects$effect <- fct_rev(fct_inorder(model1_effects$effect))
+model1_effects <- model1_effects %>%
   mutate(significance = case_when(
     `Pr(>|z|)` <= 0.001 ~ "***",
     `Pr(>|z|)` <= 0.01 ~ "**",
@@ -634,17 +598,111 @@ gamm_effects <- gamm_effects %>%
   mutate(filler = case_when(
     Estimate <= 0.0 ~ -1,
     Estimate >= 0.0 ~ 1))
-gamm_effects<-na.omit(gamm_effects)
-gamm_effects%>%ggplot(aes())+
-  geom_pointrange(aes(x=Estimate,y=effect,color=as.factor(filler),xmin = Estimate-1.96 * `Std. Error`, xmax = Estimate+1.96 * `Std. Error`))+
-  geom_point(aes(x=Estimate,y=effect,fill=Model),size=3)+
+
+glmm1_viz<-model1_effects%>%ggplot(aes(x=Estimate,y=effect,color=as.factor(filler)))+
+  geom_pointrange(aes(xmin = Estimate-1.96 * `Std. Error`, xmax = Estimate+1.96 * `Std. Error`))+
   geom_vline(xintercept = 0, linetype = "dashed", color = "black")+
-  geom_text(aes(x=-2,y=effect,label = significance))+
+  geom_text(aes(x=-2,label = significance))+
   theme_minimal()+
+  ylab("")+
   theme(panel.grid.minor.y = element_blank(),
         panel.grid.minor.x = element_blank(),
         legend.position = "none")+
   scale_color_manual(values=c("#007BC0", "#FDB515"))
-ggsave(file.path(viz_path,"model_gamm_effects.pdf"), width = 6, height = 2)
 ```
-sj
+
+```{r GLMM: Accent model output as data for Visualization}
+#GLMM viz
+model2_effects <- as.data.frame(coef(summary(glmm2_3)))
+model2_effects$effect<-as.factor(rownames(model2_effects))
+model2_effects$effect <- fct_rev(fct_inorder(model2_effects$effect))
+model2_effects <- model2_effects %>%
+  mutate(significance = case_when(
+    `Pr(>|z|)` <= 0.001 ~ "***",
+    `Pr(>|z|)` <= 0.01 ~ "**",
+    `Pr(>|z|)` <= 0.05 ~ "*",
+    `Pr(>|z|)` > 0.05 ~ "",))%>%
+  mutate(filler = case_when(
+    Estimate <= 0.0 ~ -1,
+    Estimate >= 0.0 ~ 1))
+
+glmm2_viz<-model2_effects%>%ggplot(aes(x=Estimate,y=effect,color=as.factor(filler)))+
+  geom_pointrange(aes(xmin = Estimate-1.96 * `Std. Error`, xmax = Estimate+1.96 * `Std. Error`))+
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black")+
+  geom_text(aes(x=-2,label = significance))+
+  theme_minimal()+
+  ylab("")+
+  theme(panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        legend.position = "none")+
+  scale_color_manual(values=c("#007BC0", "#FDB515"))
+```
+
+```{r GAMM: Main model output as data for Visualization}
+gamm1_effects <- as.data.frame(summary(mod1)$p.table)
+gamm1_effects$effect<-as.factor(rownames(gamm1_effects))
+gamm1_effects$effect <- fct_rev(fct_inorder(gamm1_effects$effect))
+gamm1_effects <- gamm1_effects %>%
+  mutate(significance = case_when(
+    `Pr(>|z|)` <= 0.001 ~ "***",
+    `Pr(>|z|)` <= 0.01 ~ "**",
+    `Pr(>|z|)` <= 0.05 ~ "*",
+    `Pr(>|z|)` > 0.05 ~ "",))%>%
+  mutate(filler = case_when(
+    Estimate <= 0.0 ~ -1,
+    Estimate >= 0.0 ~ 1))
+
+gamm1_viz<-gamm1_effects%>%ggplot(aes(x=Estimate,y=effect,color=as.factor(filler)))+
+  geom_pointrange(aes(xmin = Estimate-1.96 * `Std. Error`, xmax = Estimate+1.96 * `Std. Error`))+
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black")+
+  geom_text(aes(x=-2,label = significance))+
+  theme_minimal()+
+  ylab("")+
+  theme(panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        legend.position = "none")+
+  scale_color_manual(values=c("#007BC0", "#FDB515"))
+```
+```{r GAMM: Accent model output as data for Visualization}
+gamm2_effects <- as.data.frame(summary(mod2)$p.table)
+gamm2_effects$effect<-as.factor(rownames(gamm2_effects))
+gamm2_effects$effect <- fct_rev(fct_inorder(gamm2_effects$effect))
+gamm2_effects <- gamm2_effects %>%
+  mutate(significance = case_when(
+    `Pr(>|z|)` <= 0.001 ~ "***",
+    `Pr(>|z|)` <= 0.01 ~ "**",
+    `Pr(>|z|)` <= 0.05 ~ "*",
+    `Pr(>|z|)` > 0.05 ~ "",))%>%
+  mutate(filler = case_when(
+    Estimate <= 0.0 ~ -1,
+    Estimate >= 0.0 ~ 1))
+
+gamm2_viz<-gamm2_effects%>%ggplot(aes(x=Estimate,y=effect,color=as.factor(filler)))+
+  geom_pointrange(aes(xmin = Estimate-1.96 * `Std. Error`, xmax = Estimate+1.96 * `Std. Error`))+
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black")+
+  geom_text(aes(x=-2,label = significance))+
+  theme_minimal()+
+  ylab("")+
+  theme(panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        legend.position = "none")+
+  scale_color_manual(values=c("#007BC0", "#FDB515"))
+```
+```{r cow model plots}
+glmm1_viz<-glmm1_viz+ggtitle("GLMM Main Model Effects")
+glmm2_viz<-glmm2_viz+ggtitle("GLMM Accent Model Effects")
+gamm1_viz<-gamm1_viz+ggtitle("GAMM Main Model Effects")
+gamm2_viz<-gamm2_viz+ggtitle("GAMM Accent Model Effects")
+
+plot_grid(glmm1_viz, glmm2_viz, nrow = 1, align = "h")
+ggsave(file.path(viz_path,"GLMM_cow_model.pdf"), width = 10, height = 2)
+plot_grid(gamm1_viz, gamm2_viz, nrow = 1, align = "h")
+ggsave(file.path(viz_path,"GAMM_cow_model.pdf"), width = 10, height = 2)
+```
+
+```{r write all the CSVs for models}
+write.csv(model1_effects,file.path(output_path,"GLM_main_model_output.csv"))
+write.csv(model2_effects,file.path(output_path,"GLM_accented_model_output.csv"))
+write.csv(gamm1_effects,file.path(output_path,"GAM_main_model_output.csv"))
+write.csv(gamm2_effects,file.path(output_path,"GAM_accented_model_output.csv"))
+```
