@@ -1,6 +1,6 @@
 ## ----GLMM: Main model output as data for Visualization----
 #GLMM viz
-model1_effects <- as.data.frame(coef(summary(glmm1_2)))
+model1_effects <- as.data.frame(coef(summary(glmm1_1)))
 model1_effects$effect<-as.factor(rownames(model1_effects))
 model1_effects$effect <- fct_rev(fct_inorder(model1_effects$effect))
 model1_effects <- model1_effects %>%

@@ -1,7 +1,7 @@
 ## ----GLMM: Main Model----
-glmm1_2<-glmer(target~talker*verb_type+
+glmm1_1<-glmer(target~talker*verb_type+
             (talker||subject_img_file)+
             (verb_type||Participant.Private.ID)+
             (1|time_normalized),
           family="binomial",data=mem_data)
-summary(glmm1_2)
+summary(glmm1_1)
