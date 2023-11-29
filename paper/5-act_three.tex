@@ -32,11 +32,11 @@ GAMMs are becoming increasingly popular as they allow the researcher to model co
 
 \lstinputlisting[style=mystyle, firstnumber=546]{scripts/chunk-GAMM: Leveling the Data.R}
 
-GAMM Models were built using the \inlineR{mgcv} package \parencite{mgcv_wood_2017}. Like the GLMM model, the GAMM models treat target(L:603) as independent variable with dependent variables includingl: three fixed effects: \inlineR{talker\_coded} (L: 603), \inlineR{verb\_type\_coded} (L: 605) and their interaction (L: 607). Random effects included \inlineR{Event} (L: 612). Smooth terms were included for \inlineR{time\_elapsed} by levels of \inlineR{talker\_coded} (L: 604), \inlineR{verb\_type\_coded} (L: 606), and \inlineR{Condition} (L: 608). Smooth terms allow for a non-linear relationship between \inlineR{time\_elapsed} and the response variable \inlineR{verb\_type\_coded}, with a different smooth function for each level of variable (i.e., native/non-native). An additional smooth term for \inlineR{log\_SUBTLWF\_Obj} (L: 609) was included. Smooth terms for \inlineR{time\_elapsed} were included for grouping levels: \inlineR{Participant.Private.ID} and \inlineR{subject\_image\_file} (L:610-611). The logit link function ("binomial") was specified in the model, equivalent to modeling logit-transformed response probability with identity link function.  
+GAMM Models were built using the \inlineR{mgcv} package \parencite{mgcv_wood_2017}. Model comparisons suggest that random intercept of \inlineR{Event} significantly improved maximal model. Like the GLMM model, the GAMM models treat target(L:603) as independent variable with dependent variables including: three fixed effects: \inlineR{talker\_coded} (L: 603), \inlineR{verb\_type\_coded} (L: 605) and their interaction (L: 607). Random effects included \inlineR{Event} (L: 612). Smooth terms were included for \inlineR{time\_elapsed} by levels of \inlineR{talker\_coded} (L: 604), \inlineR{verb\_type\_coded} (L: 606), and \inlineR{Condition} (L: 608). Smooth terms allow for a non-linear relationship between \inlineR{time\_elapsed} and the response variable \inlineR{verb\_type\_coded}, with a different smooth function for each level of variable (i.e., native/non-native). An additional smooth term for \inlineR{log\_SUBTLWF\_Obj} (L: 609) was included. Smooth terms for \inlineR{time\_elapsed} were included for grouping levels: \inlineR{Participant.Private.ID} and \inlineR{subject\_image\_file} (L:610-611). The logit link function ("binomial") was specified in the model, equivalent to modeling logit-transformed response probability with identity link function. 
 
 \lstinputlisting[style=mystyle, firstnumber=602]{scripts/chunk-GAMM: Main Model.R}
 
-The accent GAMM had identical structure to the main GAMM with the expectation of having only 1 main effect: \inlineR{experience\_chinese} (L: 642) and removing the smoothing term leveled by \inlineR{talker\_coded}. \inlineR{gamm\_data\_accented} was the data frame (L: 648).
+The accent GAMM had identical structure to the main GAMM with the expectation of having only 1 main effect: \inlineR{experience\_chinese} (L: 642) and removing the smoothing term leveled by \inlineR{talker\_coded}. \inlineR{gamm\_data\_accented} was the data frame (L: 648). Model comparisons suggest that random intercept of \inlineR{Event} significantly improves in the maximum model.
 
 \lstinputlisting[style=mystyle, firstnumber=641]{scripts/chunk-GAMM: Accent Model.R}
 
@@ -52,9 +52,7 @@ The accent GAMM had identical structure to the main GAMM with the expectation of
 \end{figure}
 
 \subsection{3.3.1 GLMM Results}
-Results from the Main GLMM revealed a significant effect of  \inlineR{verb\_type}-Restricting  ($\beta$ = 0.281, SE = 0.067, z = 4.190, p < .001), indicating more looks to targets for restrictive \inlineR{verb\_type} over non-restrictive \inlineR{verb\_type}, see figure \ref{fig:GLMM_cow_model}. Additionally, an interaction between speaker and verb type was found ($\beta$ = -0.136, SE = 0.053, z = -2.552, p = 0.011), indicating less looks when listening to the accented speaker.
-
-Results from the Accent GLMM revealed a significant effect of  \inlineR{verb\_type}-Restricting  ($\beta$ = 0.323, SE = 0.046, z = 6.946, p < .001), indicating more looks to targets for restrictive \inlineR{verb\_type} over non-restrictive \inlineR{verb\_type}, see figure \ref{fig:GLMM_cow_model}. Additionally, an interaction verb type and experience with Chinese accent was found ($\beta$ = -0.010, SE = 0.003, z = -3.999, p < 0.001), indicating less looks to non-restrctive verbs as experience goes up.
+Results from the Main GLMM revealed a significant effect of  \inlineR{verb\_type}-Restricting  ($\beta$ = 0.281, SE = 0.067, z = 4.191, p < .001), indicating more looks to targets for restrictive \inlineR{verb\_type} over non-restrictive \inlineR{verb\_type}, see figure \ref{fig:GLMM_cow_model} (left). Additionally, an interaction between speaker and verb type was found ($\beta$ = -0.136, SE = 0.053, z = -2.554, p = 0.011), indicating less looks when listening to the accented speaker. Results from the Accent GLMM found null results at an alpha-level of .05, see figure \ref{fig:GLMM_cow_model} (right). 
 
 \begin{figure}[H]
     \centering
@@ -65,9 +63,7 @@ Results from the Accent GLMM revealed a significant effect of  \inlineR{verb\_ty
 
 \subsection{3.3.2 GAMM Results}
 
-Like the GLMM, the Main GAMM revealed a significant effect of \inlineR{verb\_type}-Restricting ($\beta$ = 0.398, SE = 0.129, z = 3.078, p = 0.002), indicating more looks to targets for restrictive \inlineR{verb\_type} over non-restrictive \inlineR{verb\_type}, see figure \ref{fig:GAMM_cow_model}.
-
-Like the GLMM, the Accent GAMM revealed a significant effect of \inlineR{verbtype}-Restricting ($\beta$ = 0.556, SE = 0.157, z = 3.537, p < 0.001), indicating more looks to targets for restrictive \inlineR{verb\_type} over non-restrictive \inlineR{verb\_type}, see figure \ref{fig:GAMM_cow_model}.
+Like the GLMM modeling results, results from the Main GAMM revealed a significant effect of  \inlineR{verb\_type}-Restricting  ($\beta$ = 0.398, SE = 0.129, z = 3.078, p = .002), indicating more looks to targets for restrictive \inlineR{verb\_type} over non-restrictive \inlineR{verb\_type}, see figure \ref{fig:GAMM_cow_model} (left). Results from the Accent GAMM found null results at an alpha-level of .05. see figure \ref{fig:GAMM_cow_model} (right).
 
 \begin{figure}[H]
     \centering
