@@ -12,6 +12,7 @@ file.remove(remove_lister)
 #put in files
 library(knitr)
 file<-file.path(path,"AOW_r_work_flow.Rmd")
+file
 p <- purl(file)
 read_chunk(p)
 chunks <- knitr:::knit_code$get()
