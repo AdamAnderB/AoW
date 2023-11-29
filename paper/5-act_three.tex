@@ -1,49 +1,44 @@
 \section{3. Modeling ET data}
 
-In all previous steps, wrangling can be thought of as a condensing process, where the primary object is to remove, clean, and transform the data into a structure that is usable. However, once the data is put into tidy form, then the data must be transformed for specific visualizations and analyses. In this section, we think of \inlineR{all\_data\_cleaned} and \inlineR{all\_data\_tidy} as launching points to gain understanding of our data. 
+In all previous steps, wrangling can be thought of as a condensing process, where the primary object is to remove, clean, and transform the data into a structure that is usable. However, once the data is put into tidy form, then the data must be transformed for specific visualizations and analyses. In this section, we think of \inlineR{all\_data\_cleaned} and \inlineR{all\_data\_tidy} as launching points to gain an understanding of our data \footnote{If you wish to start from here then read in the \inlineR{all\_data\_tidy} and \inlineR{all\_data\_cleaned} from cleaned data on OSF.}.
 
- Here, we are creating two data frames from \inlineR{all\_data\_tidy}: \inlineR{mem\_data} in L: 453 and then \inlineR{gamm\_data} in L: 459. In general, in data wrangling, keeping as much data as possible is essential to creating a usable data frame. However, in model wrangling, it is often best to remove variables that you will not be using. This is because some models can have complications interpreting unprocessed data types. For \inlineR{mem\_data}, we start by selecting all necessary columns for the model (L: 454-455). Factor type conversion occurs next (L: 456). Finally, to get background information we join \inlineR{tidy\_quest\_data}. In addition to the \inlineR{mem\_data}, we create \inlineR{gamm\_data} by simply cloning \inlineR{mem\_data} in L: 459 and by adding a single variable needed in the GAMM models.
+ Here, we are creating two data frames from \inlineR{all\_data\_tidy}: \inlineR{mem\_data} in L: 453 and \inlineR{gamm\_data} in L: 459. In general data wrangling, maximally retaining informative columns is essential to creating a usable data frame. However, in model wrangling, it is often best to remove variables that you will not be using. This is because some models can have complications interpreting unprocessed data types (e.g., \inlineR{NAs}). For \inlineR{mem\_data}, we start by selecting all necessary columns for the model (L: 454-455). Factor type conversion occurs next (L: 456). Finally, to get background information we join \inlineR{tidy\_quest\_data}. In addition to the \inlineR{mem\_data}, we create \inlineR{gamm\_data} by simply cloning \inlineR{mem\_data} in L: 459 and by adding a single variable needed in the GAMM models.
 
 \lstinputlisting[style=mystyle, firstnumber=452]{scripts/chunk-All Data: Preparing for Models.R}
 
-There are a handful of excellent papers that outline the advantages and disadvantages of different methods of eye-fixation analysis and relevant considerations for each method of analysis \parencite{Ito_Knoeferle_2022,Mirman_Dixon_Magnuson_2008,McMurray_2023,Barr_2008}. Here we continue to focus on the data wrangling process and present the data wrangling steps--and decisions--needed to carry out two of the more widely used statistical analyses: generalized linear mixed effect models or GLMM and generalized additive mixed effects models or GAMM. Both GLMMs and GAMMs require specific coding of the data before running models to get expected results. That is, each of these models start with coding the data correctly and building maximal models as justified by the design and working down to simpler models for model comparison. \parencite{Barr_Levy_Scheepers_Tily_2013}.
+There are a handful of excellent papers that outline the advantages and disadvantages of different methods of eye-fixation analysis and relevant considerations for each method of analysis \parencite{Ito_Knoeferle_2022,Mirman_Dixon_Magnuson_2008,McMurray_2023,Barr_2008}. Here, we continue to focus on the data wrangling process and present the data wrangling steps--and decisions--needed to carry out two of the more widely used statistical analyses: generalized linear mixed effect models or GLMMs and generalized additive mixed effects models or GAMMs. Both GLMMs and GAMMs require specific contrast coding (e.g., dummy, orthogonal) of the data before running models to get expected results.  After contrast coding, all model building starts with maximal models, as justified by the design, working down to simpler models for model comparison. \parencite{Barr_Levy_Scheepers_Tily_2013}.
 
 \subsection{3.1 GLMMs}
-
 \subsection{3.1.1 GLMMs: coding}
-
-For GLMMs coding, start with data type conversion (L: 464-465). We then, can re-level both \inlineR{talker}(Native, Non-Native) and \inlineR{verb\_type}(Restrictive or Non-Restrictive) so that \inlineR{verb\_type}(Restrictive) and \inlineR{talker}-Native are both set as reference levels (L: 466-467).  We can then rename the contrasts to improve model output readability (L: 468-471). Lastly, in L: 473 through L: 476, we normalize the \inlineR{time\_elapsed}. Lastly, we create a dataframe for the accent model (L:477).
+For GLMMs coding, start with data type conversion (L: 464-465). Then, re-level both \inlineR{talker}(Native, Non-Native) and \inlineR{verb\_type}(Restrictive or Non-Restrictive) so that \inlineR{verb\_type}(Restrictive) and \inlineR{talker}-Native are both set as reference levels (L: 466-467).  We can then rename the contrasts to improve model output readability (L: 468-471) and later visualization. Lastly, in L: 473 through L: 476, we normalize the \inlineR{time\_elapsed}. Lastly, we create a dataframe for the accent model (L:477).
 
 \lstinputlisting[style=mystyle, firstnumber=463]{scripts/chunk-GLMM: Leveling the Data.R}
 
 \subsection{3.1.2 GLMMs: models}
 
-Two GLMMs were built using the \inlineR{lme4} package \parencite{Bates2014-eq}.  Looks to the target (coded as 1, 0) served as the dependent variable. The \inlineR{Main Model} included three fixed effects: \inlineR{verb\_type} (Restrictive or Non-Restrictive), \inlineR{talker}(Native, Non-Native) and their interaction (L: 509). Random intercepts for \inlineR{subject\_img\_file},
-\inlineR{time\_normalized}, and
-\inlineR{Participant.Private.ID} were included, as were random slopes for \inlineR{talker} and \inlineR{verb\_type}, but correlations were removed after model comparison showed preference for parsimonious models over full models and simplified models with lower AIC and ANOVA comparisons (p<.001). The logit link function ("binomial") was specified in the model, equivalent to modeling logit-transformed response probability with identity link function. 
+Two GLMMs were built using the \inlineR{lme4} package \parencite{Bates2014-eq}. Looks to the target (coded as 1, 0) served as the dependent variable. The \inlineR{Main Model} included three fixed effects: \inlineR{verb\_type} (Restrictive or Non-Restrictive), \inlineR{talker}(Native, Non-Native) and their interaction (L: 509). Random intercepts for \inlineR{subject\_img\_file},
+\inlineR{Participant.Private.ID}, and
+\inlineR{time\_normalized}.
+ were included, as were random slopes for \inlineR{talker} and \inlineR{verb\_type}. The logit link function ("binomial") was specified in the model, equivalent to modeling logit-transformed response probability with identity link function. Model comparison \footnote{See \inlineR{AOW\_r\_work\_flow.rmd} for all model comparisons} showed preference for the full model with ANOVA comparisons (p < .001) and lower AIC and BIC. 
 
 \lstinputlisting[style=mystyle, firstnumber=508]{scripts/chunk-GLMM: Main Model.R}
 
-Similar to the above model, an accent-specific model was run only on the data of accented speech. more here.
+Similar to the above model, an accent only model was run on \inlineR{accent\_mem\_data}. Model specifications are identical to \inlineR{Main Model} outside of changing fixed effects to \inlineR{experience\_chinese} (L:540). Additionally, \inlineR{talker} is removed as a random slope because \inlineR{accent\_mem\_data} only has one \inlineR{talker}: accented. Full models were shown to outperform simpler models from  ANOVA comparisons (p < .001) and lower AIC and BIC, as well as non-convergence of simpler models. 
 
 \lstinputlisting[style=mystyle, firstnumber=539]{scripts/chunk-GLMM: Accent Model.R}
 
 \subsection{3.2 GAMMs}
-GAMMs are becoming increasingly popular as they allow the researcher to model complex time course information without the need for assumptions of linearity. Like GLMM data, GAMM data must be first coded and prepared (L: 546-559). Here, we turn variables into factors and level them at the same time (e.g., L: 442). 
-
-Leveling is similar to the GLMMs. However, it is important to note that GAMMs do better with coded variables. Specific coding style for GAMMs can be found in \inlineR{AOW\_r\_work\_flow.rmd} from L: 550-552. Lastly, we split off the accent data for accent GAMM
+GAMMs are becoming increasingly popular as they allow the researcher to model complex time course information without the need for assumptions of linearity. Like GLMM data, GAMM data must be first coded and prepared (L: 546-559). Here, we turn variables into factors and level them at the same time (e.g., L: 550-553). However, it is important to note that GAMMs do better with coded variables, L: 550-552. We create \inlineR{even} as a combination between conditions (L:554-555). Then we only \inlineR{select()} columns necessary for the analysis (L:557-559). Lastly, we split off the accent data for the accent GAMM (L: 560).
 
 \lstinputlisting[style=mystyle, firstnumber=546]{scripts/chunk-GAMM: Leveling the Data.R}
 
-GAMM Models were built using the \inlineR{mgcv} package \parencite{mgcv_wood_2017}. details here
+GAMM Models were built using the \inlineR{mgcv} package \parencite{mgcv_wood_2017}. Like the GLMM model, the GAMM models treat target(L:603) as independent variable with dependent variables includingl: three fixed effects: \inlineR{talker\_coded} (L: 603), \inlineR{verb\_type\_coded} (L: 605) and their interaction (L: 607). Random effects included \inlineR{Event} (L: 612). Smooth terms were included for \inlineR{time\_elapsed} by levels of \inlineR{talker\_coded} (L: 604), \inlineR{verb\_type\_coded} (L: 606), and \inlineR{Condition} (L: 608). Smooth terms allow for a non-linear relationship between \inlineR{time\_elapsed} and the response variable \inlineR{verb\_type\_coded}, with a different smooth function for each level of variable (i.e., native/non-native). An additional smooth term for \inlineR{log\_SUBTLWF\_Obj} (L: 609) was included. Smooth terms for \inlineR{time\_elapsed} were included for grouping levels: \inlineR{Participant.Private.ID} and \inlineR{subject\_image\_file} (L:610-611). The logit link function ("binomial") was specified in the model, equivalent to modeling logit-transformed response probability with identity link function.  
 
-\lstinputlisting[style=mystyle, firstnumber=563]{scripts/chunk-GAMM: Main Model.R}
+\lstinputlisting[style=mystyle, firstnumber=602]{scripts/chunk-GAMM: Main Model.R}
 
-describe accent gamm here
+The accent GAMM had identical structure to the main GAMM with the expectation of having only 1 main effect: \inlineR{experience\_chinese} (L: 642) and removing the smoothing term leveled by \inlineR{talker\_coded}. \inlineR{gamm\_data\_accented} was the data frame (L: 648).
 
-\lstinputlisting[style=mystyle, firstnumber=577]{scripts/chunk-GAMM: Accent Model.R}
-
-
+\lstinputlisting[style=mystyle, firstnumber=641]{scripts/chunk-GAMM: Accent Model.R}
 
 \subsection{3.3 Results}
 
