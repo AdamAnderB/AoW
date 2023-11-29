@@ -1,41 +1,36 @@
 \section{Discussion}
-Alone, eye-fixations are meaningless. Exacting Meaning for x- and y-coordinates is achieved
-through time, visual stimuli, and audio stimuli. These \textit{four core} constructs correspond directly with the variables of our experiments, research questions, and data analyses. However, managing these constructs is complex. Data wrangling, through lines of code, knits these constructs together, gradually constructing bridges of understanding.
+Alone, eye-fixations are meaningless. Exacting meaning for x- and y-coordinates is achieved
+through time, visual stimuli, and audio stimuli. These \textit{four core} constructs correspond directly with the variables of our experiment, research questions, and data analyses. However, managing these constructs is complex. Data wrangling, through lines of code, knits these constructs together, gradually constructing bridges of understanding.
 
-Our replication results suggest that web-based eye-tracking is a viable method for replicating in-person eye tracking studies. Our main models show that predictive sentence processing. While our accent models did not find evidence of accent-modulated predictive processing, our sample of participants also had far less experience with Chinese accents than \textcite{Porretta_et_al_2020}. Results are inconclusive in this regard. However, the level of effects found in main models suggests that it is not a problem of capturing the effect. However, the variation is likely due to differences beyond the method of data collection.
+Like other recent web-based eye-tracking studies, our replication results suggest that web-based eye-tracking is an excellent method for not only replicating in-person eye-tracking studies \parencite{Vos_2017, Prystauka_Altmann_Rothman_2023} but even for conducting novel studies. Our main models show that predictive sentence processing is modulated by restrictive and non-restrictive verb type. While our accent models did not find evidence of accent-modulated predictive processing, our sample of participants also had far less experience with Chinese accents than \textcite{Porretta_et_al_2020}. As mentioned in 2.2.1, our participants reported very little accent experience ($M$ = 11.42\%, SD = 13.28) on a scale of 0-100. There are two possibilities for the outcome of this low metric. The first is that the students tested in \textcite{Porretta_et_al_2020} simply have higher amounts of Chinese experience ($M$ = 7.04, SD = 6.54) on a scale of 0-30. Another possibility is measurement error, 13 of our 49 participants reported 0 Chinese experience. One of the possible contributing factors to this may be the design of the sliding scale for reporting Chinese accent experience. The sliding scale was set to start at 0 (Gorilla pre-set setting, which can be controlled in configuration settings). It could be that some participants simply selected next to move on quickly. Future studies should clearly state the exact type of method used for capturing such data and make materials fully available to avoid this confusion for metrics that are essential for analyses. Results are inconclusive in this regard for the accent models. However, the level of effects found in both the GLMM and GAMM main models suggests that it is not a problem of capturing the effect. However, the variation is likely due to differences beyond the method of data collection.
 
+The data wrangling cycle is an iterative cycle of exploration that allows the researcher to ask and answer practical questions (e.g., who to remove, what eye-fixation to keep, how to join data without losing data, how to build robust models that provide insight into the data). Here, we summarize key decision points that are essential for web-based eye-tracking studies to consider through a Q\&A style guide. 
 
-vwp- four core
-meaning is built/mapped/poured into:
--eye fixations
-through data wrangling of:
--visual stimuli
--audio sitmuli
--time
+\subsection{What are the exclusion criteria for participant backgrounds?}
 
+Removal of participants for background information or not fitting the study requirements should be made beforehand and should be a simple filtering step at the beginning of data wrangling.
 
-the data wrangling cycle: is an iterative cycle of exploration that allows the research to ask and answer practical questions (e.g., who to remove, what eye-fixation to keep, how to join data without losing data, How to build robust models that provide insight into the data). Here, we used data wrangling practices to formulate principled key decision points to guide future web-based eye-tracking research :
+\subsection{What are the behavioral task checks and what are the criteria for removal?}
 
-- what are the exclusion criteria for participants?
-These types of removal should always always be made before hand. If you start removing people here based on feeling it doesn't feel good for science and it doesn't feel good yourself. 
+The decisions and standards of participant and item removal should always be done before data analysis begins. We recommend removal by median absolute deviation or set standard deviation where appropriate with a set value prior to beginning wrangling.  
+Crucially, report what criterion you used for removal. Do not simply report that you removed certain items and participants for 'technology' failures.
 
+\subsection{How do we identify and select quadrants?}
+This is primarily a question of which eye-fixations should be considered as 'in' a quadrant. Previous web-based eye-tracking studies have shown that removal to the boundary of visual stimuli still enables the researcher to capture results even with this strict standards for removal of eye-fixations (28\% in \textcite{Vos_2017}). That is, eye-fixations outside the target areas in figure \ref{fig:signal_noise} are excluded regardless of how close they are to the area (i.e., classifying web-based eye-fixation the same way that lab-based eye tracking does). However, ranges of removal at this strict standard suggest removal of up to ~93.61\% of the data. 
 
-- what are the behavioral task checks and what are the criteria for removal?
-Removal here can be strict. However, beyond setting a strict limit. The more important thing is to report what criterion you used for removal not simply that you removed certain items and participants for 'technology' failures or whatever it is that is in a lot of papers. Decide before hand
+Our suggestion is twofold: firstly, embrace the noise. If eye-fixations are random or equally distributed from the center, then including them will not hinder analysis. We suggest that future research maximize retained signal, rather than maximizing removed noise.  Secondly, we suggest that future research report and explore standards for maximizing signal and minimizing noise retention of eye-fixations. 
 
 
-- how to identify and select quadrants
-Lab-based eye-tracking is extremely precise, web-based eye-tracking is more variable. This is part of the reason that it is difficult to wrangle. Previous web-based eye-tracking studies have shown that eye-fixation variability can be captured even with strict standards for removal. That is, eye-fixations outside the target areas in figure \ref{fig:signal_noise} are excluded regardless of how close they are to the area (i.e., classifying web-based eye-fixation the same way that lab-based eye tracking does). In our data, we looked to examine where eye-fixations are distributed throughout the trial.
-
+\subsection{How do we identify and select quadrants?}
 - frame-rate cutoffs
-Basically below 5 seems to be "unusable". However, beyond that, it really depends on what your RQ is. If you are looking at the verb\_type effect this is found all the way down to 6-10 fps. However, this is only true with the native speaker is speaking. The effect in the non-native speaker cannot be captured until around 12-17 Hzs
+Below 5Hz seems to be 'unusable'. However, beyond that, it may depend on the research question of interest. It is possible that some weaker effects may require higher frame rates to capture. For example, if you are looking at the \inlineR{verb\_type} effect; it is visually apparent in our data all the way down to the 6-10Hz range. However, this is only true for the native speaker condition. The effect in the non-native speaker conditions cannot be captured until around 12-17Hz. 
 
-- bin sizes
-Perhaps a remnant from the past. It no longer seems necessary outside of visualizations. Basically the guidance here is that you must understand that increasing the bin size decreases the amount of bins. e.g., if you have 250ms and you want 50 binwidth bins then you will only  5 bins. Or the opposite.
+Additionally, in an exploratory attempt, we found that device OS and age of the browser potentially explains variability between participants. Cut offs for types of browsers could be useful in collecting higher quality data and lower need to remove large amounts of participants found in other web-based eye-tracking studies \parencite{Prystauka_Altmann_Rothman_2023}.
 
+Again, here we suggest that all standards for removal should be reported, regardless of the range.
 
-data wrangling is pervasive throughout the data analysis process from raw to visualizing model results.
+\subsection{What bin size to use?}
+The amount of data per bin has an inverse relationship to the amount of bins over a set period of time. Along with reporting standards for binning, we recommend that the researcher find a balance between fewer bins with more data and more bins with less data. \textcite{Vos_2017} and the current study used 50ms time bins. However, larger bin sizes could be useful with audio stimuli with longer duration. The crucial decision comes down to understanding the area of interest. Excluding extreme scenarios where the bin size is approaching the size of the area of interest, our data suggests that varying bin size has little effect on outcomes. 
 
-Data wrangling is a method of exploration that allows us to gain a fimiliarity with the constructs that we think about. Improving our experimental design, data analysis, data visualization, and happiness.
 
 
