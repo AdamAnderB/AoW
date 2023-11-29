@@ -2,37 +2,44 @@
 
 In all previous steps, wrangling can be thought of as a condensing process, where the primary object is to remove, clean, and transform the data into a structure that is usable. However, once the data is put into tidy form, then the data must be transformed for specific visualizations and analyses. In this section, we think of \inlineR{all\_data\_cleaned} and \inlineR{all\_data\_tidy} as launching points to gain understanding of our data. 
 
- Here, we are creating two data frames from \inlineR{all\_data\_tidy}: \inlineR{mem\_data} in L: 405 and then \inlineR{gamm\_data} in L: 411. In general, in data wrangling, keeping as much data as possible is essential to creating a usable data frame. However, in model wrangling, it is often best to remove variables that you will not be using. This is because some models can have complications interpreting unprocessed data types. For \inlineR{mem\_data}, we start by selecting all necessary columns for the model: \inlineR{Participant.Private.ID}, \inlineR{verb\_type},\inlineR{talker}, item \inlineR{subject\_img\_file}, \inlineR{target}, log frequency of object item \inlineR{log\_SUBTLWF\_Obj}, and  \inlineR{time\_elapsed\_rounded}. \inlineR{Participant.Private.ID} is turned into a factor in L: 408. Finally, \inlineR{tidy\_quest\_data} is joined to \inlineR{mem\_data} to add questionnaire values for each participant (e.g., \inlineR{Chinese\_accent\_experience}). In addition to the \inlineR{mem\_data}, we create \inlineR{gamm\_data} by simply cloning \inlineR{mem\_data} in L: 411 and by adding a single variable needed in the GAMM models.
+ Here, we are creating two data frames from \inlineR{all\_data\_tidy}: \inlineR{mem\_data} in L: 453 and then \inlineR{gamm\_data} in L: 459. In general, in data wrangling, keeping as much data as possible is essential to creating a usable data frame. However, in model wrangling, it is often best to remove variables that you will not be using. This is because some models can have complications interpreting unprocessed data types. For \inlineR{mem\_data}, we start by selecting all necessary columns for the model (L: 454-455). Factor type conversion occurs next (L: 456). Finally, to get background information we join \inlineR{tidy\_quest\_data}. In addition to the \inlineR{mem\_data}, we create \inlineR{gamm\_data} by simply cloning \inlineR{mem\_data} in L: 459 and by adding a single variable needed in the GAMM models.
 
 \lstinputlisting[style=mystyle, firstnumber=452]{scripts/chunk-All Data: Preparing for Models.R}
 
 There are a handful of excellent papers that outline the advantages and disadvantages of different methods of eye-fixation analysis and relevant considerations for each method of analysis \parencite{Ito_Knoeferle_2022,Mirman_Dixon_Magnuson_2008,McMurray_2023,Barr_2008}. Here we continue to focus on the data wrangling process and present the data wrangling steps--and decisions--needed to carry out two of the more widely used statistical analyses: generalized linear mixed effect models or GLMM and generalized additive mixed effects models or GAMM. Both GLMMs and GAMMs require specific coding of the data before running models to get expected results. That is, each of these models start with coding the data correctly and building maximal models as justified by the design and working down to simpler models for model comparison. \parencite{Barr_Levy_Scheepers_Tily_2013}.
 
-
 \subsection{3.1 GLMMs}
 
 \subsection{3.1.1 GLMMs: coding}
 
-For GLMMs coding, start with data type conversion (L: 404-405). We then, can re-level both \inlineR{talker}(Native, Non-Native) and \inlineR{verb\_type}(Restrictive or Non-Restrictive) so that \inlineR{verb\_type}(Restrictive) and \inlineR{talker}-Native are both set as reference levels (L: 406-408).  We can then rename the contrasts to improve model output readability (L: 418-421). Lastly, in L: 423 through L: 430, we normalize the two variables \inlineR{time\_elapsed} and \inlineR{experience\_chinese}.
+For GLMMs coding, start with data type conversion (L: 464-465). We then, can re-level both \inlineR{talker}(Native, Non-Native) and \inlineR{verb\_type}(Restrictive or Non-Restrictive) so that \inlineR{verb\_type}(Restrictive) and \inlineR{talker}-Native are both set as reference levels (L: 466-467).  We can then rename the contrasts to improve model output readability (L: 468-471). Lastly, in L: 473 through L: 476, we normalize the \inlineR{time\_elapsed}. Lastly, we create a dataframe for the accent model (L:477).
 
 \lstinputlisting[style=mystyle, firstnumber=463]{scripts/chunk-GLMM: Leveling the Data.R}
 
 \subsection{3.1.2 GLMMs: models}
 
-Two GLMMs were built using the \inlineR{lme4} package \parencite{Bates2014-eq}.  Looks to the target (coded as 1, 0) served as the dependent variable. The \inlineR{Main Model} included three fixed effects: \inlineR{verb\_type} (Restrictive or Non-Restrictive), \inlineR{talker}(Native, Non-Native) and their interaction (L: 432). All factor variables were coded with effects coding L: 414-417. Random intercepts for \inlineR{subject\_img\_file},
+Two GLMMs were built using the \inlineR{lme4} package \parencite{Bates2014-eq}.  Looks to the target (coded as 1, 0) served as the dependent variable. The \inlineR{Main Model} included three fixed effects: \inlineR{verb\_type} (Restrictive or Non-Restrictive), \inlineR{talker}(Native, Non-Native) and their interaction (L: 509). Random intercepts for \inlineR{subject\_img\_file},
 \inlineR{time\_normalized}, and
 \inlineR{Participant.Private.ID} were included, as were random slopes for \inlineR{talker} and \inlineR{verb\_type}, but correlations were removed after model comparison showed preference for parsimonious models over full models and simplified models with lower AIC and ANOVA comparisons (p<.001). The logit link function ("binomial") was specified in the model, equivalent to modeling logit-transformed response probability with identity link function. 
 
 \lstinputlisting[style=mystyle, firstnumber=508]{scripts/chunk-GLMM: Main Model.R}
 
+Similar to the above model, an accent-specific model was run only on the data of accented speech. more here.
+
 \lstinputlisting[style=mystyle, firstnumber=539]{scripts/chunk-GLMM: Accent Model.R}
 
 \subsection{3.2 GAMMs}
-GAMMs are becoming increasingly popular as they allow the researcher to model complex time course information without the need for assumptions of linearity. Like GLMM data, GAMM data must be first coded and prepared (L: 434-446). Here, we turn variables into factors and level them at the same time (e.g., L: 442). 
+GAMMs are becoming increasingly popular as they allow the researcher to model complex time course information without the need for assumptions of linearity. Like GLMM data, GAMM data must be first coded and prepared (L: 546-559). Here, we turn variables into factors and level them at the same time (e.g., L: 442). 
+
+Leveling is similar to the GLMMs. However, it is important to note that GAMMs do better with coded variables. Specific coding style for GAMMs can be found in \inlineR{AOW\_r\_work\_flow.rmd} from L: 550-552. Lastly, we split off the accent data for accent GAMM
 
 \lstinputlisting[style=mystyle, firstnumber=546]{scripts/chunk-GAMM: Leveling the Data.R}
 
+GAMM Models were built using the \inlineR{mgcv} package \parencite{mgcv_wood_2017}. details here
+
 \lstinputlisting[style=mystyle, firstnumber=563]{scripts/chunk-GAMM: Main Model.R}
+
+describe accent gamm here
 
 \lstinputlisting[style=mystyle, firstnumber=577]{scripts/chunk-GAMM: Accent Model.R}
 
@@ -50,26 +57,26 @@ GAMMs are becoming increasingly popular as they allow the researcher to model co
 \end{figure}
 
 \subsection{3.3.1 GLMM Results}
-Results from the GLMM revealed a significant effect of  \inlineR{verbtype}-Restricting  ($\beta$ = 0.281, SE = 0.067, z = 4.192, p = .001), indicating more looks to targets for restrictive \inlineR{verb\_types} over non-restrictive \inlineR{verb\_types}, see figure \ref{fig:GLMER_base_model}. Additionally, an interaction between speaker and verb type was found ($\beta$ = -0.13737, SE = 0.05346, z = -2.570, p=.05).
+Results from the Main GLMM revealed a significant effect of  \inlineR{verb\_type}-Restricting  ($\beta$ = 0.281, SE = 0.067, z = 4.190, p < .001), indicating more looks to targets for restrictive \inlineR{verb\_type} over non-restrictive \inlineR{verb\_type}, see figure \ref{fig:GLMM_cow_model}. Additionally, an interaction between speaker and verb type was found ($\beta$ = -0.136, SE = 0.053, z = -2.552, p = 0.011), indicating less looks when listening to the accented speaker.
 
+Results from the Accent GLMM revealed a significant effect of  \inlineR{verb\_type}-Restricting  ($\beta$ = 0.323, SE = 0.046, z = 6.946, p < .001), indicating more looks to targets for restrictive \inlineR{verb\_type} over non-restrictive \inlineR{verb\_type}, see figure \ref{fig:GLMM_cow_model}. Additionally, an interaction verb type and experience with Chinese accent was found ($\beta$ = -0.010, SE = 0.003, z = -3.999, p < 0.001), indicating less looks to non-restrctive verbs as experience goes up.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figures/GLMM_cow_model.pdf}
-    \caption{Model output for parsimonious model}
-    \label{fig:GLMER_base_model}
+    \caption{Model output for parsimonious GLMM models}
+    \label{fig:GLMM_cow_model}
 \end{figure}
- Similar to the above model, an accent-specific model was run only on the data of accented speech. more here.
-
 
 \subsection{3.3.2 GAMM Results}
 
-GAMM Models were built using the \inlineR{mgcv} package \parencite{mgcv_wood_2017}.
-Like the GLMM, the GAMM revealed a significant effect of \inlineR{verbtype}-Restricting ($\beta$ = 0.3981, SE = 0.1293, z = 3.078, p < .005), indicating more looks to targets for restrictive \inlineR{verb\_types} over non-restrictive \inlineR{verb\_types}, see figure \ref{fig:model_gamm_effects}. Additionally, an interaction between speaker and verb type was found ($\beta$ = -0.137, SE = 0.053, z = -2.570, p=.). 
+Like the GLMM, the Main GAMM revealed a significant effect of \inlineR{verb\_type}-Restricting ($\beta$ = 0.398, SE = 0.129, z = 3.078, p = 0.002), indicating more looks to targets for restrictive \inlineR{verb\_type} over non-restrictive \inlineR{verb\_type}, see figure \ref{fig:GAMM_cow_model}.
+
+Like the GLMM, the Accent GAMM revealed a significant effect of \inlineR{verbtype}-Restricting ($\beta$ = 0.556, SE = 0.157, z = 3.537, p < 0.001), indicating more looks to targets for restrictive \inlineR{verb\_type} over non-restrictive \inlineR{verb\_type}, see figure \ref{fig:GAMM_cow_model}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figures/GAMM_cow_model.pdf}
-    \caption{place holder for real model outputs later}
-    \label{fig:GLMER_accent_model}
+    \caption{Model output for parsimonious GAMM models}
+    \label{fig:GAMM_cow_model}
 \end{figure}
