@@ -1,6 +1,6 @@
 ## ----GLMM: Accent model output as data for Visualization----
 #GLMM viz
-model2_effects <- as.data.frame(coef(summary(glmm2_3)))
+model2_effects <- as.data.frame(coef(summary(glmm2_1)))
 model2_effects$effect<-as.factor(rownames(model2_effects))
 model2_effects$effect <- fct_rev(fct_inorder(model2_effects$effect))
 model2_effects <- model2_effects %>%

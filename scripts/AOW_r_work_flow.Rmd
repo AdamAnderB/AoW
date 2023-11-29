@@ -493,42 +493,38 @@ accent_mem_data<-mem_data%>%filter(talker == "NonNativeMale")
 #            (talker||subject_img_file)+
 #            (verb_type||Participant.Private.ID),
 #          family="binomial",data=mem_data)
-#
-#anova(glmm1_2,glmm1_1)
-#anova(glmm1_3,glmm1_2)
 #m2 is a more parsimonious and preferable model compared to m1_1 or m1_3 because of lower AIC and BIC
 #as well as the anova coming up significant in comparison to simpler model m1_3.
 #summary(glmm1_1)
 #summary(glmm1_2)
 #summary(glmm1_3)
-#anova(glmm1_2,glmm1_1)
-#anova(glmm1_3,glmm1_2)
+#anova(glmm1_1,glmm1_2)
+#anova(glmm1_2,glmm1_3)
 ```
-
 ```{r GLMM: Main Model}
-glmm1_2<-glmer(target~talker*verb_type+
+glmm1_1<-glmer(target~talker*verb_type+
             (talker||subject_img_file)+
             (verb_type||Participant.Private.ID)+
             (1|time_normalized),
           family="binomial",data=mem_data)
-summary(glmm1_2)
+summary(glmm1_1)
 ```
-
-
 ```{r GLMM: Accent Model Comparison}
-#glmm2_1<-glmer(target~verb_type*experience_chinese+
+#glmm2_1<-glmer(target~experience_chinese+
 #            (1|subject_img_file)+
-#            (subject_img_file|Participant.Private.ID),
+#            (verb_type|Participant.Private.ID)+
+#            (1|time_normalized),
 #          family="binomial",data=accent_mem_data)
 ##remove correlations
-#glmm2_2<-glmer(target~verb_type*experience_chinese+
+#glmm2_2<-glmer(target~experience_chinese+
 #            (1|subject_img_file)+
-#            (subject_img_file||Participant.Private.ID),
+#            (verb_type||Participant.Private.ID)+
+#            (1|time_normalized),
 #          family="binomial",data=accent_mem_data)
-##remove random effect
-#glmm2_3<-glmer(target~verb_type*experience_chinese+
+#remove timing random effect
+#glmm2_3<-glmer(target~experience_chinese+
 #            (1|subject_img_file)+
-#            (1|Participant.Private.ID),
+#            (verb_type||Participant.Private.ID),
 #          family="binomial",data=accent_mem_data)
 #summary(glmm2_1)
 #summary(glmm2_2)
@@ -537,11 +533,11 @@ summary(glmm1_2)
 #anova(glmm2_3,glmm2_2)
 ```
 ```{r GLMM: Accent Model}
-glmm2_3<-glmer(target~verb_type*experience_chinese+
+glmm2_1<-glmer(target~experience_chinese+
             (1|subject_img_file)+
-            (1|Participant.Private.ID),
-          family="binomial",data=accent_mem_data)
-summary(glmm2_3)
+            (verb_type|Participant.Private.ID)+
+            (1|time_normalized),family="binomial",data=accent_mem_data)
+summary(glmm2_1)
 ```
 ```{r GAMM: Leveling the Data}
 gamm_data <- gamm_data %>%
@@ -560,6 +556,45 @@ gamm_data <- gamm_data %>%
 gamm_data_accented<-gamm_data%>%filter(talker_coded == 1)
 ```
 # GAM 
+```{r GAMM: Main Model Comparison}
+#mod1 <- bam(target ~ talker_coded + 
+#              s(time_elapsed, by=talker_coded) + 
+#              verb_type_coded + 
+#              s(time_elapsed, by=verb_type_coded) +
+#              talker_coded:verb_type_coded + 
+#              s(time_elapsed, by=Condition)+
+#              s(log_SUBTLWF_Obj)+
+#              s(time_elapsed, Participant.Private.ID, bs="fs", m=1)+
+#              s(time_elapsed, subject_img_coded, bs="fs", m=1)+
+#              s(Event, bs="re"), 
+#              family="binomial", data=gamm_data, discrete=TRUE, method="fREML")
+# Reduced model 1: Remove random effects
+#mod_reduced1 <- bam(target ~ talker_coded + 
+#                    s(time_elapsed, by=talker_coded) + 
+#                    verb_type_coded + 
+#                    s(time_elapsed, by=verb_type_coded) +
+#                    talker_coded:verb_type_coded + 
+#                    s(time_elapsed, by=Condition)+
+#                    s(log_SUBTLWF_Obj)+
+#                    s(time_elapsed, Participant.Private.ID, bs="fs", m=1)+
+#                    s(time_elapsed, subject_img_coded, bs="fs", m=1), 
+#                    family="binomial", data=gamm_data, discrete=TRUE, method="fREML")
+# Reduced model 2: Remove some fixed effects and interactions
+#mod_reduced2 <- bam(target ~ talker_coded + 
+#                    s(time_elapsed, by=talker_coded) + 
+#                    verb_type_coded + 
+#                    s(time_elapsed, by=verb_type_coded) +
+#                    talker_coded:verb_type_coded + 
+#                    s(time_elapsed, by=Condition)+
+#                    s(log_SUBTLWF_Obj), 
+#                    family="binomial", data=gamm_data, discrete=TRUE, method="fREML")
+#summary(mod1)
+#summary(mod_reduced1)
+#summary(mod_reduced2)
+# ANOVA for model comparison
+#anova(mod_reduced1, mod1)
+#anova(mod_reduced2, mod_reduced1)
+```
 ```{r GAMM: Main Model}
 mod1 <- bam(target ~ talker_coded + 
               s(time_elapsed, by=talker_coded) + 
@@ -574,22 +609,46 @@ mod1 <- bam(target ~ talker_coded +
               family="binomial", data=gamm_data, discrete=TRUE, method="fREML")
 summary(mod1)
 ```
+```{r GAMM: Accent Model comparison}
+#mod2 <- bam(target ~ experience_chinese + 
+#              s(time_elapsed, by=verb_type_coded) +
+#              s(log_SUBTLWF_Obj)+
+#              s(time_elapsed, Participant.Private.ID, bs="fs", m=1)+
+#              s(time_elapsed, subject_img_coded, bs="fs", m=1)+
+#              s(Event, bs="re"), 
+#                  family="binomial", data=gamm_data_accented, discrete=TRUE, method="fREML")
+#mod2_reduced1 <- bam(target ~ experience_chinese + 
+#              s(time_elapsed, by=verb_type_coded) +
+#              s(log_SUBTLWF_Obj)+
+#              s(time_elapsed, Participant.Private.ID, bs="fs", m=1)+
+#              s(time_elapsed, subject_img_coded, bs="fs", m=1),
+#                  family="binomial", data=gamm_data_accented, discrete=TRUE, method="fREML")
+#mod2_reduced2 <- bam(target ~ experience_chinese + 
+#              s(time_elapsed, by=verb_type_coded) +
+#              s(log_SUBTLWF_Obj),
+#                  family="binomial", data=gamm_data_accented, discrete=TRUE, method="fREML")
+#summary(mod2)
+#summary(mod2_reduced1)
+#summary(mod2_reduced2)
+# ANOVA for model comparison
+#anova(mod2_reduced1, mod2)
+#anova(mod2_reduced2, mod2_reduced1)
+```
 ```{r GAMM: Accent Model}
 mod2 <- bam(target ~ experience_chinese + 
-              verb_type_coded + 
               s(time_elapsed, by=verb_type_coded) +
-              experience_chinese:verb_type_coded + 
               s(log_SUBTLWF_Obj)+
               s(time_elapsed, Participant.Private.ID, bs="fs", m=1)+
               s(time_elapsed, subject_img_coded, bs="fs", m=1)+
               s(Event, bs="re"), 
-                  family="binomial", data=gamm_data_accented, discrete=TRUE, method="fREML")
+    family="binomial", data=gamm_data_accented, discrete=TRUE, method="fREML")
 summary(mod2)
 ```
+
 #model visualizations
 ```{r GLMM: Main model output as data for Visualization}
 #GLMM viz
-model1_effects <- as.data.frame(coef(summary(glmm1_2)))
+model1_effects <- as.data.frame(coef(summary(glmm1_1)))
 model1_effects$effect<-as.factor(rownames(model1_effects))
 model1_effects$effect <- fct_rev(fct_inorder(model1_effects$effect))
 model1_effects <- model1_effects %>%
@@ -616,7 +675,7 @@ glmm1_viz<-model1_effects%>%ggplot(aes(x=Estimate,y=effect,color=as.factor(fille
 
 ```{r GLMM: Accent model output as data for Visualization}
 #GLMM viz
-model2_effects <- as.data.frame(coef(summary(glmm2_3)))
+model2_effects <- as.data.frame(coef(summary(glmm2_1)))
 model2_effects$effect<-as.factor(rownames(model2_effects))
 model2_effects$effect <- fct_rev(fct_inorder(model2_effects$effect))
 model2_effects <- model2_effects %>%
