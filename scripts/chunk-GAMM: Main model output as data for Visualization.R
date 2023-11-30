@@ -7,17 +7,19 @@ gamm1_effects <- gamm1_effects %>%
     `Pr(>|z|)` <= 0.001 ~ "***",
     `Pr(>|z|)` <= 0.01 ~ "**",
     `Pr(>|z|)` <= 0.05 ~ "*",
-    `Pr(>|z|)` > 0.05 ~ "",))%>%
+    `Pr(>|z|)` > 0.05 ~ ""))%>%
   mutate(filler = case_when(
     Estimate <= 0.0 ~ -1,
     Estimate >= 0.0 ~ 1))
 
+labels_list1 <- rev(model1_effects$effect)
 gamm1_viz<-gamm1_effects%>%ggplot(aes(x=Estimate,y=effect,color=as.factor(filler)))+
   geom_pointrange(aes(xmin = Estimate-1.96 * `Std. Error`, xmax = Estimate+1.96 * `Std. Error`))+
   geom_vline(xintercept = 0, linetype = "dashed", color = "black")+
   geom_text(aes(x=-2,label = significance))+
   theme_minimal()+
   ylab("")+
+  scale_y_discrete(labels = labels_list1)+
   theme(panel.grid.minor.y = element_blank(),
         panel.grid.minor.x = element_blank(),
         legend.position = "none")+

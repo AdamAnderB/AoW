@@ -13,6 +13,7 @@ model2_effects <- model2_effects %>%
     Estimate <= 0.0 ~ -1,
     Estimate >= 0.0 ~ 1))
 
+
 glmm2_viz<-model2_effects%>%ggplot(aes(x=Estimate,y=effect,color=as.factor(filler)))+
   geom_pointrange(aes(xmin = Estimate-1.96 * `Std. Error`, xmax = Estimate+1.96 * `Std. Error`))+
   geom_vline(xintercept = 0, linetype = "dashed", color = "black")+

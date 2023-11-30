@@ -1,6 +1,6 @@
 ---
 title: "combining_data"
-author: "Adam A. Bramlett"
+author: "xxx"
 date: "2023-11-18"
 output: html_document
 ---
@@ -9,23 +9,37 @@ output: html_document
 library(tidyverse)
 library(tidyr)
 library(dplyr)
-library(ggplot2)
 library(stringr)
 library(readxl)
 ```
+Here is some code for combining data frame
 
+
+The code below is split into 5 chunks
+-some file management set -up
+
+3 methods for combining data by data type.
+-the actual code we used in the Art of wrangling for combining data using plyr
+-a simple for-loop solution
+-an alternative tidyverse solution using a for loop and dplyr
+
+
+At the end we have a small data column conversion code made to create easier variable names for the Art of Wrangling. This was necessary for making the paper readable. 
+
+
+plyr solution: be careful if you are a tidyverse user. Plyr has overlapping arguments with dplyr. Be sure to detach it. However, this method is easy and straight forward with very little problems even with data that can have overlapping names. This is directly usable for the Gorilla data structure with relational data frame. Additional you can use argmuments for a pattern which is helpful if you have many tasks avaiable.
 ```{r}
 #load all data
 library(plyr)
 #data eye_tracking
 
-data_eyetracking<-plyr::ldply(list.files("/Users/adambramlett/scripts/et/eye_tracking/uploads", pattern="eyetracking", full.names=TRUE),function(filename) {
+data_eyetracking<-plyr::ldply(list.files("/Users/xxusernamexx/scripts/et/eye_tracking/uploads", pattern="eyetracking", full.names=TRUE),function(filename) {
   dum=read_xlsx(filename)
   return(dum)
 })
 
 #load responses
-data<-plyr::ldply(list.files("/Users/adambramlett/scripts/et/eye_tracking/", pattern="task", full.names=TRUE),function(filename) {
+data<-plyr::ldply(list.files("/Users/xxusernamexx/scripts/et/eye_tracking/", pattern="task", full.names=TRUE),function(filename) {
   dum=read.csv(filename)
   return(dum)
 })
@@ -33,12 +47,47 @@ data<-plyr::ldply(list.files("/Users/adambramlett/scripts/et/eye_tracking/", pat
 detach("package:plyr")
 #this is only necessary if you have more than one eye-tracking task
 task_dat <- data%>%filter(Task.Name == "Eye-tracking-task")
+#our task had an additional bird song learning task with eye-tracking data for that as well
 #bird_dat <- data%>%filter(Task.Name == "bird_tracking")
 #load OSF data
-OSF_df <- read.csv("/Users/adambramlett/scripts/et/eye_tracking_practice/OSF_data.csv")
+OSF_df <- read.csv("xxx")
+```
+simple for loop: this is useful for situations that you just want to pull in all the data in a file and you know each spreadsheet is identical in form.
+```{r}
+dum<-read.csv(list[1],sep = "")
+cols<-ncol(dum)+1
+cols
+
+data <- data.frame(matrix(ncol = cols, nrow = 0))
+for (files in 1:length(list)){
+  dum<-read.csv(list[files],sep = "")
+  dum$name<-list[files]
+  data<-rbind(data,dum)
+} 
+write.csv(data,"/Users/xxusernamexx/scripts/all_Mandarin_speakers/all_data.csv", row.names = FALSE)
+```
+for_loop+ dplyr solution--- this is useful when you have many spreadsheets that may have some form of inconsistency that you need to fix. Here, I was fixing the data types after loading in and providing the name of the file as a column name
+```{r}
+file_names<-list.files("/Users/xxusernamexx/scripts/kbi_data/",pattern = "data")
+file_names
+the_data<-data.frame(matrix(ncol = 1, nrow = 0))
+
+for (file in file_names) {
+  result <- list.files(paste("/Users/xxusernamexx/scripts/kbi_data/",file,"/",sep = ""),
+                           pattern="one_[0-9]{4}-[0-9]{2}-[0-9]{2}_([A-Za-z0-9]+(.[A-Za-z0-9]+)+).csv",
+                           full.names=TRUE)%>%
+  map_df(~read_csv(.x)%>%mutate(across(.fns = as.character)))%>%
+  type_convert()
+  result$expName<-file
+  result$participant<-as.numeric(result$participant)
+  the_data<-bind_rows(the_data,result)
+}
+
+write.csv(all_data,file= "combined_data.csv")
+
 ```
 
-
+#some name changes
 ```{r}
 task_data<-task_dat
 task_data[task_data == "Screen 1"] <- "gender"
