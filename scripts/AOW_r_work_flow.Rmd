@@ -454,7 +454,7 @@ mem_data<-all_data_tidy%>%
   select(Participant.Private.ID,verb_type,talker,
          subject_img_file,target,Trial.Number,log_SUBTLWF_Obj,target_obj,time_elapsed)%>%
   mutate(Participant.Private.ID=as.factor(Participant.Private.ID))%>%
-  left_join(tidy_quest_data)
+  left_join(filtered_quest_data)
 
 gamm_data<-mem_data%>%
   mutate(Condition = paste(talker,verb_type,sep="."))
@@ -501,10 +501,14 @@ accent_mem_data<-mem_data%>%filter(talker == "NonNativeMale")
 #anova(glmm1_1,glmm1_2)
 #anova(glmm1_2,glmm1_3)
 ```
+
+
+
+
 ```{r GLMM: Main Model}
 glmm1_1<-glmer(target~talker*verb_type+
-            (talker||subject_img_file)+
-            (verb_type||Participant.Private.ID)+
+            (talker|subject_img_file)+
+            (verb_type|Participant.Private.ID)+
             (1|time_normalized),
           family="binomial",data=mem_data)
 summary(glmm1_1)
@@ -688,6 +692,7 @@ model2_effects <- model2_effects %>%
     Estimate <= 0.0 ~ -1,
     Estimate >= 0.0 ~ 1))
 
+
 glmm2_viz<-model2_effects%>%ggplot(aes(x=Estimate,y=effect,color=as.factor(filler)))+
   geom_pointrange(aes(xmin = Estimate-1.96 * `Std. Error`, xmax = Estimate+1.96 * `Std. Error`))+
   geom_vline(xintercept = 0, linetype = "dashed", color = "black")+
@@ -709,17 +714,19 @@ gamm1_effects <- gamm1_effects %>%
     `Pr(>|z|)` <= 0.001 ~ "***",
     `Pr(>|z|)` <= 0.01 ~ "**",
     `Pr(>|z|)` <= 0.05 ~ "*",
-    `Pr(>|z|)` > 0.05 ~ "",))%>%
+    `Pr(>|z|)` > 0.05 ~ ""))%>%
   mutate(filler = case_when(
     Estimate <= 0.0 ~ -1,
     Estimate >= 0.0 ~ 1))
 
+labels_list1 <- rev(model1_effects$effect)
 gamm1_viz<-gamm1_effects%>%ggplot(aes(x=Estimate,y=effect,color=as.factor(filler)))+
   geom_pointrange(aes(xmin = Estimate-1.96 * `Std. Error`, xmax = Estimate+1.96 * `Std. Error`))+
   geom_vline(xintercept = 0, linetype = "dashed", color = "black")+
   geom_text(aes(x=-2,label = significance))+
   theme_minimal()+
   ylab("")+
+  scale_y_discrete(labels = labels_list1)+
   theme(panel.grid.minor.y = element_blank(),
         panel.grid.minor.x = element_blank(),
         legend.position = "none")+
@@ -739,12 +746,14 @@ gamm2_effects <- gamm2_effects %>%
     Estimate <= 0.0 ~ -1,
     Estimate >= 0.0 ~ 1))
 
+labels_list2 <- rev(model2_effects$effect)
 gamm2_viz<-gamm2_effects%>%ggplot(aes(x=Estimate,y=effect,color=as.factor(filler)))+
   geom_pointrange(aes(xmin = Estimate-1.96 * `Std. Error`, xmax = Estimate+1.96 * `Std. Error`))+
   geom_vline(xintercept = 0, linetype = "dashed", color = "black")+
   geom_text(aes(x=-2,label = significance))+
   theme_minimal()+
   ylab("")+
+  scale_y_discrete(labels = labels_list2)+
   theme(panel.grid.minor.y = element_blank(),
         panel.grid.minor.x = element_blank(),
         legend.position = "none")+
@@ -756,15 +765,32 @@ glmm2_viz<-glmm2_viz+ggtitle("GLMM Accent Model Effects")
 gamm1_viz<-gamm1_viz+ggtitle("GAMM Main Model Effects")
 gamm2_viz<-gamm2_viz+ggtitle("GAMM Accent Model Effects")
 
+
 plot_grid(glmm1_viz, glmm2_viz, nrow = 1, align = "h")
 ggsave(file.path(viz_path,"GLMM_cow_model.pdf"), width = 10, height = 2)
 plot_grid(gamm1_viz, gamm2_viz, nrow = 1, align = "h")
 ggsave(file.path(viz_path,"GAMM_cow_model.pdf"), width = 10, height = 2)
 ```
-
 ```{r write all the CSVs for models}
 write.csv(model1_effects,file.path(output_path,"GLM_main_model_output.csv"))
 write.csv(model2_effects,file.path(output_path,"GLM_accented_model_output.csv"))
 write.csv(gamm1_effects,file.path(output_path,"GAM_main_model_output.csv"))
 write.csv(gamm2_effects,file.path(output_path,"GAM_accented_model_output.csv"))
+write.csv(all_data_tidy,file.path(output_path,"all_data_tidy.csv"))
+write.csv(all_data_cleaned,file.path(output_path,"all_data_cleaned.csv"))
+```
+```{r experience calculations}
+experience <- accent_mem_data %>%
+  select(Participant.Private.ID, experience_chinese_accent) %>%
+  unique() %>%
+  mutate(experience = experience_chinese_accent*.3)%>%
+  mutate(experience_1_corr= if_else(experience == 0, 1,experience))%>%
+  mutate(log_experience = log(experience_1_corr))
+
+#actual accent experience
+mean(experience$experience_chinese_accent)
+sd(experience$experience_chinese_accent)
+#log chinese accent experience
+mean(experience$log_experience)
+sd(experience$log_experience)
 ```
