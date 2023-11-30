@@ -1,6 +1,6 @@
 ---
 title: "audio_vizualization"
-author: "Adam A. Bramlett"
+author: "xxxusernamexxx"
 date: "2023-10-23"
 output: html_document
 ---
@@ -10,7 +10,7 @@ library(tuneR)
 library(cowplot)
 list.files(aow.wav)
 # define path to audio file
-fin = '/Users/adambramlett/scripts/the_art_of_wrangling/AoW/figures/AOW.wav'
+fin = '/Users/xxxusernamexxx/scripts/the_art_of_wrangling/AoW/figures/AOW.wav'
 
 # read in audio file
 data = readWave(fin)
@@ -85,7 +85,7 @@ df$new_question<-str_replace(df$Question,"/[^0-9]+/","" )
 ```
 
 ```{r}
-list.files('/Users/adambramlett/scripts/the_art_of_wrangling/cleaned_data/')
+list.files('/Users/xxxusernamexxx/scripts/the_art_of_wrangling/cleaned_data/')
 all_data<-read.csv('/Users/adambramlett/scripts/the_art_of_wrangling/cleaned_data/all_data.csv')
 
 library("jpeg") 
@@ -99,7 +99,7 @@ library("ggimage")
 ```
 ```{r}
 
-img = "/Users/adambramlett/scripts/the_art_of_wrangling/AoW/figures/core_four_background.jpeg"
+img = "/Users/xxxusernamexxx/scripts/the_art_of_wrangling/AoW/figures/core_four_background.jpeg"
 
 # adding image to graph  
 
