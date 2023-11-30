@@ -1,15 +1,10 @@
 \section{Abstract}
 
-Quantitative research in second language acquisition and bi-/multilingualism requires careful and thorough explanations of the steps taken between collecting raw data
-(exported from the experiment directly) and handling cleaned and coded data (ready for statistical
-analysis). However, this process of data wrangling is not standardized across studies in the language
-sciences. Often, hundreds or thousands of lines of R code are reported in 3-4 lines within methods. This is especially problematic for complex data wrangling procedures like that of web-based eye-tracking, which has now been validated for capturing various levels of language processing by several studies \parencite[e.g.,][]{Vos_2017,Prystauka_Altmann_Rothman_2023}, including this one.
-As we demonstrate below, web-based eye-tracking is more accessible than ever with lower cost than ever. However, doing a web-based eye-tracking study requires careful planning of experiment, extensive data wrangling skills, and requires many decisions from the researcher. Below we demonstrate a single change replication of an in-person eye-tracking study, \textcite{Porretta_et_al_2020}, from experiment building to statistical modeling in three acts. In Act 1: we provide a guide for building eye-tracking studies with Gorilla \parencite{Gorilla}. In Act 2: we show every data wrangling decision between raw data and tidy data of a web-based eye-tracking study. Lastly, we model the data with both GLMMs and GAMMs. We conclude with recommendations for future web-based eye-tracking studies.
+Web-based eye-tracking is more accessible than ever. Researchers can finally carry out visual world paradigm studies remotely and access never before tested populations via the internet without the need for an expensive eye-tracker. Web-based eye-tracking, however, requires careful planning of the experiment and extensive data wrangling skills. In this paper, we provide a guide for building reproducible, open science eye-tracking studies using the online experiment builder Gorilla. We provide step-by-step instructions to building a typical linguistics eye-tracking study, and walk the reader through a series of data wrangling steps needed to prepare the data for visualization and analysis using the open source software environment, R. Importantly, we highlight the key decisions researchers need to make--and report--in order to reproduce an analysis. We demonstrate our approach by successfully carrying out a single change replication of an in-person eye-tracking study, \textcite{Porretta_et_al_2020}. We conclude with best practices and recommendations for future web-based eye-tracking studies.
 
 
 \section{Keywords}
-Data wrangling, Web-based experiments, Visual world paradigm, Open science practices, GAMM/GLMM
-
-
+Data quality, online research, Open science, eye-tracking, psycholinguistics
+\newpage
 
 

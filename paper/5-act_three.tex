@@ -2,15 +2,15 @@
 
 In all previous steps, wrangling can be thought of as a condensing process, where the primary object is to remove, clean, and transform the data into a structure that is usable. However, once the data is put into tidy form, then the data must be transformed for specific visualizations and analyses. In this section, we think of \inlineR{all\_data\_cleaned} and \inlineR{all\_data\_tidy} as launching points to gain an understanding of our data \footnote{If you wish to start from here then read in the \inlineR{all\_data\_tidy} and \inlineR{all\_data\_cleaned} from cleaned data on OSF.}.
 
- Here, we are creating two data frames from \inlineR{all\_data\_tidy}: \inlineR{mem\_data} in L: 453 and \inlineR{gamm\_data} in L: 459. In general data wrangling, maximally retaining informative columns is essential to creating a usable data frame. However, in model wrangling, it is often best to remove variables that you will not be using. This is because some models can have complications interpreting unprocessed data types (e.g., \inlineR{NAs}). For \inlineR{mem\_data}, we start by selecting all necessary columns for the model (L: 454-455). Factor type conversion occurs next (L: 456). Finally, to get background information we join \inlineR{tidy\_quest\_data}. In addition to the \inlineR{mem\_data}, we create \inlineR{gamm\_data} by simply cloning \inlineR{mem\_data} in L: 459 and by adding a single variable needed in the GAMM models.
+ Here, we are creating two data frames from \inlineR{all\_data\_tidy}: \inlineR{mem\_data} in L: 453 and \inlineR{gamm\_data} in L: 459. In general, maximally retaining informative columns is essential to creating a usable data frame. When building models, however, it is often best to remove variables that you will not be using. This is because some models can have complications interpreting unprocessed data types (e.g., \inlineR{NAs}). For \inlineR{mem\_data}, we start by selecting all necessary columns for the model (L: 454-455). Factor type conversion occurs next (L: 456). Finally, to get background information we join \inlineR{tidy\_quest\_data}. In addition to the \inlineR{mem\_data}, we create \inlineR{gamm\_data} by simply cloning \inlineR{mem\_data} in L: 459 and by adding a single variable needed in the GAMM models.
 
 \lstinputlisting[style=mystyle, firstnumber=452]{scripts/chunk-All Data: Preparing for Models.R}
 
 There are a handful of excellent papers that outline the advantages and disadvantages of different methods of eye-fixation analysis and relevant considerations for each method of analysis \parencite{Ito_Knoeferle_2022,Mirman_Dixon_Magnuson_2008,McMurray_2023,Barr_2008}. Here, we continue to focus on the data wrangling process and present the data wrangling steps--and decisions--needed to carry out two of the more widely used statistical analyses: generalized linear mixed effect models or GLMMs and generalized additive mixed effects models or GAMMs. Both GLMMs and GAMMs require specific contrast coding (e.g., dummy, orthogonal) of the data before running models to get expected results.  After contrast coding, all model building starts with maximal models, as justified by the design, working down to simpler models for model comparison. \parencite{Barr_Levy_Scheepers_Tily_2013}.
-
+\newline
 \subsection{3.1 GLMMs}
 \subsection{3.1.1 GLMMs: coding}
-For GLMMs coding, start with data type conversion (L: 464-465). Then, re-level both \inlineR{talker}(Native, Non-Native) and \inlineR{verb\_type}(Restrictive or Non-Restrictive) so that \inlineR{verb\_type}(Restrictive) and \inlineR{talker}-Native are both set as reference levels (L: 466-467).  We can then rename the contrasts to improve model output readability (L: 468-471) and later visualization. Lastly, in L: 473 through L: 476, we normalize the \inlineR{time\_elapsed}. Lastly, we create a dataframe for the accent model (L:477).
+For GLMMs coding, start with data type conversion (L: 464-465). Then, re-level both \inlineR{talker}(Native, Non-Native) and \inlineR{verb\_type}(Restrictive or Non-Restrictive) so that \inlineR{verb\_type}(Restrictive) and \inlineR{talker}-Native are both set as reference levels (L: 466-467).  We can then rename the contrasts to improve model output readability (L: 468-471) and later visualization. In L: 473 through L: 476, we normalize the \inlineR{time\_elapsed}. Lastly, we create a dataframe for the accent model (L:477).
 
 \lstinputlisting[style=mystyle, firstnumber=463]{scripts/chunk-GLMM: Leveling the Data.R}
 
@@ -36,13 +36,13 @@ GAMM Models were built using the \inlineR{mgcv} package \parencite{mgcv_wood_201
 
 \lstinputlisting[style=mystyle, firstnumber=602]{scripts/chunk-GAMM: Main Model.R}
 
-The accent GAMM had identical structure to the main GAMM with the expectation of having only 1 main effect: \inlineR{experience\_chinese} (L: 642) and removing the smoothing term leveled by \inlineR{talker\_coded}. \inlineR{gamm\_data\_accented} was the data frame (L: 648). Model comparisons suggest that random intercept of \inlineR{Event} significantly improves in the maximum model.
+The accent GAMM had identical structure to the main GAMM with the expectation of having only 1 main effect, \inlineR{experience\_chinese} (L: 642), and removing the smoothing term leveled by \inlineR{talker\_coded}. \inlineR{gamm\_data\_accented} was the data frame (L: 648). Model comparisons suggest that random intercept of \inlineR{Event} significantly improves in the maximum model.
 
 \lstinputlisting[style=mystyle, firstnumber=641]{scripts/chunk-GAMM: Accent Model.R}
 
 \subsection{3.3 Results}
 
- We observed nearly identical time course of predictive processing, see figure \ref{fig:smooth}, in which restricted sentences resulted in earlier looks to the target object than nonrestrictive sentences. Further, this effect is even partially reduced in accented speech in a similar manner to \textcite{Porretta_et_al_2020}. For \inlineR{ggplot()} code and data wrangling for visualizations, see \inlineR{AOW\_r\_work\_flow.rmd}.
+ We observed nearly identical time course of predictive processing (Figure \ref{fig:smooth}) in which restricted sentences resulted in earlier looks to the target object than nonrestrictive sentences. Further, this effect is partially reduced in accented speech in a similar manner to \textcite{Porretta_et_al_2020}. For \inlineR{ggplot()} code and data wrangling for visualizations, see \inlineR{AOW\_r\_work\_flow.rmd}.
 
 \begin{figure}[h]
     \centering
@@ -52,7 +52,7 @@ The accent GAMM had identical structure to the main GAMM with the expectation of
 \end{figure}
 
 \subsection{3.3.1 GLMM Results}
-Results from the Main GLMM revealed a significant effect of  \inlineR{verb\_type}-Restricting  ($\beta$ = 0.281, SE = 0.067, z = 4.191, p < .001), indicating more looks to targets for restrictive \inlineR{verb\_type} over non-restrictive \inlineR{verb\_type}, see figure \ref{fig:GLMM_cow_model} (left). Additionally, an interaction between speaker and verb type was found ($\beta$ = -0.136, SE = 0.053, z = -2.554, p = 0.011), indicating less looks when listening to the accented speaker. Results from the Accent GLMM found null results at an alpha-level of .05, see figure \ref{fig:GLMM_cow_model} (right). 
+Results from the Main GLMM revealed a significant effect of  \inlineR{verb\_type}-Restricting  ($\beta$ = 0.281, SE = 0.067, z = 4.191, p < .001), indicating more looks to targets for restrictive \inlineR{verb\_type} over non-restrictive \inlineR{verb\_type}, see Figure \ref{fig:GLMM_cow_model} (left). Additionally, an interaction between speaker and verb type was found ($\beta$ = -0.136, SE = 0.053, z = -2.554, p = 0.011), indicating less looks when listening to the accented speaker. Results from the Accent GLMM found null results at an alpha-level of .05, see Figure \ref{fig:GLMM_cow_model} (right). 
 
 \begin{figure}[H]
     \centering
@@ -63,7 +63,7 @@ Results from the Main GLMM revealed a significant effect of  \inlineR{verb\_type
 
 \subsection{3.3.2 GAMM Results}
 
-Like the GLMM modeling results, results from the Main GAMM revealed a significant effect of  \inlineR{verb\_type}-Restricting  ($\beta$ = 0.398, SE = 0.129, z = 3.078, p = .002), indicating more looks to targets for restrictive \inlineR{verb\_type} over non-restrictive \inlineR{verb\_type}, see figure \ref{fig:GAMM_cow_model} (left). Results from the Accent GAMM found null results at an alpha-level of .05. see figure \ref{fig:GAMM_cow_model} (right).
+Like the GLMM modeling results, results from the Main GAMM revealed a significant effect of  \inlineR{verb\_type}-Restricting  ($\beta$ = 0.398, SE = 0.129, z = 3.078, p = .002), indicating more looks to targets for restrictive \inlineR{verb\_type} over non-restrictive \inlineR{verb\_type}, see Figure \ref{fig:GAMM_cow_model} (left). Results from the Accent GAMM found null results at an alpha-level of .05. see figure \ref{fig:GAMM_cow_model} (right).
 
 \begin{figure}[H]
     \centering
@@ -71,3 +71,5 @@ Like the GLMM modeling results, results from the Main GAMM revealed a significan
     \caption{Model output for parsimonious GAMM models}
     \label{fig:GAMM_cow_model}
 \end{figure}
+\newline
+\newline
