@@ -165,8 +165,8 @@ et_data<-eyetracking_data%>%
 shinny_binning_data<-behavioral_data %>% 
   left_join(et_data, by=c("Participant.Private.ID", "Spreadsheet.Row"))
 shinny_binning_data <- apply(shinny_binning_data,2,as.character)
-#write.csv(shinny_binning_data,file.path(shiny_path,"Frame_Rate_App/shiny_binning_data.csv"))
-#write.csv(shinny_binning_data,file.path(shiny_path,"Eye_Fixations_App/shiny_binning_data.csv"))
+write.csv(shinny_binning_data,file.path(shiny_path,"Frame_Rate_App/shiny_binning_data.csv"))
+write.csv(shinny_binning_data,file.path(shiny_path,"Eye_Fixations_App/shiny_binning_data.csv"))
 ```
 ```{r ET Data: Localizing Visual Stimuli}
 #logically equivalent to doing full join and removing non-experimental trials.
@@ -264,7 +264,7 @@ viz%>%
                            size=14, angle=0),
         axis.text.y = element_text(face="bold", color="#C41230", 
                            size=14, angle=0))
-#ggsave(file.path(viz_path,"signal_noise.pdf"), width = 8, height = 4)
+ggsave(file.path(viz_path,"signal_noise.pdf"), width = 8, height = 4)
 ```
 ```{r ET Data: Varibility and Frame Rates}
 filter_median_hz_min<-0
@@ -309,7 +309,7 @@ plotter<-participant_frame_rate%>%
   ylab("Frame Rate (Hz)")
 
 ggMarginal(plotter, groupColour = TRUE, groupFill = TRUE)
-#ggsave(file.path(viz_path,"Participant_frame_rates.pdf"), width = 8, height = 4)
+ggsave(file.path(viz_path,"Participant_frame_rates.pdf"), width = 8, height = 4)
 #frame rates across time
 time_binning=400
 
@@ -368,7 +368,7 @@ ggplot()+
         legend.title = element_blank())+
   xlab("Adjusted Time")+
   ylab("Total Looks Captured")
-#ggsave(file.path(viz_path,"frame_rates_over_trial.pdf"), width = 8, height = 4)
+ggsave(file.path(viz_path,"frame_rates_over_trial.pdf"), width = 8, height = 4)
 ```
 
 
@@ -447,7 +447,7 @@ all_data_tidy_viz%>%
         legend.key=element_blank())+
         guides(color = guide_legend(override.aes = list(fill = NA)),
         linetype = guide_legend(override.aes = list(fill = NA)))
-#ggsave(file.path(viz_path,"smooth_plot_individual_differences.pdf"), width = 8, height = 20)
+ggsave(file.path(viz_path,"smooth_plot_individual_differences.pdf"), width = 8, height = 20)
 ```
 ```{r All Data: Preparing for Models}
 mem_data<-all_data_tidy%>%
@@ -767,17 +767,17 @@ gamm2_viz<-gamm2_viz+ggtitle("GAMM Accent Model Effects")
 
 
 plot_grid(glmm1_viz, glmm2_viz, nrow = 1, align = "h")
-#ggsave(file.path(viz_path,"GLMM_cow_model.pdf"), width = 10, height = 2)
+ggsave(file.path(viz_path,"GLMM_cow_model.pdf"), width = 10, height = 2)
 plot_grid(gamm1_viz, gamm2_viz, nrow = 1, align = "h")
-#ggsave(file.path(viz_path,"GAMM_cow_model.pdf"), width = 10, height = 2)
+ggsave(file.path(viz_path,"GAMM_cow_model.pdf"), width = 10, height = 2)
 ```
 ```{r write all the CSVs for models}
-#write.csv(model1_effects,file.path(output_path,"GLM_main_model_output.csv"))
-#write.csv(model2_effects,file.path(output_path,"GLM_accented_model_output.csv"))
-#write.csv(gamm1_effects,file.path(output_path,"GAM_main_model_output.csv"))
-#write.csv(gamm2_effects,file.path(output_path,"GAM_accented_model_output.csv"))
-#write.csv(all_data_tidy,file.path(output_path,"all_data_tidy.csv"))
-#write.csv(all_data_cleaned,file.path(output_path,"all_data_cleaned.csv"))
+write.csv(model1_effects,file.path(output_path,"GLM_main_model_output.csv"))
+write.csv(model2_effects,file.path(output_path,"GLM_accented_model_output.csv"))
+write.csv(gamm1_effects,file.path(output_path,"GAM_main_model_output.csv"))
+write.csv(gamm2_effects,file.path(output_path,"GAM_accented_model_output.csv"))
+write.csv(all_data_tidy,file.path(output_path,"all_data_tidy.csv"))
+write.csv(all_data_cleaned,file.path(output_path,"all_data_cleaned.csv"))
 ```
 ```{r experience calculations}
 experience <- accent_mem_data %>%
