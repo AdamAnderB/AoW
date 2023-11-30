@@ -1,8 +1,9 @@
 ---
 title: "R_workflow"
-output: 
+output:
+  word_document: default
   pdf_document:
-    keep_tex: true
+    keep_tex: yes
 ---
 ```{r libraries, message=FALSE, error=FALSE}
 library(sjPlot)
@@ -20,7 +21,7 @@ library(cowplot)
 ```
 ```{r data_load,echo=FALSE}
 #This is only for csv and figure saving. Feel free to ignore or use.
-path<-"/Users/adambramlett/scripts/the_art_of_wrangling/"
+path<-"/Users/xxusernamexx/scripts/the_art_of_wrangling/"
 input_path<-file.path(path,"data")
 output_path<-file.path(path,"cleaned_data")
 shiny_path<-file.path(path,"shiny_apps")
