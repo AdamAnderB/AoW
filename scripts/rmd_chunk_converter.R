@@ -1,7 +1,7 @@
 
 
 #set paths
-path<-"/Users/adambramlett/scripts/the_art_of_wrangling/AoW/scripts/"
+path<-"/Users/adambramlett/scripts/the_art_of_wrangling/AoW/scripts/chunks"
 list<-list.files(path,full.names = TRUE)
 list
 #removing files
@@ -21,7 +21,4 @@ invisible(mapply(function(chunk, name) {
 }, chunks, names(chunks)))
 unlink(p) # delete the original purl script
 knitr:::knit_code$restore() 
-
-
-
 

@@ -1,6 +1,6 @@
 ---
 title: "meta_scrript_on_scripts"
-author: "Adam A. Bramlett"
+author: "xxx"
 date: "2023-11-21"
 output: html_document
 ---
@@ -18,6 +18,7 @@ extract_line_info_from_rmd <- function(file_path) {
   
   return(result)
 }
+
 
 # Example usage
 rmd_file_path <- "r_work_flow.Rmd"
