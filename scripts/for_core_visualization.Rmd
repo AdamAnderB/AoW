@@ -8,9 +8,16 @@ output: html_document
 ```{r setup, include=FALSE}
 library(tuneR) 
 library(cowplot)
+library(dplyr)
+library(ggplot2)
+list.files(full.names = TRUE)
+getwd()
+
+```
+```{r}
 list.files(aow.wav)
 # define path to audio file
-fin = '/Users/xxxusernamexxx/scripts/the_art_of_wrangling/AoW/figures/AOW.wav'
+fin = '/Users/adambramlett/scripts/the_art_of_wrangling/AoW/figures/AOW.wav'
 
 # read in audio file
 data = readWave(fin)
@@ -44,7 +51,7 @@ sound_plot<-sound%>%ggplot(aes(x=x,y=snd))+
         xmin = -100, xmax = 500,
         ymin = -Inf, ymax = Inf)+
   geom_vline(aes(xintercept = 0),color="#007BC0")+
-  geom_line(color="#719F94")+
+  geom_line(color="#FDB515")+
   scale_y_continuous(expand=c(.1,-.15))+
   scale_x_continuous(breaks=c(-400,-100,0,500,900),limits = c(-500,900),
                      labels = c("0\n\n\n-400","300\n\n\n-100","400\n\n\n0","800\n\n\n400","1200\n\n\n800"))+
@@ -65,7 +72,7 @@ sound_plot<-sound%>%ggplot(aes(x=x,y=snd))+
         axis.title.x = element_text(vjust = 15,hjust =.55, color="#007BC0", size=14, face="bold"),
         plot.margin = unit(c(0, 0, -13, 0), "mm")
     )+
-  geom_text(x=250,y=-3000,label = "Audio Stimuli", size = 5,color = "#719F94")+
+  geom_text(x=250,y=-3000,label = "Audio Stimuli", size = 5,color = "#FDB515")+
   geom_text(x=250,y=7000,label = "Window of Interest", size = 5,color = "#999999")
 sound_plot
 ```
@@ -73,7 +80,6 @@ sound_plot
 ```{r}
 removal_list<-as.character(c(1:25))
 removal_list
-View(sound)
 sound$name ="asdf"
 
 sound<-sound%>%seperate(name,c("q1","trash") ,"s" )
@@ -83,8 +89,8 @@ df$new_question<-str_replace(df$Question,"/[^0-9]+/","" )
 ```
 
 ```{r}
-list.files('/Users/xxxusernamexxx/scripts/the_art_of_wrangling/cleaned_data/')
-all_data<-read.csv('/Users/xxxusernamexxx/scripts/the_art_of_wrangling/cleaned_data/all_data.csv')
+list.files('/Users/adambramlett/scripts/the_art_of_wrangling/cleaned_data/')
+all_data<-read.csv('/Users/adambramlett/scripts/the_art_of_wrangling/cleaned_data/all_data.csv')
 
 library("jpeg") 
 library("ggplot2") 
@@ -92,10 +98,11 @@ library("patchwork")
 library("grid")
 library("magick")
 library("ggimage") 
+library("cowplot")
 ```
 ```{r}
 
-img = "/Users/xxxusernamexxx/scripts/the_art_of_wrangling/AoW/figures/core_four_background.jpeg"
+img = "/Users/adambramlett/scripts/the_art_of_wrangling/AoW/figures/core_four_background.jpeg"
 
 # adding image to graph  
 all_data<-all_data%>%
@@ -127,12 +134,12 @@ sample_plot<-sample%>%ggplot()+
   geom_text(x=-0.25,y=1.75,label = "Eye-Fixations", size = 5,color = "white",face="bold")+
   geom_text(x=-0.25,y=1.75,label = "Eye-Fixations", size = 5,color = "#941120",face="bold")+
   geom_text(x=1.4,y=-2.7,label = "Visual Stimuli", size = 5,color = "black",face="bold")
-
+sample_plot
 fixations<-ggbackground(sample_plot, img)
 fixations
-plot_grid(sound_plot, fixations, nrow = 2, align = "v")
-list.files("/Users/xxxusernamexxx/scripts/the_art_of_wrangling/AoW/figures/")
-ggsave(file.path("/Users/xxxusernamexxx/scripts/the_art_of_wrangling/AoW/figures/Core_four_R.jpeg"), width = 7, height = 8)
+cowplot::plot_grid(sound_plot, fixations, nrow = 2, align = "v")
+list.files("/Users/adambramlett/scripts/the_art_of_wrangling/AoW/figures/")
+ggsave(file.path("/Users/adambramlett/scripts/the_art_of_wrangling/AoW/figures/Core_four_R_revised.jpeg"), width = 7, height = 8)
 ```
 
 
