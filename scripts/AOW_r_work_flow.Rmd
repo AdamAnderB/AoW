@@ -27,9 +27,7 @@ output_path<-file.path(path,"cleaned_data")
 shiny_path<-file.path(path,"shiny_apps")
 viz_path<-file.path(path,"AoW/figures")
 ```
-Here, three dialogue boxes will pop up. You simply need to select task data from the file you downloaded from the OSF link. The rest should run automatically
-
-
+Here, a dialogue box will pop up. You simply need to select task data from the file you downloaded from the OSF link. The rest should run automatically
 ```{r Data Reading}
 #select task_data
 task_data_select <- file.choose()
@@ -96,6 +94,7 @@ OSF_filt <- OSF_data%>%
   select(talker,verb_type,subject_img_file,img_1_file, img_2_file, 
          img_3_file, img_4_file,log_SUBTLWF_Obj)
 ```
+
 ```{r Behavioral Data: Join OSF and Experimental Data}
 behavioral_data <-experimental_tidy%>%
   left_join(OSF_filt, by=c( "talker","verb_type","subject_img_file"))
@@ -386,7 +385,7 @@ all_data_cleaned<-all_data%>%
   ungroup()%>%
   group_by(Participant.Private.ID)%>%
   mutate(median_frame_rate = median(frame_rate))%>%
-    filter(median_frame_rate>=frame_rate_cut_off)%>%
+  filter(median_frame_rate>=frame_rate_cut_off)%>%
   mutate(time_elapsed=time_elapsed-object_start-200)%>% 
   mutate(time_elapsed_rounded=time_binning*round((time_elapsed)/time_binning))
 

@@ -1,0 +1,43 @@
+---
+title: "color_blind_simulator"
+author: "Adam A. Bramlett"
+date: "2024-02-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(dichromat)
+
+```
+
+```{r}
+# Function to simulate colorblindness
+simulate_colorblindness <- function(color, type) {
+  return(dichromat(color, type = type))
+}
+
+# Define colors
+colors <- c("#FDB515","#941120", "#007BC0","#719F94")
+color_names <- c("Color 1", "Color 2", "Color 3","color 4")
+
+# Types of colorblindness
+cb_types <- c("deutan", "protan", "tritan")
+
+# Data frame for plotting
+data <- expand.grid(ColorName = color_names, Type = c("Original", cb_types))
+data$Hex <- c(colors,
+              sapply(colors, simulate_colorblindness, "deutan"),
+              sapply(colors, simulate_colorblindness, "protan"),
+              sapply(colors, simulate_colorblindness, "tritan"))
+
+# Plot
+ggplot(data, aes(x = Type, y = ColorName, fill = Hex)) +
+  geom_tile() +
+  scale_fill_identity() +
+  labs(title = "Colorblindness Simulation", x = "Simulation Type", y = "Color") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
