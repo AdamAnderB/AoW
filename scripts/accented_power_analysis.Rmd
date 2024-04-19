@@ -1,0 +1,233 @@
+---
+title: "power_analysis"
+author: "blind"
+date: "2024-04-08"
+output: html_document
+---
+
+```{r}
+library(lme4) 
+require(tidyverse)
+library(dplyr)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(lme4)
+library(conflicted)
+library(beepr)
+```
+```{r}
+list.files("../../poretta_et_al")
+our_dir<-"../model_data"
+por_dir<-"../poretta_et_al"
+mem_data<-read.csv(file.path(our_dir,"mem_data.csv"))
+por_data<-readRDS(file.path(por_dir,"DatCor_400_0_800.rds"))
+```
+
+```{r}
+mem_data$verb_type<-as.factor(mem_data$verb_type)
+mem_data$talker<-as.factor(mem_data$talker)
+contrasts(mem_data$verb_type)<-c(-.5,.5)
+contrasts(mem_data$talker)<-c(-.5,.5)
+colnames(contrasts(mem_data$talker))<- c('Native:')
+rownames(contrasts(mem_data$talker))<-c("Native","NonNative")
+colnames(contrasts(mem_data$verb_type))<- c('Restricting:')
+rownames(contrasts(mem_data$verb_type))<-c("Non-Restricting","Restricting")
+mem_data$experience_chinese<-mem_data$experience_chinese_accent
+mem_data <- mem_data %>%
+  mutate(time_normalized = 
+           (time_elapsed - min(time_elapsed)) / 
+           (max(time_elapsed) - min(time_elapsed)))
+accent_mem_data<-mem_data%>%filter(talker == "NonNativeMale")
+```
+
+```{r}
+#accent model
+glmm2_1<-glmer(target~experience_chinese+
+            (1|subject_img_file)+
+            (1|Participant.Private.ID)+
+            (1|time_normalized),family="binomial",data=accent_mem_data)
+summary(glmm2_1)
+```
+
+```{r}
+set.seed(2)
+simulate_data <- function(glmm_model, n_participants, n_subject_images) {
+  # Define scaled time normalized
+  times <- seq(-400, 800, by = 100) / 1000  # Scaling down time
+  # Generate all combinations for each participant and subject image
+  
+  # Generate base participant data first
+  participants <- data.frame(
+    participant = 1:n_participants
+  )
+  
+  # Simulating 'experience_chinese' using a gamma distribution, one value per participant
+  shape <- 2  # Shape parameter for gamma distribution
+  scale <- 10  # Scale parameter for gamma distribution
+  participants$experience_chinese <- rgamma(n_participants, shape = shape, scale = scale) + rnorm(n_participants, mean = 0, sd = 2)
+  participants$experience_chinese[participants$experience_chinese > 50] <- 50  # Capping at 50
+  
+
+  # Generate all combinations for each participant and subject image
+  base_data <- expand.grid(
+    participant = participants$participant,
+    subject_img_file = paste0("img_", 1:n_subject_images, ".png"),
+    time_normalized = times
+  )
+  
+  # Merge to include experience_chinese for each participant
+  base_data <- merge(base_data, participants, by = "participant")
+  
+  # Assuming random effects (simplified for simulation)
+  sd_subject_img <- 0.5
+  sd_participant <- 0.5
+  sd_time_normalized <- 0.2
+  
+  base_data$re_subject_img_file <- rnorm(nrow(base_data), mean = 0, sd = sd_subject_img)
+  base_data$re_participant <- rnorm(nrow(base_data), mean = 0, sd = sd_participant)
+  base_data$re_time_normalized <- rnorm(nrow(base_data), mean = 0, sd = sd_time_normalized)
+  
+  # Fixed effects assumptions (simplified)
+  intercept <- -1  # Base log-odds of target
+  effect_experience_chinese <- 0.002  # Log-odds increase per unit of 'experience_chinese'
+  
+  # Calculate log-odds of target
+  base_data$log_odds_target <- with(base_data, 
+    intercept +
+    effect_experience_chinese * experience_chinese +
+    re_subject_img_file +
+    re_participant +
+    re_time_normalized
+  )
+  
+  # Adding time effect, assuming linear increase over time
+  time_effect_slope <- 0.5  # Increase in log-odds per second
+  base_data$log_odds_target <- base_data$log_odds_target + time_effect_slope * base_data$time_normalized
+
+  # Simulate target based on probability using a logistic function
+  base_data$target <- rbinom(nrow(base_data), size = 1, prob = plogis(base_data$log_odds_target))
+
+  return(base_data)
+}
+
+set.seed(42)
+simulated_data <- simulate_data(glmm2_1,n_participants = 50, n_subject_images = 25)
+
+simdata_agg<-simulated_data%>%
+  mutate(time_rounded=round(time_normalized/.10)*.10)%>%
+  group_by(participant,experience_chinese)%>%
+  summarize(looks_to_target=mean(target))
+
+simdata_agg%>%
+  ggplot(aes(x=experience_chinese,y=looks_to_target,alpha=.5))+
+  geom_jitter()+geom_smooth(method="lm")
+```
+```{r}
+run_analysis <- function(data) {
+  m0 <-glmer(target~0+
+            (1|subject_img_file)+
+            (1|participant)+
+            (1|time_normalized),family="binomial",data=data)
+  summary(glmm2_1)
+
+  m1 <-glmer(target~experience_chinese+
+            (1|subject_img_file)+
+            (1|participant)+
+            (1|time_normalized),family="binomial",data=data)
+  summary(glmm2_1)
+
+  sum_m1 <- summary(m1)
+  sum_m0 <- summary(m0)
+  est <- fixef(m1)[2] # estimate of Incongruent - Congruent difference in RT 
+  se <- summary(m1)$coef[, 2, drop = FALSE][2] # stderr of estimate
+  m_bic <- BIC(m0, m1)$BIC
+  statistic <- diff(m_bic)
+  # Return the estimate, its standard error, and BIC difference
+  return(c(Estimate = est, SE = se, BIC_Difference = statistic))
+}
+```
+
+```{r}
+simulated_data <- simulate_data(glmm5_1,n_participants = 2, n_subject_images = 2)
+run_analysis(simulated_data)
+```
+```{r}
+repeat_analysis <- function(n_simulations, alpha, theta, glmm_model, n_participants, n_subject_images) {
+    simouts <- matrix(rep(NA, 3 * n_simulations), nrow = n_simulations) # empty vector to store outputs simulation
+    # loop for repeating the simulation
+    for (i in 1:n_simulations) {
+        data <- simulate_data(glmm_model, n_participants, n_subject_images)
+        simouts[i,] <- run_analysis(data) # save the analysis outputs for this sim.
+    }
+    # calculate how many of the simulations had significant results (coverage)
+    power <- mean(simouts[,3] <= -20) # -20 is a good standard threshold for strong evidence, see Raftery & Kass 1995
+    # calculate relative parameter estimate bias
+    theta_bias <- (mean(simouts[,1]) - theta) / theta
+    # calculate relative standard error bias 
+    sigma_bias <- (mean(simouts[,2]) - sd(simouts[,1])) / sd(simouts[,1])
+    return(list(power = power, theta_bias = theta_bias, sigma_bias = sigma_bias))
+}
+```
+
+```{r}
+dat <- expand.grid(n_participants = c(20,40,60,80,100), n_trials = c(25))
+dat$id <- 1:nrow(dat)
+
+true_slope_value <- 0.1  
+true_effect_size <- 0.28074 
+
+results_1 <- dat %>%
+    mutate(
+        simulations = pmap(list(n_participants, n_trials),
+                           ~ repeat_analysis(n_simulations = 1000, alpha = 0.05, theta = true_effect_size,
+                                             glmm_model = glmm5_1,
+                                             n_participants = ..1, n_subject_images = ..2)),
+        theta_bias = map_dbl(simulations, ~ .x$theta_bias),
+        power = map_dbl(simulations, ~ .x$power),
+        sigma_bias = map_dbl(simulations, ~ .x$sigma_bias)
+    ) %>%
+    select(-simulations)  # Remove simulations column to clean up the dataframe
+
+print(results_1)
+
+beep(6)
+```
+
+```{r}
+#big_results_1<-results
+results_1
+
+ggplot(results_1, aes(n_participants, theta_bias, color=as.factor(n_trials), group=n_trials)) +
+    geom_point() +
+    geom_line() +
+    scale_color_discrete('Number of trials per subject') +
+    scale_x_continuous('Number of subjects') +
+    scale_y_continuous('Theta') +
+    theme_classic()
+
+ggplot(results_1, aes(n_participants, power, color=as.factor(n_trials), group=n_trials)) +
+    geom_point() +
+    geom_line() +
+    geom_hline(yintercept = 0.8) + #thresholds for acceptable power
+    geom_hline(yintercept = 0.95) +
+    scale_color_discrete('Number of trials per subject') +
+    scale_x_continuous('Number of subjects') +
+    scale_y_continuous('Statistical power (for Delta BIC <= -20)') +
+    theme_classic()
+
+ggplot(results_1, aes(n_participants, sigma_bias, color=as.factor(n_trials), group=n_trials)) +
+    geom_point() +
+    geom_line() +
+    scale_color_discrete('Number of trials per subject') +
+    scale_x_continuous('Number of subjects') +
+    scale_y_continuous('Sigma Bias') +
+    theme_classic()
+```
+
+```{r}
+
+install.packages("beepr")
+library(beepr)
+```
+

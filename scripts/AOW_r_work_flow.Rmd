@@ -522,13 +522,13 @@ summary(glmm1_1)
 ##remove correlations
 #glmm2_2<-glmer(target~experience_chinese+
 #            (1|subject_img_file)+
-#            (verb_type||Participant.Private.ID)+
+#            (1||Participant.Private.ID)+
 #            (1|time_normalized),
 #          family="binomial",data=accent_mem_data)
 #remove timing random effect
 #glmm2_3<-glmer(target~experience_chinese+
 #            (1|subject_img_file)+
-#            (verb_type||Participant.Private.ID),
+#            (1||Participant.Private.ID),
 #          family="binomial",data=accent_mem_data)
 #summary(glmm2_1)
 #summary(glmm2_2)
@@ -539,7 +539,7 @@ summary(glmm1_1)
 ```{r GLMM: Accent Model}
 glmm2_1<-glmer(target~experience_chinese+
             (1|subject_img_file)+
-            (verb_type|Participant.Private.ID)+
+            (1|Participant.Private.ID)+
             (1|time_normalized),family="binomial",data=accent_mem_data)
 summary(glmm2_1)
 ```
@@ -765,11 +765,11 @@ glmm2_viz<-glmm2_viz+ggtitle("GLMM Accent Model Effects")
 gamm1_viz<-gamm1_viz+ggtitle("GAMM Main Model Effects")
 gamm2_viz<-gamm2_viz+ggtitle("GAMM Accent Model Effects")
 
-
-plot_grid(glmm1_viz, glmm2_viz, nrow = 1, align = "h")
+library(cowplot)
+cowplot::plot_grid(glmm1_viz, glmm2_viz, nrow = 1, align = "h")
 #ggsave(file.path(viz_path,"GLMM_cow_model.pdf"), width = 10, height = 2)
-plot_grid(gamm1_viz, gamm2_viz, nrow = 1, align = "h")
-#ggsave(file.path(viz_path,"GAMM_cow_model.pdf"), width = 10, height = 2)
+cowplot::plot_grid(gamm1_viz, gamm2_viz, nrow = 1, align = "h")
+#ggsave(file.path('/Users/adambramlett/scripts/the_art_of_wrangling//AoW/figures/',"GAMM_cow_model.pdf"), width = 10, height = 2)
 ```
 ```{r write all the CSVs for models}
 #write.csv(model1_effects,file.path(output_path,"GLM_main_model_output.csv"))
@@ -780,6 +780,7 @@ plot_grid(gamm1_viz, gamm2_viz, nrow = 1, align = "h")
 #write.csv(all_data_cleaned,file.path(output_path,"all_data_cleaned.csv"))
 ```
 ```{r experience calculations}
+#for reviewers
 experience <- accent_mem_data %>%
   select(Participant.Private.ID, experience_chinese_accent) %>%
   unique() %>%
@@ -796,4 +797,9 @@ sd(experience$log_experience)
 #range values
 log(31)
 log(1)
+```
+
+```{r}
+#for power analysis
+#write.csv(mem_data,"mem_data.csv")
 ```

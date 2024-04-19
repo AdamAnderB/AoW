@@ -1,0 +1,244 @@
+---
+title: "power_analysis"
+author: "blind"
+date: "2024-04-08"
+output: html_document
+---
+
+```{r}
+library(lme4) # we need lme4 so we can do test-runs of mixed effects analyses. 
+require(tidyverse) # in case tidyverse needs to be re-loaded
+library(dplyr)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(lme4)
+library(conflicted)
+```
+```{r}
+list.files("../../poretta_et_al")
+our_dir<-"../../model_data"
+por_dir<-"../../poretta_et_al"
+mem_data<-read.csv(file.path(our_dir,"mem_data.csv"))
+por_data<-readRDS(file.path(por_dir,"DatCor_400_0_800.rds"))
+```
+
+```{r}
+mem_data$verb_type<-as.factor(mem_data$verb_type)
+mem_data$talker<-as.factor(mem_data$talker)
+contrasts(mem_data$verb_type)<-c(-.5,.5)
+contrasts(mem_data$talker)<-c(-.5,.5)
+colnames(contrasts(mem_data$talker))<- c('Native:')
+rownames(contrasts(mem_data$talker))<-c("Native","NonNative")
+colnames(contrasts(mem_data$verb_type))<- c('Restricting:')
+rownames(contrasts(mem_data$verb_type))<-c("Non-Restricting","Restricting")
+mem_data$experience_chinese<-mem_data$experience_chinese_accent
+mem_data <- mem_data %>%
+  mutate(time_normalized = 
+           (time_elapsed - min(time_elapsed)) / 
+           (max(time_elapsed) - min(time_elapsed)))
+accent_mem_data<-mem_data%>%filter(talker == "NonNativeMale")
+```
+
+```{r}
+#main model
+glmm1_1<-glmer(target~talker*verb_type+
+            (talker|subject_img_file)+
+            (verb_type|Participant.Private.ID)+
+            (1|time_normalized),
+          family="binomial",data=mem_data)
+summary(glmm1_1)
+
+glmm5_1<-glmer(target~talker*verb_type*time_normalized+
+            (talker|subject_img_file)+
+            (verb_type|Participant.Private.ID),
+          family="binomial",data=mem_data)
+summary(glmm5_1)
+
+#accent model
+glmm2_1<-glmer(target~experience_chinese+
+            (1|subject_img_file)+
+            (1|Participant.Private.ID)+
+            (1|time_normalized),family="binomial",data=accent_mem_data)
+summary(glmm2_1)
+```
+
+
+```{r}
+
+set.seed(2)
+simulate_data <- function(glmm_model, n_participants, n_subject_images) {
+  # Define scaled time normalized
+  times <- seq(-400, 800, by = 100) / 1000  # Scaling down time
+
+  # Generate all combinations for each participant and subject image
+  base_data <- expand.grid(
+    participant = 1:n_participants,
+    subject_img_file = paste0("img_", 1:n_subject_images, ".png"),
+    talker = c("non-native", "native"),
+    verb_type = c("restricting", "non-restricting"),
+    time_normalized = times
+  )
+  
+  # Extract fixed and random effect parameters from the model
+  fe <- fixef(glmm_model)
+  re_variances <- VarCorr(glmm_model)
+  
+  # Adding random effects contributions
+  base_data$re_participant <- rnorm(nrow(base_data), mean = 0, sd = sqrt(re_variances$`Participant.Private.ID`[1,1]))
+  base_data$re_image <- rnorm(nrow(base_data), mean = 0, sd = sqrt(re_variances$subject_img_file[1,1]))
+
+  # Calculate probabilities using model coefficients and scaled time
+  base_data$probability <- with(base_data, 
+    fe["(Intercept)"] +
+    fe["talkerNative:"] * (talker == "native") +
+    fe["verb_typeRestricting:"] * (verb_type == "restricting") +
+    fe["time_normalized"] * time_normalized +
+    fe["talkerNative::verb_typeRestricting:"] * (talker == "native" & verb_type == "restricting") +
+    fe["talkerNative::time_normalized"] * (talker == "native") * time_normalized +
+    fe["verb_typeRestricting::time_normalized"] * (verb_type == "restricting") * time_normalized +
+    fe["talkerNative::verb_typeRestricting::time_normalized"] * (talker == "native" & verb_type == "restricting") * time_normalized +
+    re_participant + re_image
+  )
+
+  # Simulate target based on probability
+  base_data$target <- rbinom(nrow(base_data), size = 1, prob = plogis(base_data$probability))
+
+  return(base_data)
+}
+
+# Example usage
+set.seed(42)
+simulated_data <- simulate_data(glmm5_1,n_participants = 50, n_subject_images = 25)
+
+simdata_agg<-simulated_data%>%
+  mutate(time_rounded=round(time_normalized/.10)*.10)%>%
+  group_by(talker,verb_type,time_rounded)%>%
+  summarize(looks_to_target=mean(target))
+
+simdata_agg%>%
+  ggplot(aes(x=time_rounded,y=looks_to_target,color=verb_type,alpha=.5))+
+  geom_jitter()+facet_wrap(talker~.)+geom_smooth(method="lm")
+```
+```{r}
+run_analysis <- function(data) {
+  m0 <- glmer(target ~ 1 + 
+              (1|subject_img_file) + 
+              (1|participant) + 
+              (1|time_normalized), 
+            family = "binomial", data = data)
+
+  m1 <- glmer(target ~ talker * verb_type + 
+              (talker|subject_img_file) +
+              (verb_type|participant) +
+              (1|time_normalized),
+            family = "binomial", data = data)
+
+  sum_m1 <- summary(m1)
+  sum_m0 <- summary(m0)
+  est <- fixef(m1)[2] # estimate of Incongruent - Congruent difference in RT 
+  se <- summary(m1)$coef[, 2, drop = FALSE][2] # stderr of estimate
+  m_bic <- BIC(m0, m1)$BIC
+  statistic <- diff(m_bic)
+  # Return the estimate, its standard error, and BIC difference
+  return(c(Estimate = est, SE = se, BIC_Difference = statistic))
+}
+```
+
+```{r}
+simulated_data <- simulate_data(glmm5_1,n_participants = 2, n_subject_images = 2)
+run_analysis(simulated_data)
+```
+```{r}
+repeat_analysis <- function(n_simulations, alpha, theta, glmm_model, n_participants, n_subject_images) {
+    simouts <- matrix(rep(NA, 3 * n_simulations), nrow = n_simulations) # empty vector to store outputs simulation
+    # loop for repeating the simulation
+    for (i in 1:n_simulations) {
+        data <- simulate_data(glmm_model, n_participants, n_subject_images)
+        simouts[i,] <- run_analysis(data) # save the analysis outputs for this sim.
+    }
+    # calculate how many of the simulations had significant results (coverage)
+    power <- mean(simouts[,3] <= -20) # -20 is a good standard threshold for strong evidence, see Raftery & Kass 1995
+    # calculate relative parameter estimate bias
+    theta_bias <- (mean(simouts[,1]) - theta) / theta
+    # calculate relative standard error bias 
+    sigma_bias <- (mean(simouts[,2]) - sd(simouts[,1])) / sd(simouts[,1])
+    return(list(power = power, theta_bias = theta_bias, sigma_bias = sigma_bias))
+}
+#repeat_analysis(n_simulations=2, alpha=.05, glmm_model=glmm5_1, n_participants=2, n_subject_images=4)
+```
+
+
+
+```{r}
+
+dat <- expand.grid(n_participants = c(40,50,60), n_trials = c(15,25,35))
+dat$id <- 1:nrow(dat)
+
+true_slope_value <- 0.1  # Example true slope, adjust this based on your needs
+true_effect_size <- 0.28074  # Example effect size based on previous estimates
+
+results_1 <- dat %>%
+    mutate(
+        simulations = pmap(list(n_participants, n_trials),
+                           ~ repeat_analysis(n_simulations = 2, alpha = 0.05, theta = true_effect_size,
+                                             glmm_model = glmm5_1,
+                                             n_participants = ..1, n_subject_images = ..2)),
+        theta_bias = map_dbl(simulations, ~ .x$theta_bias),
+        power = map_dbl(simulations, ~ .x$power),
+        sigma_bias = map_dbl(simulations, ~ .x$sigma_bias)
+    ) %>%
+    select(-simulations)  # Remove simulations column to clean up the dataframe
+
+print(results_1)
+```
+
+```{r}
+dat <- expand.grid(n_participants = c(40,50,60), n_trials = c(15,25,35))
+dat$id <- 1:nrow(dat)
+
+# Run simulations directly using map2
+results <- dat %>%
+    mutate(
+        simulations = pmap(list(n_participants, n_trials),
+                           ~ repeat_analysis(n_simulations = 10, alpha = 0.05,
+                                             glmm_model = glmm5_1,
+                                             n_participants = ..1, n_subject_images = ..2)),
+        power = map_dbl(simulations, ~ .x$power),
+        sigma_bias = map_dbl(simulations, ~ .x$sigma_bias)
+    ) %>%
+    select(-simulations) 
+
+```
+
+```{r}
+#big_results_1<-results
+results_1
+
+ggplot(results_1, aes(n_participants, theta_bias, color=as.factor(n_trials), group=n_trials)) +
+    geom_point() +
+    geom_line() +
+    scale_color_discrete('Number of trials per subject') +
+    scale_x_continuous('Number of subjects') +
+    scale_y_continuous('Theta') +
+    theme_classic()
+
+ggplot(results_1, aes(n_participants, power, color=as.factor(n_trials), group=n_trials)) +
+    geom_point() +
+    geom_line() +
+    geom_hline(yintercept = 0.8) + #thresholds for acceptable power
+    geom_hline(yintercept = 0.95) +
+    scale_color_discrete('Number of trials per subject') +
+    scale_x_continuous('Number of subjects') +
+    scale_y_continuous('Statistical power (for Delta BIC <= -20)') +
+    theme_classic()
+
+ggplot(results_1, aes(n_participants, sigma_bias, color=as.factor(n_trials), group=n_trials)) +
+    geom_point() +
+    geom_line() +
+    scale_color_discrete('Number of trials per subject') +
+    scale_x_continuous('Number of subjects') +
+    scale_y_continuous('Sigma Bias') +
+    theme_classic()
+```
+

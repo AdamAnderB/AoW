@@ -1,6 +1,6 @@
 ---
 title: "color_blind_simulator"
-author: "Adam A. Bramlett"
+author: "blind"
 date: "2024-02-24"
 output: html_document
 ---
