@@ -56,7 +56,6 @@ simulate_data <- function(glmm_model, n_participants, n_subject_images) {
   # Define scaled time normalized
   times <- seq(-400, 800, by = 100) / 1000  # Scaling down time
   # Generate all combinations for each participant and subject image
-  
   # Generate base participant data first
   participants <- data.frame(
     participant = 1:n_participants
@@ -154,7 +153,7 @@ run_analysis(simulated_data)
 ```
 ```{r}
 repeat_analysis <- function(n_simulations, alpha, theta, glmm_model, n_participants, n_subject_images) {
-    simouts <- matrix(rep(NA, 3 * n_simulations), nrow = n_simulations) # empty vector to store outputs simulation
+    simouts <- matrix(rep(NA, 3 * n_simulations), nrow = n_simulations) # empty vector to store outputs 
     # loop for repeating the simulation
     for (i in 1:n_simulations) {
         data <- simulate_data(glmm_model, n_participants, n_subject_images)
@@ -187,7 +186,7 @@ results_1 <- dat %>%
         power = map_dbl(simulations, ~ .x$power),
         sigma_bias = map_dbl(simulations, ~ .x$sigma_bias)
     ) %>%
-    select(-simulations)  # Remove simulations column to clean up the dataframe
+    select(-simulations)
 
 print(results_1)
 

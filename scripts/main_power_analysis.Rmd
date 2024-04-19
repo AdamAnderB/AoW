@@ -6,8 +6,8 @@ output: html_document
 ---
 
 ```{r}
-library(lme4) # we need lme4 so we can do test-runs of mixed effects analyses. 
-require(tidyverse) # in case tidyverse needs to be re-loaded
+library(lme4)  
+require(tidyverse)
 library(dplyr)
 library(dplyr)
 library(tidyr)
@@ -144,7 +144,7 @@ run_analysis(simulated_data)
 ```
 ```{r}
 repeat_analysis <- function(n_simulations, alpha, theta, glmm_model, n_participants, n_subject_images) {
-    simouts <- matrix(rep(NA, 3 * n_simulations), nrow = n_simulations) # empty vector to store outputs simulation
+    simouts <- matrix(rep(NA, 3 * n_simulations), nrow = n_simulations) 
     # loop for repeating the simulation
     for (i in 1:n_simulations) {
         data <- simulate_data(glmm_model, n_participants, n_subject_images)
@@ -180,7 +180,7 @@ results_1 <- dat %>%
         power = map_dbl(simulations, ~ .x$power),
         sigma_bias = map_dbl(simulations, ~ .x$sigma_bias)
     ) %>%
-    select(-simulations)  # Remove simulations column to clean up the dataframe
+    select(-simulations)  
 
 print(results_1)
 
