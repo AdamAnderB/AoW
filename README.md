@@ -35,7 +35,7 @@ This project offers a comprehensive guide for conducting eye-tracking studies in
 
 ## Getting Started
 1. **Installation**: Set up your environment with R and the necessary packages.
-2. **Running Experiments**: Design your study and ensure data quality.
+2. **Running Experiments**: Design your study, pre-register your study with cut-off and removal standards, and collect data.
 3. **Data Analysis**: Analyze your data in R, from data wrangling to statistical modeling. Following along with our main script: AOW_r_work_flow.Rmd
 
 ## Contributing
