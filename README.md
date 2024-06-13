@@ -29,7 +29,12 @@ This project offers a comprehensive guide for conducting eye-tracking studies in
     - [Link to Frame-rate Shiny App GitHub Repository](https://github.com/AdamAnderB/Frame_Rate_App)
   - **Signal and Noise with Eye-fixations**: These visuals aim to help the reader build an understanding of the relationship between removing data and retaining the signal.
     - [Link to Signal and Noise Shiny App GitHub Repository](https://github.com/AdamAnderB/Eye_Fixations_App)
-      
+
+- **Statistical Analysis and Results**: Generalized Additive Mixed Models (GAMMs) and Generalized Mixed Effect Models (GMEM). 
+  
+   <img src="figures/smooth_comparison_plot.jpg" alt="Results" width="600">
+
+
 - **Paper**: This is an earlier draft of the paper before the editing process when we were just getting started.
 
 
