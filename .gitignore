@@ -8,3 +8,5 @@ rmd_chunk_converter.R
 .RDataTmp
 .DS_Store
 .Rapp.history
+AoW.Rproj
+AoW.gitignore.txt

@@ -1,4 +1,0 @@
-### AOW ###
-
-#personal version of script that creates outputs
-AOW_r_work_flow_Version_AAB.Rmd
