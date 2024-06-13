@@ -43,3 +43,4 @@ Contributions are welcome! Feel free to report bugs, improve documentation, or s
 
 ## Citation
 Please cite our paper if this framework assists in your research.
+> Bramlett, A. A. & Wiener, S. (2024). The Art of Wrangling: Working with Web-based Eye-tracking Data in Language Research. *Linguistic Approaches to Bilingualism*.
