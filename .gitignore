@@ -10,3 +10,4 @@ rmd_chunk_converter.R
 .Rapp.history
 AoW.Rproj
 AoW.gitignore.txt
+*.csv
