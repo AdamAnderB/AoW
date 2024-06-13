@@ -6,3 +6,5 @@ rmd_chunk_converter.R
 .DS_Store
 .Rapp.history
 .RDataTmp
+.DS_Store
+.Rapp.history
