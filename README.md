@@ -1,4 +1,5 @@
-# The Art of Wrangling: Web-based Eye-tracking in Language Research
+# The Art of Wrangling: Working with Web-based Visual World Paradigm Eye-tracking Data in Language Research
+
 
 ## *Reference:*
  Bramlett, A. A. & Wiener, S. (2024). The Art of Wrangling: Working with Web-based Eye-tracking Data in Language Research. *Linguistic Approaches to Bilingualism*.
