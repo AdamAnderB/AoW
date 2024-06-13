@@ -10,7 +10,7 @@ For further details and resources related to this project, please visit the foll
 This project offers a comprehensive guide for conducting eye-tracking studies in psycholinguistics through web-based methods. It focuses on making research accessible and reproducible, targeting bilingualism and multilingualism studies.
 
 ## Key Features
-- **Framework for Reproducible Science**: Instructions for designing and analyzing eye-tracking studies.
+- **Framework for Reproducible Science**: Instructions for designing and analyzing eye-tracking studies. ![Optional Alt Text](figures/data_wrangling_revised.png)
 - **Data Wrangling Guide**: Preparing eye-tracking data with R for analysis.
 - **Best Practices**: Ensuring quality data collection and experimental design.
 - **Open-Source Tools**: Emphasizing the use of R for data analysis.
