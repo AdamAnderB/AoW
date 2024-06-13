@@ -20,7 +20,7 @@ This project offers a comprehensive guide for conducting eye-tracking studies in
 - **Best Practices**: Ensuring quality data collection and experimental design.
 
   <img src="figures/Participant_frame_rates.jpg" alt="Best Practices" width="500">
-- **Open-Science Tools**: Emphasizing the use of R for data analysis. [Gorilla experiment modules]([https://osf.io/a3e5s/?view_only=822c5f28422444768729f5342fd16848](https://app.gorilla.sc/openmaterials/715241)).
+- **Open-Science Tools**: Emphasizing the use of R for data analysis. [Gorilla experiment modules](https://app.gorilla.sc/openmaterials/715241).
   
    <img src="figures/calibration.png" alt="Web-based Eye-tracking calibration screen" width="300">
 
