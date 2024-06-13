@@ -3,3 +3,5 @@
 .RData
 .Ruserdata
 rmd_chunk_converter.R
+.DS_Store
+.Rapp.history

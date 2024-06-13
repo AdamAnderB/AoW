@@ -1,5 +1,5 @@
 ---
-title: "R_workflow"
+title: "R_workflow by Adam A. Bramlett and Seth Wiener"
 output:
   word_document: default
   pdf_document:

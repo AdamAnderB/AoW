@@ -1,5 +1,5 @@
 ---
-title: "color_blind_simulator"
+title: "Color_blind_simulator by Adam A. Bramlett and Seth Wiener""
 author: "blind"
 date: "2024-02-24"
 output: html_document

@@ -1,5 +1,5 @@
 ---
-title: "power_analysis"
+title: "Accented power_analysis by Adam A. Bramlett and Seth Wiener""
 author: "blind"
 date: "2024-04-08"
 output: html_document
@@ -192,9 +192,9 @@ print(results_1)
 
 beep(6)
 ```
-
 ```{r}
 #big_results_1<-results
+#big_results_accent_1<-results_1
 results_1
 
 ggplot(results_1, aes(n_participants, theta_bias, color=as.factor(n_trials), group=n_trials)) +
@@ -225,6 +225,36 @@ ggplot(results_1, aes(n_participants, sigma_bias, color=as.factor(n_trials), gro
 ```
 
 ```{r}
+ggplot(results_1, aes(n_participants, theta_bias, color=as.factor(n_trials), group=n_trials)) +
+    geom_point() +
+    geom_line() +
+    scale_color_discrete('Number of trials per subject') +
+    scale_x_continuous('Number of subjects') +
+    scale_y_continuous('Theta') +
+    theme_classic()
+
+ggplot(results_1, aes(n_participants, power, color=as.factor(n_trials), group=n_trials)) +
+    geom_point() +
+    geom_line() +
+    geom_hline(yintercept = 0.8) + #thresholds for acceptable power
+    geom_hline(yintercept = 0.95) +
+    scale_color_discrete('Number of trials per subject') +
+    scale_x_continuous('Number of subjects') +
+    scale_y_continuous('Statistical power (for Delta BIC <= -20)') +
+    theme_classic()
+
+ggplot(results_1, aes(n_participants, sigma_bias, color=as.factor(n_trials), group=n_trials)) +
+    geom_point() +
+    geom_line() +
+    scale_color_discrete('Number of trials per subject') +
+    scale_x_continuous('Number of subjects') +
+    scale_y_continuous('Sigma Bias') +
+    theme_classic()
+```
+
+```{r}
+write.csv(results_1, file = "../../power_data/accent_power.csv")
+beep(3)
 
 install.packages("beepr")
 library(beepr)

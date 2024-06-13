@@ -1,5 +1,5 @@
 ---
-title: "power_analysis"
+title: "Main power_analysis by Adam A. Bramlett and Seth Wiener""
 author: "blind"
 date: "2024-04-08"
 output: html_document

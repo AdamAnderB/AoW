@@ -1,6 +1,6 @@
 ---
 title: "meta_scrript_on_scripts"
-author: "xxx"
+author: "Adam A. Bramlett and Seth Wiener""
 date: "2023-11-21"
 output: html_document
 ---

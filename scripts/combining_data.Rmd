@@ -1,6 +1,6 @@
 ---
 title: "combining_data"
-author: "xxx"
+author: "Adam A. Bramlett and Seth Wiener""
 date: "2023-11-18"
 output: html_document
 ---
