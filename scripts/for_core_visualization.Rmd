@@ -1,6 +1,6 @@
 ---
 title: "audio_vizualization and Eye-Fixation visualization"
-author: "Adam A. Bramlett and Seth Wiener""
+author: "Adam A. Bramlett"
 date: "2023-10-23"
 output: html_document
 ---
